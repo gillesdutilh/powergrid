@@ -54,11 +54,24 @@
 ##'     used.
 ##' @author Gilles Dutilh
 ##' @examples:
-##' power_slice = power_array[, , 3]
-##' FindMinPower(power_slice, search_par = 'n', find_min = TRUE)
-##' ## works also for slice without dimensions (a vector)
-##' power_slice = power_array[, 3, 3]
-##' FindMinPower(power_slice, search_par = 'n', find_min = TRUE)
+##' ## ============================================
+##' ## most basic case, power function available:
+##' ## ============================================
+##' sse_pars = list(
+##'     n = seq(from = 10, to = 60, by = 2),
+##'     delta = seq(from = 0.5, to = 1.5, by = 0.2), ## effect size
+##'     sd = seq(.1, .9, .2)) ## Standard deviation
+##' PowFun <- function(n, delta, sd){
+##'   ptt = power.t.test(n = n/2, delta = delta, sd = sd,
+##'                      sig.level = 0.05)
+##'   return(ptt$power)
+##' }
+##' power_array = FillGrid(pars = sse_pars, fun = PowFun, n_iter = NA)
+##' ex_out = Example(power_array,
+##'                  example = list(delta = .7, sd = .7),
+##'                  target = .9)
+##' ex_out
+
 
 FindTarget = function(power_slice,
                       target = .9,
@@ -111,5 +124,3 @@ FindTarget = function(power_slice,
 	      Find)
     }
 }
-
-

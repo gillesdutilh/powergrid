@@ -54,16 +54,6 @@
 ##' @author Gilles Dutilh
 ##'
 ##' @examples
-##' pars = list(x = 1:3, y = 4:5)
-##' fun = function(x, y){
-##'     return(c('som' = sum(x, y), 'verschil' = y - x + runif(1, 0, .9)))}
-##'   fun = function(x, y){sum(x, y)+rnorm(1)}
-##'   n_iter = 11
-##'   parallel = TRUE
-##'   summary_function = function(x)mean(x)*100
-##'   more_args = NULL
-##'   keep_sims = FALSE
-
 ##' ## ============================================
 ##' ## most basic case, power function available:
 ##' ## ============================================
@@ -114,15 +104,11 @@
 ##' n_iter = 20
 ##' power_array = FillGrid(pars = sse_pars, fun = PowFun,
 ##'                             n_iter = n_iter)
-##' dimnames(array_two)
-##' summary(array_two)
-
-
-##
+##' dimnames(power_array)
 FillGrid =
   function(pars, fun, more_args = NULL, n_iter = NA, summarize = TRUE,
            summary_function = mean, parallel = FALSE,
-           n_cores = availableCores()-1)
+           n_cores = future::availableCores()-1)
 {
   ##
   ## ============================================
@@ -134,7 +120,7 @@ FillGrid =
     stop('You chose one of few parameter names that are not allowed (e1d42fl5z7b6 or funout_...)')}
   ##
   ## All pars arguments of fun?
-  if(!all(names(pars) %in% formalArgs(fun))){
+  if(!all(names(pars) %in% methods::formalArgs(fun))){
     stop("`pars` contains parameters that do not match the arguments of `fun`")
   }
   ## ============================================
@@ -151,7 +137,7 @@ FillGrid =
     ## out = cbind(pars_grid, e1d42fl5z7b6)
     ## result is a n_result_vars by nrow(pars_grid) matrix
   }
-
+##'
   ## =================================
   ## Simulation ('n_iter' supplied)
     if(!is.na(n_iter) & !parallel){
@@ -169,12 +155,12 @@ FillGrid =
                            summary_function, simplify = TRUE)
     }
   }
-
+##'
   ## parallel using future_replicate
   if(!is.na(n_iter) & parallel){
     ## plan(strategy = future_args$plan$strategy, # 'multisession'
-    ##      workers = future_args$plan$workers) # availableCores() - 1)
-    plan(multisession, workers = n_cores)
+    ##      workers = future_args$plan$workers) # future::availableCores() - 1)
+    future::plan("future::multisession", workers = n_cores)
     nrow_pars_grid = nrow(pars_grid)
     e1d42fl5z7b6 =
       drop(future.apply::future_replicate(
@@ -191,23 +177,23 @@ FillGrid =
   ## =================================
   n_funouts = length(.mapply(fun, pars_grid[1, ], MoreArgs = more_args)[[1]])
   total_dims = dim(e1d42fl5z7b6)
-
+##'
  ## Turn grid into array
   ToArray = function(gg){
-    xtabs(as.formula(
-        paste('gg ~', paste(names(pars_grid), collapse = '+'))), data = pars_grid)
+      stats::xtabs(stats::as.formula(
+                 paste('gg ~', paste(names(pars_grid), collapse = '+'))), data = pars_grid)
   }
   ## Since the array resulting from .mapply may differ depending on
   ## 1) all.equal(summary_function, I) vs other summary function, vs no iterations
   ## 2) having one versus more than one result variable,
   ## I transform into an output array in the IFs below.
-
+##'
   ## Simplest situation, with no iterations or summarized iterations,
   ## only one variable.
   if (n_funouts == 1 & (summarize | is.na(n_iter))){
     out_array = ToArray(e1d42fl5z7b6)
   } # simple xtabs with pars
-
+##'
   ## With no iterations or summarized iterations,
   ## but multiple variables
   if (n_funouts > 1 & (summarize | is.na(n_iter))) {
@@ -219,14 +205,14 @@ FillGrid =
     out_array = ToArray(t(e1d42fl5z7b6))
     names(dimnames(out_array))[length(dim(out_array))] = 'fun_out'
   } # simple xtabs on transposed array
-
+##'
   ## When simulations are not summarized (kept), one variable
   if (n_funouts == 1 & !summarize & !is.na(n_iter)) {
     out_array = ToArray(e1d42fl5z7b6) # so maybe merge with above
     dimnames(out_array)[length(dimnames(out_array))] = NULL
     names(dimnames(out_array))[length(dimnames(out_array))] = 'sim'
   }
-
+##'
   ## When simulations are not summarized (kept), multiple variables
   if (n_funouts > 1 & !summarize & !is.na(n_iter)) {
     ## first take care that pars names and funout names are not confused
@@ -235,20 +221,20 @@ FillGrid =
         paste0('funout_', dimnames(e1d42fl5z7b6)[[1]])}
     ## put in flat format to work with xtabs later
     flat = cbind(
-        as.data.frame(ftable(e1d42fl5z7b6, row.vars = c(2, 1, 3))),
+        as.data.frame(stats::ftable(e1d42fl5z7b6, row.vars = c(2, 1, 3))),
         apply(pars_grid, 2, rep, n_funouts * n_iter))
     ## easiest to set dimnames before xtabs
     colnames(flat)[1:4] = c('parscom', 'fun_out', 'sim', 'value')
-    out_array = xtabs(value ~ ., data = flat[, -1])
+    out_array = stats::xtabs(value ~ ., data = flat[, -1])
     dimnames(out_array)[['sim']] = 1:length(dimnames(out_array)[['sim']])
     ## Sort such that the first dimenstions are the pars
     dimnums = 1:length(dim(out_array))
     pardimnums = dimnums[!(dimnums %in% 1:2)]
     out_array = aperm(out_array, c(pardimnums, 1:2))
-
-
+##'
+##'
   }
-
+##'
   ## set attributes of output object
   class(out_array) = 'power_array'
   attr(out_array, which = 'sim_function') = fun
@@ -264,9 +250,6 @@ FillGrid =
   return(out_array)
 }
 
-
-
-
 ## ==================================================================
 ## Method for [INDEXING]
 ## ==================================================================
@@ -277,15 +260,18 @@ FillGrid =
 ##' keeps and updates the object's attributes. These attributes are
 ##' needed for various functions in the powergrid package to work
 ##' well.
-##'
+##' ##'
 ##' The indexing functions as normal indexing, but note that drop is
 ##' FALSE by default, so that the resulting array has the same
 ##' dimensions as the original array. The number of levels at each
 ##' dimension may be reduced, however.
-##'
+##' ##'
 ##' @title indexing with [ ] for class power_array
 ##' @return An array of class power_grid
 ##' @author Gilles Dutilh
+##' @param x object
+##' @param ... index
+##' @param drop drop
 `[.power_array` <- function(x, ..., drop=TRUE) {
   the_attributes = attributes(x)
   x = NextMethod(x)
@@ -298,11 +284,13 @@ FillGrid =
   return(x)
 }
 
+
 ## ==================================================================
 ## Method for printing power_array
 ## ==================================================================
+
 ##' Method for printing objects of class power_array.
-##'
+##' ##'
 ##' Prints a power_array as a default array with a short summary about
 ##' its contents.
 ##' @title print
@@ -338,7 +326,7 @@ print.power_array = function(x){
 
 ##' Offers a short summary of the power_array object, summarizing the
 ##' range of observed values and the grid evaluated across.
-##'
+##' ##'
 ##' See PowerGrid for details
 ##' @title Summary of power_grid object.
 ##' @param x array of class power_grid
