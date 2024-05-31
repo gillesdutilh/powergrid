@@ -20,14 +20,19 @@
 ##' sample size yielding a confidence interval that is not bigger than
 ##' some maximum width.
 ##'
-##' Second, the implementation allows to search for a certain target
-##' to be achieved by maximizing (find_minimum = FALSE) the parameter
-##' on the searched dimension. This may be used, for example, when the
-##' aim is to find the maximum standard deviation at which the power
-##' may still be acceptable.
+##' Second, the implementation allows to search along another *named*
+##' dimension of the power_slice than n.
 ##'
-##' \code{FindTarget} may most often be implicitly called inside
-##' \code{Example}, \code{plot} or \code{PowerLinesPlot}.
+##' Third, the implementation allows to search for a certain target to
+##' be achieved by maximizing (find_minimum = FALSE) the parameter on
+##' the searched dimension. This may be used, for example, when the
+##' aim is to find the maximum standard deviation at which a study's
+##' power is still acceptable.
+##'
+##'
+##' \code{FindTarget} may most
+##' often be implicitly called inside \code{Example}, \code{plot} or
+##' \code{PowerLinesPlot}.
 ##'
 ##' @title Find Target Power or Other Value
 ##' @param power_slice
