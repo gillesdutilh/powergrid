@@ -105,22 +105,20 @@
 ##' power_array = FillGrid(pars = sse_pars, fun = PowFun,
 ##'                             n_iter = n_iter)
 ##' dimnames(power_array)
-FillGrid =
-  function(pars, fun, more_args = NULL, n_iter = NA, summarize = TRUE,
-           summary_function = mean, parallel = FALSE,
-           n_cores = future::availableCores()-1)
-{
+FillGrid = function(pars, fun, more_args = NULL, n_iter = NA,
+                    summarize = TRUE, summary_function = mean,
+                    parallel = FALSE,
+                    n_cores = future::availableCores()-1) {
   ##
   ## ============================================
   ## Process arguments
   ##
   ## catch the very unlikely case someone takes e1d42fl5z7b6 as a
   ## parameter name, or a parameter name including funout_
-  if('e1d42fl5z7b6' %in% names(pars) | any(grepl('funout_', names(pars)))){
+  if ('e1d42fl5z7b6' %in% names(pars) || any(grepl('funout_', names(pars)))) {
     stop('You chose one of few parameter names that are not allowed (e1d42fl5z7b6 or funout_...)')}
-  ##
   ## All pars arguments of fun?
-  if(!all(names(pars) %in% methods::formalArgs(fun))){
+  if (!all(names(pars) %in% methods::formalArgs(fun))){
     stop("`pars` contains parameters that do not match the arguments of `fun`")
   }
   ## ============================================
@@ -128,46 +126,44 @@ FillGrid =
   pars_grid = expand.grid(pars)
   ## =================================
   ## No simulation ('n_iter' not supplied)
-  if(is.na(n_iter)){
+  if(is.na(n_iter)) {
     e1d42fl5z7b6 = sapply( # the long name is to make it very unlikely
                                         # to get the same name in the grid, which
                                         # would break the xtab below.
-        .mapply(fun, pars_grid, MoreArgs = more_args), function(x)x,
-        simplify = "array")
+      .mapply(fun, pars_grid, MoreArgs = more_args), function(x)x,
+      simplify = "array")
     ## out = cbind(pars_grid, e1d42fl5z7b6)
     ## result is a n_result_vars by nrow(pars_grid) matrix
   }
-##'
+  ##'
   ## =================================
   ## Simulation ('n_iter' supplied)
-    if(!is.na(n_iter) & !parallel){
-        if (!requireNamespace("future.apply", quietly = TRUE)){
-            stop("Setting argument `parallel' to TRUE requires installation of future.apply", call. = FALSE)}
-        nrow_pars_grid = nrow(pars_grid)
-        e1d42fl5z7b6 =
-            drop(replicate(
-          n_iter, sapply( # reshape mapply result
-                      .mapply(fun, pars_grid, MoreArgs = more_args),
-                      function(x)unlist(x))))
-    if (summarize){
+  if (!is.na(n_iter) && !parallel) {
+    if (!requireNamespace("future.apply", quietly = TRUE)) {
+      stop("Setting argument `parallel' to TRUE requires installation of future.apply", call. = FALSE)}
+    e1d42fl5z7b6 =
+      drop(replicate(
+        n_iter, sapply( # reshape mapply result
+                  .mapply(fun, pars_grid, MoreArgs = more_args),
+                  function(x)unlist(x))))
+    if (summarize) {
       e1d42fl5z7b6 = apply(e1d42fl5z7b6,
                            1:(length(dim(e1d42fl5z7b6)) - 1), # per all but sim dim
                            summary_function, simplify = TRUE)
     }
   }
-##'
+  ##'
   ## parallel using future_replicate
-  if(!is.na(n_iter) & parallel){
+  if (!is.na(n_iter) && parallel) {
     ## plan(strategy = future_args$plan$strategy, # 'multisession'
     ##      workers = future_args$plan$workers) # future::availableCores() - 1)
     future::plan("future::multisession", workers = n_cores)
-    nrow_pars_grid = nrow(pars_grid)
     e1d42fl5z7b6 =
       drop(future.apply::future_replicate(
-          n_iter, sapply( # reshape mapply result
-                      .mapply(fun, pars_grid, MoreArgs = more_args),
-                      function(x)unlist(x))
-          ))
+                           n_iter, sapply( # reshape mapply result
+                                     .mapply(fun, pars_grid, MoreArgs = more_args),
+                                     function(x)unlist(x))
+                         ))
     if (summarize){
       e1d42fl5z7b6 = apply(e1d42fl5z7b6,
                            1:(length(dim(e1d42fl5z7b6)) - 1), # per all but sim dim
@@ -176,27 +172,26 @@ FillGrid =
   }
   ## =================================
   n_funouts = length(.mapply(fun, pars_grid[1, ], MoreArgs = more_args)[[1]])
-  total_dims = dim(e1d42fl5z7b6)
-##'
- ## Turn grid into array
+  ##'
+  ## Turn grid into array
   ToArray = function(gg){
-      stats::xtabs(stats::as.formula(
-                 paste('gg ~', paste(names(pars_grid), collapse = '+'))), data = pars_grid)
+    stats::xtabs(stats::as.formula(
+                          paste('gg ~', paste(names(pars_grid), collapse = '+'))), data = pars_grid)
   }
   ## Since the array resulting from .mapply may differ depending on
   ## 1) all.equal(summary_function, I) vs other summary function, vs no iterations
   ## 2) having one versus more than one result variable,
   ## I transform into an output array in the IFs below.
-##'
+  ##'
   ## Simplest situation, with no iterations or summarized iterations,
   ## only one variable.
-  if (n_funouts == 1 & (summarize | is.na(n_iter))){
+  if (n_funouts == 1 && (summarize || is.na(n_iter))) {
     out_array = ToArray(e1d42fl5z7b6)
   } # simple xtabs with pars
-##'
+  ##'
   ## With no iterations or summarized iterations,
   ## but multiple variables
-  if (n_funouts > 1 & (summarize | is.na(n_iter))) {
+  if (n_funouts > 1 && (summarize || is.na(n_iter))) {
     ## first take care that pars names and funout names are not confused
     if(any(rownames(e1d42fl5z7b6) %in% names(pars))){
       rownames(e1d42fl5z7b6) =
@@ -205,36 +200,36 @@ FillGrid =
     out_array = ToArray(t(e1d42fl5z7b6))
     names(dimnames(out_array))[length(dim(out_array))] = 'fun_out'
   } # simple xtabs on transposed array
-##'
+  ##'
   ## When simulations are not summarized (kept), one variable
-  if (n_funouts == 1 & !summarize & !is.na(n_iter)) {
+  if (n_funouts == 1 && !summarize && !is.na(n_iter)) {
     out_array = ToArray(e1d42fl5z7b6) # so maybe merge with above
     dimnames(out_array)[length(dimnames(out_array))] = NULL
     names(dimnames(out_array))[length(dimnames(out_array))] = 'sim'
   }
-##'
+  ##'
   ## When simulations are not summarized (kept), multiple variables
-  if (n_funouts > 1 & !summarize & !is.na(n_iter)) {
+  if (n_funouts > 1 && !summarize && !is.na(n_iter)) {
     ## first take care that pars names and funout names are not confused
     if(any(dimnames(e1d42fl5z7b6)[[1]] %in% names(pars))){
       dimnames(e1d42fl5z7b6)[[1]] =
         paste0('funout_', dimnames(e1d42fl5z7b6)[[1]])}
     ## put in flat format to work with xtabs later
     flat = cbind(
-        as.data.frame(stats::ftable(e1d42fl5z7b6, row.vars = c(2, 1, 3))),
-        apply(pars_grid, 2, rep, n_funouts * n_iter))
+      as.data.frame(stats::ftable(e1d42fl5z7b6, row.vars = c(2, 1, 3))),
+      apply(pars_grid, 2, rep, n_funouts * n_iter))
     ## easiest to set dimnames before xtabs
     colnames(flat)[1:4] = c('parscom', 'fun_out', 'sim', 'value')
     out_array = stats::xtabs(value ~ ., data = flat[, -1])
-    dimnames(out_array)[['sim']] = 1:length(dimnames(out_array)[['sim']])
-    ## Sort such that the first dimenstions are the pars
-    dimnums = 1:length(dim(out_array))
+    dimnames(out_array)[['sim']] = seq_along(dimnames(out_array)[['sim']])
+    ## Sort such that the first dimensions are the pars
+    dimnums = seq_along(dim(out_array))
     pardimnums = dimnums[!(dimnums %in% 1:2)]
     out_array = aperm(out_array, c(pardimnums, 1:2))
-##'
-##'
+    ##'
+    ##'
   }
-##'
+  ##'
   ## set attributes of output object
   class(out_array) = 'power_array'
   attr(out_array, which = 'sim_function') = fun
@@ -272,13 +267,14 @@ FillGrid =
 ##' @param x object
 ##' @param ... index
 ##' @param drop drop
+##' @NoRd
 `[.power_array` <- function(x, ..., drop=TRUE) {
   the_attributes = attributes(x)
   x = NextMethod(x)
   the_attributes$dim = dim(x)
   the_attributes$dimnames = dimnames(x)
   if (all(names(dimnames(x)) != 'fun_out')){
-      the_attributes$sim_function_nval = 1
+    the_attributes$sim_function_nval = 1
   } else {the_attributes$sim_function_nval = length(dimnames(x)$fun_out)}
   attributes(x) = the_attributes
   return(x)
@@ -297,27 +293,28 @@ FillGrid =
 ##' @param x object of class power_array
 ##' @return object of class power_array
 ##' @author Gilles Dutilh
+##' @NoRd
 print.power_array = function(x){
   print.table(x)
   cat(
-      paste0('Array of class "power_array" created using FillGrid, ',
-             ifelse(!is.na(attr(x, which = 'n_iter')) &
-                    !attr(x, which = 'summarized'),
-                    '\nkeeping individual simulations,\n',
-                    ''),
-             ifelse(attr(x, which = 'sim_function_nval') > 1,
-                    paste0(attr(x, which = 'sim_function_nval'), ' output values from each application of fun,\n'), ''),
-             'yielding dimensions:\n',
-             paste(names(dimnames(x)), collapse = ', '), '. ',
-             ifelse(!is.na(attr(x, which = 'n_iter')),
-                    paste0('\nResults from ', attr(x, which = 'n_iter'), ' iterations\n'),
-                    paste0('')
-                    ),
-             ifelse(!is.na(attr(x, which = 'n_iter')) & attr(x, which = 'summarized'),
-                    "summarized by `summary_function` (see attributes).", ""),
-             '\n'
-             )
-      )
+    paste0('Array of class "power_array" created using FillGrid, ',
+           ifelse(!is.na(attr(x, which = 'n_iter')) &
+                  !attr(x, which = 'summarized'),
+                  '\nkeeping individual simulations,\n',
+                  ''),
+           ifelse(attr(x, which = 'sim_function_nval') > 1,
+                  paste0(attr(x, which = 'sim_function_nval'), ' output values from each application of fun,\n'), ''),
+           'yielding dimensions:\n',
+           paste(names(dimnames(x)), collapse = ', '), '. ',
+           ifelse(!is.na(attr(x, which = 'n_iter')),
+                  paste0('\nResults from ', attr(x, which = 'n_iter'), ' iterations\n'),
+                  paste0('')
+                  ),
+           ifelse(!is.na(attr(x, which = 'n_iter')) & attr(x, which = 'summarized'),
+                  "summarized by `summary_function` (see attributes).", ""),
+           '\n'
+           )
+  )
 }
 
 ## ==================================================================
@@ -332,40 +329,40 @@ print.power_array = function(x){
 ##' @param x array of class power_grid
 ##' @author Gilles Dutilh
 summary.power_array = function(x){
-    aa = attributes(x)
-    parnames = names(aa$dimnames)
-    if(!is.na(aa$n_iter) & aa$summarized){
-        iter_summary_text = paste0(paste(strwrap(paste0('- Containing summary statistic over ',
-                                          aa$n_iter, ' iterations. See attribute summary_function for the applied summary statistic.'), width = 50), collapse = '\n  '), '\n')
-    }
-    if(!is.na(aa$n_iter) & !aa$summarized){
-        iter_summary_text = paste0('- Containing output of ', aa$n_iter, ' individual iterations.\n')
-        parnames = parnames[-length(parnames)] # get rid of the sim dimension
-    }
-    if(is.na(aa$n_iter)){
-        iter_summary_text = ''
-        }
-    cat(paste0(
-        "- Object of class: ", aa$class, "\n",
-        iter_summary_text,
-        "- Range of values: ",
-        ifelse('fun_out' %in% names(dimnames(x)),
-               paste0('\n    ', dimnames(x)$fun_out, ': ',
-                      apply(apply(x, 'fun_out', range, na.rm = TRUE),
-                            2, function(x)
-                            {paste0(
-                                 '[', paste0(round(x, 2), collapse = ', '), ']')}), collapse = '')
-              , paste0('[', paste0(round(range(x, na.rm = TRUE), 2), collapse = ', '), ']')
-               )
-        , "\n- Evaluated at:\n",
-        ## paste(format(parnames, width = max(nchar(parnames) + 2), justify = 'right'),
-        ##       lapply(aa$dimnames, paste, collapse = ', '),
-        ##       sep = ': ', collapse = '\n'),
-        paste(mapply(function(x, y){
-          paste(format(as.list(x), width = max(nchar(parnames) + 2), justify = 'right'),
-                strwrap(paste(y, collapse = ', '), width = 50), collapse = '\n')},
-          x = as.list(parnames), y = aa$dimnames[parnames]), collapse = '\n'),
-        '\n')
+  aa = attributes(x)
+  parnames = names(aa$dimnames)
+  if(!is.na(aa$n_iter) && aa$summarized){
+    iter_summary_text = paste0(paste(strwrap(paste0('- Containing summary statistic over ',
+                                                    aa$n_iter, ' iterations. See attribute summary_function for the applied summary statistic.'), width = 50), collapse = '\n  '), '\n')
+  }
+  if(!is.na(aa$n_iter) && !aa$summarized){
+    iter_summary_text = paste0('- Containing output of ', aa$n_iter, ' individual iterations.\n')
+    parnames = parnames[-length(parnames)] # get rid of the sim dimension
+  }
+  if(is.na(aa$n_iter)){
+    iter_summary_text = ''
+  }
+  cat(paste0(
+    "- Object of class: ", aa$class, "\n",
+    iter_summary_text,
+    "- Range of values: ",
+    ifelse('fun_out' %in% names(dimnames(x)),
+           paste0('\n    ', dimnames(x)$fun_out, ': ',
+                  apply(apply(x, 'fun_out', range, na.rm = TRUE),
+                        2, function(x)
+                        {paste0(
+                           '[', paste0(round(x, 2), collapse = ', '), ']')}), collapse = '')
+         , paste0('[', paste0(round(range(x, na.rm = TRUE), 2), collapse = ', '), ']')
+           )
+  , "\n- Evaluated at:\n",
+    ## paste(format(parnames, width = max(nchar(parnames) + 2), justify = 'right'),
+    ##       lapply(aa$dimnames, paste, collapse = ', '),
+    ##       sep = ': ', collapse = '\n'),
+    paste(mapply(function(x, y){
+      paste(format(as.list(x), width = max(nchar(parnames) + 2), justify = 'right'),
+            strwrap(paste(y, collapse = ', '), width = 50), collapse = '\n')},
+      x = as.list(parnames), y = aa$dimnames[parnames]), collapse = '\n'),
+    '\n')
     )
 }
 
