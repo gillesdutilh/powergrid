@@ -1,54 +1,48 @@
 ## Aim:
 ##
-## - take a list of parameters
-## - apply function to grid of parameters
-## - form usable output in form of an array (may be converted to grid)
+## - take a list of parameters apply function to grid of parameters form usable
+## - output in form of an array (may be converted to grid)
 
-##' FillGrid Is an apply-like function, allowing to evaluate a
-##' function at the crossings of a set of parameters. The results is
-##' saved in an array with attributes that optimize further usage by
-##' functions in package \code{powergrid}. In particular, performing a
-##' function iteratively (using parallel computing if required) is
-##' implemented conveniently. The typical use is for evaluating
-##' statistical power at a grid of assumed parameters.
+##' FillGrid Is an apply-like function, allowing to evaluate a function at the
+##' crossings of a set of parameters. The results is saved in an array with
+##' attributes that optimize further usage by functions in package
+##' \code{powergrid}. In particular, performing a function iteratively (using
+##' parallel computing if required) is implemented conveniently. The typical use
+##' is for evaluating statistical power at a grid of assumed parameters.
 ##'
-##' Function \code{fun} is evaluated at each combination of the
-##' argument values listed in \code{pars} and its results are stored
-##' in an array whose dimensions (and \code{dimnames()}) are defined
-##' by \code{pars}. If function \code{fun} returns more than one value
-##' (always as a single vector), the array will have an additional
-##' dimension, with levels named after the names of the returned
-##' vector (if given). If n_iter is not NA, function \code{fun} is
-##' evaluated n_iter times. This will add to the resulting array an
+##' Function \code{fun} is evaluated at each combination of the argument values
+##' listed in \code{pars} and its results are stored in an array whose
+##' dimensions (and \code{dimnames()}) are defined by \code{pars}. If function
+##' \code{fun} returns more than one value (always as a single vector), the
+##' array will have an additional dimension, with levels named after the names
+##' of the returned vector (if given). If n_iter is not NA, function \code{fun}
+##' is evaluated n_iter times. This will add to the resulting array an
 ##' additional dimension "sim".
 ##'
-##' The elements of \code{pars} must match the argument names of
-##' fun. If input parameters are not to be part of the grid, but
-##' rather further settings, these can be passed on in a named list to
-##' \code{fun} through the argument \code{more_args}.
+##' The elements of \code{pars} must match the argument names of fun. If input
+##' parameters are not to be part of the grid, but rather further settings,
+##' these can be passed on in a named list to \code{fun} through the argument
+##' \code{more_args}.
 ##'
 ##' @title (iteratively) Evaluate Function at Grid of Argument Values
-##' @param pars A list where each element is a vector of values named
-##'     as one of the arguments of \code{fun}. Fun will be applied to
-##'     the full grid crossing the values of each of these parameters.
-##' @param fun Function applied at each combination of
-##'     \code{pars}. Arguments may contain all element names of
-##'     \code{pars} and \code{more_args}. Output should be a single
-##'     number or a vector.
+##' @param pars A list where each element is a vector of values named as one of
+##'   the arguments of \code{fun}. Fun will be applied to the full grid crossing
+##'   the values of each of these parameters.
+##' @param fun Function applied at each combination of \code{pars}. Arguments
+##'   may contain all element names of \code{pars} and \code{more_args}. Output
+##'   should be a single number or a vector.
 ##' @param more_args Fixed arguments to \code{fun} that are not in
-##'     \code{pars}. (internally used in \code{.mapply} for supplying
-##'     argument \code{MoreArgs})
-##' @param n_iter If not NA, function \code{fun} is applied
-##'     \code{n_iter} times at each point in the grid defined by
-##'     \code{pars}.
-##' @param summarize Logical indicating whether iterations (if
-##'     \code{n_iter} is given) are to be sunmmarized by
-##'     \code{summary_function}.
-##' @param summary_function A function to be applied to aggregate
-##'     across simulations. Defaults to \code{mean}, ignored when
-##'     \code{keep_sims} == TRUE or when \code{is.na(n_iter)}.
+##'   \code{pars}. (internally used in \code{.mapply} for supplying argument
+##'   \code{MoreArgs})
+##' @param n_iter If not NA, function \code{fun} is applied \code{n_iter} times
+##'   at each point in the grid defined by \code{pars}.
+##' @param summarize Logical indicating whether iterations (if \code{n_iter} is
+##'   given) are to be sunmmarized by \code{summary_function}.
+##' @param summary_function A function to be applied to aggregate across
+##'   simulations. Defaults to \code{mean}, ignored when \code{keep_sims} ==
+##'   TRUE or when \code{is.na(n_iter)}.
 ##' @param parallel Should parallel computing be applied. If TRUE,
-##'     future::future_replicate is used.
+##'   future::future_replicate is used.
 ##' @param n_cores Passed on to future_replicate
 ##' @return An array of class "power_array"
 ##' @author Gilles Dutilh
@@ -58,18 +52,18 @@
 ##' ## most basic case, power function available:
 ##' ## ============================================
 ##' sse_pars = list(
-##'     n = seq(from = 10, to = 60, by = 2),
-##'     delta = seq(from = 0.5, to = 1.5, by = 0.2), ## effect size
-##'     sd = seq(.1, .9, .2)) ## Standard deviation
+##'   n = seq(from = 10, to = 60, by = 2),
+##'   delta = seq(from = 0.5, to = 1.5, by = 0.2), ## effect size
+##'   sd = seq(.1, .9, .2)) ## Standard deviation
 ##' PowFun <- function(n, delta, sd){
 ##'   ptt = power.t.test(n = n/2, delta = delta, sd = sd,
 ##'                      sig.level = 0.05)
 ##'   return(ptt$power)
 ##' }
 ##' power_array = FillGrid(pars = sse_pars, fun = PowFun, n_iter = NA)
-##'
+##' ##'
 ##' summary(power_array)
-
+##'
 ##' ## ============================================
 ##' ## Multiple outputs are automatically handled
 ##' ## ============================================
@@ -80,14 +74,14 @@
 ##' }
 ##' ##
 ##' sse_pars = list(
-##'     n = seq(from = 10, to = 60, by = 2),
-##'     delta = seq(from = 0.5, to = 1.5, by = 0.2),
-##'     sd = seq(.5, 1.5, .2))
+##'   n = seq(from = 10, to = 60, by = 2),
+##'   delta = seq(from = 0.5, to = 1.5, by = 0.2),
+##'   sd = seq(.5, 1.5, .2))
 ##' array_two_returns = FillGrid(sse_pars, TwoValuesFun)
 ##' ## multiple outputs result in an additional dimension:
 ##' dimnames(array_two_returns)
 ##' summary(array_two_returns)
-
+##'
 ##' ## ============================================
 ##' ## Simulations over iterations
 ##' ## ============================================
@@ -97,14 +91,15 @@
 ##'   t.test(x1, x2)$p.value < .05
 ##' }
 ##' sse_pars = list(
-##'     n = seq(from = 10, to = 60, by = 5),
-##'     delta = seq(from = 0.5, to = 1.5, by = 0.2),
-##'     sd = seq(.5, 1.5, .2))
+##'   n = seq(from = 10, to = 60, by = 5),
+##'   delta = seq(from = 0.5, to = 1.5, by = 0.2),
+##'   sd = seq(.5, 1.5, .2))
 ##' ##
 ##' n_iter = 20
 ##' power_array = FillGrid(pars = sse_pars, fun = PowFun,
-##'                             n_iter = n_iter)
+##'                        n_iter = n_iter)
 ##' dimnames(power_array)
+
 FillGrid = function(pars, fun, more_args = NULL, n_iter = NA,
                     summarize = TRUE, summary_function = mean,
                     parallel = FALSE,
