@@ -262,7 +262,7 @@ FillGrid = function(pars, fun, more_args = NULL, n_iter = NA,
 ##' @param x object
 ##' @param ... index
 ##' @param drop drop
-##' @NoRd
+##' @noRd
 `[.power_array` <- function(x, ..., drop=TRUE) {
   the_attributes = attributes(x)
   x = NextMethod(x)
@@ -288,7 +288,7 @@ FillGrid = function(pars, fun, more_args = NULL, n_iter = NA,
 ##' @param x object of class power_array
 ##' @return object of class power_array
 ##' @author Gilles Dutilh
-##' @NoRd
+##' @noRd
 print.power_array = function(x){
   print.table(x)
   cat(
