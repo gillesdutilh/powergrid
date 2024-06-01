@@ -24,7 +24,7 @@
 ##' these can be passed on in a named list to \code{fun} through the argument
 ##' \code{more_args}.
 ##'
-##' @title (iteratively) Evaluate Function at Grid of Argument Values
+##' @title Evaluate Function (iteratively) at Grid of Input Arguments
 ##' @param pars A list where each element is a vector of values named as one of
 ##'   the arguments of \code{fun}. Fun will be applied to the full grid crossing
 ##'   the values of each of these parameters.
@@ -262,7 +262,6 @@ FillGrid = function(pars, fun, more_args = NULL, n_iter = NA,
 ##' @param x object
 ##' @param ... index
 ##' @param drop drop
-##' @noRd
 `[.power_array` <- function(x, ..., drop=TRUE) {
   the_attributes = attributes(x)
   x = NextMethod(x)
@@ -274,7 +273,6 @@ FillGrid = function(pars, fun, more_args = NULL, n_iter = NA,
   attributes(x) = the_attributes
   return(x)
 }
-
 
 ## ==================================================================
 ## Method for printing power_array
@@ -288,7 +286,6 @@ FillGrid = function(pars, fun, more_args = NULL, n_iter = NA,
 ##' @param x object of class power_array
 ##' @return object of class power_array
 ##' @author Gilles Dutilh
-##' @noRd
 print.power_array = function(x){
   print.table(x)
   cat(
