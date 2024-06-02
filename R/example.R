@@ -35,7 +35,7 @@
 ##'   is found, as implemented in \code{FindTarget}. Either \code{"step"}:
 ##'   walking in steps along \code{search_par} or \code{"lm"}: Interpolating
 ##'   assuming a linear relation between \code{search_par} and (qnorm(x) +
-##'   qnorm(1 - 0.05)) ^ 2. Setting 'lm' is inspired on the implementation in
+##'   qnorm(1 - 0.05)) ^ 2. Setting "lm" is inspired on the implementation in
 ##'   the sse package by Thomas Fabbro.
 ##' @return Returns a list containing:
 ##'
@@ -134,7 +134,7 @@ Example = function(x,
 ##' @param x object of class \code{power_example}
 ##' @return nothing
 ##' @author Gilles Dutilh
-print.sse_example = function(x){
+print.power_example = function(x){
   cat('================================================\n')
   cat(paste0('For a ', ifelse(x$objective == 'min', 'minimal', 'maximal'), ' power of ',
              x$target, ' assuming\n',
