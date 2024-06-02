@@ -6,7 +6,7 @@
 ##' given by argument \code{target}. More generically, the object x, sliced at
 ##' the values given in argument \code{example} results in a vector. This vector
 ##' is searched for the *minimal* value of the names of the vector where the
-##' value of the vector is *at least* equal to 'code{target}. Thus, when the
+##' value of the vector is *at least* equal to \code{target}. Thus, when the
 ##' example is a vector of power at different effect sizes, it searches the
 ##' minimal effect size at which the target power is achieved.
 ##'
@@ -39,20 +39,21 @@
 ##'   the sse package by Thomas Fabbro.
 ##' @return Returns a list containing:
 ##'
-##' - requested_example: the parameters at
-##'   which the power was evaluated to search n
+##' - requested_example: the parameters at which the power was evaluated to
+##'   search n
 ##'
 ##' - required_value: the minimum (or maximum if slot searched = 'max') for n
-##' (or other required_name)
+##'   (or other required_name)
 ##'
 ##' - required_name: the parameter minimized (or maximized if slot searched =
-##' 'max')
+##'   'max')
 ##'
-##' - searched: was the "min" or "max" <required_name> searched?
+##' - searched: was the "min" or "max" for \code{required_name} searched?
 ##'
-##' - objective: was <required_name> searched to find the "min" or "max" of x.
+##' - objective: was \code{required_name} searched to find the "min" or "max" of
+##'   x.
 ##'
-##' - target: which value should the power be
+##' - target: which value should the power (or any other value) have.
 ##'
 ##' - minimal_target: At minimum (TRUE) or maximum (FALSE)
 ##' @author Gilles Dutilh
