@@ -1,5 +1,5 @@
 ##' Find combination of parameters yielding desired power (or other value) in an
-##' object of class 'code{power_array}.
+##' object of class \code{power_array}.
 ##'
 ##' In the most common use case, and this is also the default, \code{Example}
 ##' searches the *minimal* n where the power is *at least* equal to the value
@@ -32,8 +32,8 @@
 ##'   minimizes an assumption (e.g., minimal required n) to achieve the
 ##'   \code{target} or maximizes this assumption (e.g., maximally allows SD).
 ##' @param method Character string, indicating how the location of the example
-##'   is found, as implemented in \code{FindTarget}. Either \code{'step'}:
-##'   walking in steps along \code{search_par} or \code{'lm'}: Interpolating
+##'   is found, as implemented in \code{FindTarget}. Either \code{"step"}:
+##'   walking in steps along \code{search_par} or \code{"lm"}: Interpolating
 ##'   assuming a linear relation between \code{search_par} and (qnorm(x) +
 ##'   qnorm(1 - 0.05)) ^ 2. Setting 'lm' is inspired on the implementation in
 ##'   the sse package by Thomas Fabbro.
