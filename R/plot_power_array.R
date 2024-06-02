@@ -102,7 +102,7 @@ PlotPower =
   ## handle input from old sse package
   if(all(class(x) == 'power')){
     power_array = drop(GetPowergrid(x))
-    example = list(theta = tex(x, type = 'theta'))
+    example = list(theta = sse::tex(x, type = 'theta'))
     target = x@power.example
     slicer = list(xi = x@xi.example)
   } else if(all(class(x) == 'powCalc')){
@@ -162,12 +162,12 @@ PlotPower =
     n_breaks = 101 # granularity of colors, more is better, but 101 is enough
     ## calculate breaks, which are used to define legend colors.
     breaks = seq(0, 1, length = n_breaks)
-    image_cols = grey.colors(length(breaks) - 1, start = 0.3, end = .9)
+    image_cols = grDevices::grey.colors(length(breaks) - 1, start = 0.3, end = .9)
     legend_ats = pretty(array_toplot)
     legend_cols = image_cols[
       cut(legend_ats, breaks, labels = 1:(n_breaks-1), include.lowest = TRUE)]
   } else
-  {image_cols = grey.colors(1, .9, .9)}
+  {image_cols = grDevices::grey.colors(1, .9, .9)}
   ##
   ## ============================================
   ## translator for labels; translates if label is available
@@ -192,7 +192,8 @@ PlotPower =
                    all(names(dimnames(array_toplot)) == names(slicer))
                  , "Power",
                    paste('Power at',
-                         paste(Trans(names(slice_at)), '=', slice_at, collapse = ', ')))
+                         paste(Trans(names(slice_at)), '=', slice_at,
+                               collapse = ', ')))
   }
   ## =======================================================
   ## Draw figure
@@ -204,17 +205,18 @@ PlotPower =
     graphics::layout(t(2:1), widths = c(5, 1)) # in this order, so that
                                         # you can edit the main fig afterwards
     graphics::par(mar = c(10, 1, 10, 3))
-    image(1, seq_along(legend_ats), t(rev(legend_ats)),
+    graphics::image(1, seq_along(legend_ats), t(rev(legend_ats)),
           axes = FALSE, xlab = '', ylab = '', col = rev(legend_cols))
-    text(1, seq_along(legend_ats), labels = sprintf('%1.1f', legend_ats),
-         cex = 1.5, col = grey.colors(1, .2, .2))
-    mtext(side = 3, line = 2, text = 'Power')
+    graphics::text(1, seq_along(legend_ats),
+                   labels = sprintf('%1.1f', legend_ats),
+         cex = 1.5, col = grDevices::grey.colors(1, .2, .2))
+    graphics::mtext(side = 3, line = 2, text = 'Power')
   }
   ## ============================================
   ## Main plot.
   ## Image contains shades of grey or white, creating higher level plot
   graphics::par(las = 1, mar = c(5.1, 4.1, 4.1, 2.1))
-  image(as.numeric(margins_toplot[[2]]),
+  graphics::image(as.numeric(margins_toplot[[2]]),
         as.numeric(margins_toplot[[1]]),
         t(array_toplot),
         ylab = Trans(names(margins_toplot)[[1]]),
@@ -230,7 +232,7 @@ PlotPower =
   ##   (rev(num_margins_toplot[[2]])[1] - rev(num_margins_toplot[[2]])[2])/2
   ## xlim = c(image_x_lim_min,
   ##          image_x_lim_min + (image_x_lim_max - image_x_lim_min) * 1.2)
-  ## image(as.numeric(margins_toplot[[2]]),
+  ## graphics::image(as.numeric(margins_toplot[[2]]),
   ##       as.numeric(margins_toplot[[1]]),
   ##       t(array_toplot),
   ##       ylab = Trans(names(margins_toplot)[[1]]),
@@ -241,43 +243,47 @@ PlotPower =
   ## legend_x = mean(c(image_x_lim_max, xlim[2]))
   ## y_range = extendrange(as.numeric(margins_toplot[[1]]), f = -0.15)
   ## legend_y = ScaleRange(legend_ats, y_range[1], y_range[2])
-  ## image(legend_x, legend_y, t(rev(legend_ats)), add = TRUE,
+  ## graphics::image(legend_x, legend_y, t(rev(legend_ats)), add = TRUE,
   ##       axes = FALSE, xlab = '', ylab = '', col = rev(legend_cols),
   ##       xlim = c(1.5, 1.9))
-  ## text(legend_x, seq_along(legend_ats), labels = sprintf('%1.1f', legend_ats),
-  ##      cex = 1.5, col = grey.colors(1, .2, .2))
-  ## mtext(side = 3, line = 2, text = 'Power')
-  ## box()
+  ## graphics::text(legend_x, seq_along(legend_ats), labels = sprintf('%1.1f', legend_ats),
+  ##      cex = 1.5, col = grDevices::grey.colors(1, .2, .2))
+  ## graphics::mtext(side = 3, line = 2, text = 'Power')
+  ## graphics::box()
   ## ,
   ##         xlim = range(as.numeric(margins_toplot[[2]])))
   ##
   ##
   ## grid lines
-  abline(h = margins_toplot[[1]], v = margins_toplot[[2]], col = 'white')
+  graphics::abline(h = margins_toplot[[1]], v = margins_toplot[[2]], col = 'white')
   ## power contour lines
   power_lwds = ifelse(target_levels == target, 2, 1)
   ## Contour lines
   if (is.na(smooth)){ # no smoothing
-    contour(as.numeric(margins_toplot[[2]]),
+    graphics::contour(as.numeric(margins_toplot[[2]]),
             as.numeric(margins_toplot[[1]]),
             t(array_toplot), add = TRUE, labcex = 1.2,
             levels = target_levels, lwd = power_lwds,
-            col = grey.colors(1, .2, .2))
+            col = grDevices::grey.colors(1, .2, .2))
 
   } else { # smoothing
     smooth_pred_grid = as.matrix(expand.grid(as.numeric(margins_toplot[[2]]),
                                              as.numeric(margins_toplot[[1]])))
-    smooth_z = fitted(loess(as.vector(ftable(array_toplot, row.vars = 1:2)) ~
-                              smooth_pred_grid, span = smooth, degree = 2))
-    smooth_z_m = xtabs(smooth_z ~ smooth_pred_grid[, 1] + smooth_pred_grid[, 2])
-    contour(as.numeric(margins_toplot[[2]]),
+    smooth_z =
+      stats::fitted(
+               stats::loess(
+                        as.vector(ftable(array_toplot, row.vars = 1:2)) ~
+                          smooth_pred_grid, span = smooth, degree = 2))
+    smooth_z_m =
+      stats::xtabs(smooth_z ~ smooth_pred_grid[, 1] + smooth_pred_grid[, 2])
+    graphics::contour(as.numeric(margins_toplot[[2]]),
             as.numeric(margins_toplot[[1]]),
             z = smooth_z_m, add = TRUE, labcex = 1.2,
             levels = target_levels, lwd = power_lwds,
-            col = grey.colors(1, .2, .2))
+            col = grDevices::grey.colors(1, .2, .2))
   }
 
-  axis(1);axis(2);box(bty = 'l')
+  graphics::axis(1);graphics::axis(2);graphics::box(bty = 'l')
   ## ============================================
   ## Process Example input
   if (!is.null(example)){
@@ -296,13 +302,13 @@ PlotPower =
   if(!is.null(example)){
     x0 = grDevices::extendrange(graphics::par()$usr[1:2], f = -.02)[1]
     y0 = grDevices::extendrange(graphics::par()$usr[3:4], f = -.02)[1]
-    arrows(x0 = x_ex_value, y0 = y0,
+    graphics::arrows(x0 = x_ex_value, y0 = y0,
            x1 = x_ex_value, y1 = y_ex_value, length = .15, code = 0)
-    arrows(x0 = x_ex_value, y0 = y_ex_value,
+    graphics::arrows(x0 = x_ex_value, y0 = y_ex_value,
            x1 = x0, y1 = y_ex_value, length = .15)
-    points(rep(x_ex_value, 2), rep(y_ex_value, 2), pch = c(19, 1), cex = c(1, 3))
-    text(x = x0, y = y_ex_value, labels = y_ex_value, adj = c(0, -1))
-    ##    mtext(text = y_ex_value, side = 2, at = y_ex_value, line = -2, padj = -1, las = 2)
+    graphics::points(rep(x_ex_value, 2), rep(y_ex_value, 2),
+                     pch = c(19, 1), cex = c(1, 3))
+    graphics::text(x = x0, y = y_ex_value, labels = y_ex_value, adj = c(0, -1))
   }
 }
 
@@ -316,7 +322,7 @@ PlotPower =
 ##'
 ##' @param col Color or arrow drawn.
 ##' @param ... Further arguments are passed the two calls of function
-##'   \code{arrows} drawing the nicked arrow.
+##'   \code{graphics::arrows} drawing the nicked arrow.
 ##' @return Nothing
 ##' @author Gilles Dutilh
 AddExample = function(x, slicer = NULL, example, target = .9,
@@ -337,11 +343,12 @@ AddExample = function(x, slicer = NULL, example, target = .9,
   ## Draw Example Arrow
   x0 = grDevices::extendrange(graphics::par()$usr[1:2], f = -.02)[1]
   y0 = grDevices::extendrange(graphics::par()$usr[3:4], f = -.02)[1]
-  arrows(x0 = x_ex_value, y0 = y0,
-         x1 = x_ex_value, y1 = y_ex_value, length = .15, code = 0, col = col, ...)
-  arrows(x0 = x_ex_value, y0 = y_ex_value,
+  graphics::arrows(x0 = x_ex_value, y0 = y0,
+                   x1 = x_ex_value, y1 = y_ex_value, length = .15,
+                   code = 0, col = col, ...)
+  graphics::arrows(x0 = x_ex_value, y0 = y_ex_value,
          x1 = x0, y1 = y_ex_value, length = .15, col = col, ...)
-  points(rep(x_ex_value, 2), rep(y_ex_value, 2), pch = c(19, 1), cex = c(1, 3), col = col)
-  text(x = x0, y = y_ex_value, labels = y_ex_value, adj = c(0, -1), col = col)
-  ##    mtext(text = y_ex_value, side = 2, at = y_ex_value, line = -2, padj = -1, las = 2)
+  graphics::points(rep(x_ex_value, 2), rep(y_ex_value, 2),
+                   pch = c(19, 1), cex = c(1, 3), col = col)
+  graphics::text(x = x0, y = y_ex_value, labels = y_ex_value, adj = c(0, -1), col = col)
 }
