@@ -256,8 +256,8 @@ FillGrid = function(pars, fun, more_args = NULL, n_iter = NA,
 ##' dimensions as the original array. The number of levels at each
 ##' dimension may be reduced, however.
 ##' ##'
-##' @title indexing with [ ] for class power_array
-##' @return An array of class power_grid
+##' @title indexing with [ ] for class \code{power_array}
+##' @return An array of class \code{power_grid}
 ##' @author Gilles Dutilh
 ##' @param x object
 ##' @param ... index
