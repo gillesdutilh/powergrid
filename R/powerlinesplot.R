@@ -125,7 +125,8 @@ PlotPowerLines = function(x,
        xlim = xlim,
        ylim = ylim,
        xlab = Trans(x_par), ylab = Trans(y_par), type = 'n')
-  graphics::abline(v = xvals, h = yvals,
+  graphics::abline(v = pretty(xvals[xvals >= xlim[1] & xvals <= xlim[2]]),
+                   h = pretty(yvals[yvals >= ylim[1] & yvals <= ylim[2]]),
                    col = grDevices::grey.colors(1, .95, .95))
   for(i in seq_along(ncol(y_rec))){
     ys = y_rec[, i]
