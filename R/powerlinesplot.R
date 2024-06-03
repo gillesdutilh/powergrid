@@ -121,12 +121,16 @@ PlotPowerLines = function(x,
   if (is.null(ylim)){ylim = range(yvals)}
   ## drawing graph
   graphics::par(las = 1)
+  at_x = pretty(xvals[xvals >= xlim[1] & xvals <= xlim[2]])
+  at_y = pretty(yvals[yvals >= ylim[1] & yvals <= ylim[2]])
   plot(0,
        xlim = xlim,
        ylim = ylim,
-       xlab = Trans(x_par), ylab = Trans(y_par), type = 'n')
-  graphics::abline(v = pretty(xvals[xvals >= xlim[1] & xvals <= xlim[2]]),
-                   h = pretty(yvals[yvals >= ylim[1] & yvals <= ylim[2]]),
+       xlab = Trans(x_par), ylab = Trans(y_par), type = 'n', axes = FALSE)
+  graphics::axis(1, at = at_x)
+  graphics::axis(2, at = at_y)
+  graphics::abline(v = at_x,
+                   h = at_y,
                    col = grDevices::grey.colors(1, .95, .95))
   for(i in seq_along(ncol(y_rec))){
     ys = y_rec[, i]
@@ -158,5 +162,8 @@ PlotPowerLines = function(x,
   graphics::title(title)
   ## reset previous par settings
   graphics::par(old_par)
+  return(list('at_x' = at_x,
+              'at_y' = at_y,
+              'line_colors' = col))
 }
 
