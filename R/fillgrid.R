@@ -262,6 +262,7 @@ FillGrid = function(pars, fun, more_args = NULL, n_iter = NA,
 ##' @param x object
 ##' @param ... index
 ##' @param drop drop
+##' @export
 `[.power_array` <- function(x, ..., drop=TRUE) {
   the_attributes = attributes(x)
   x = NextMethod(x)
@@ -285,6 +286,7 @@ FillGrid = function(pars, fun, more_args = NULL, n_iter = NA,
 ##' @title print
 ##' @param x object of class power_array
 ##' @return object of class power_array
+##' @export
 ##' @author Gilles Dutilh
 print.power_array = function(x){
   print.table(x)
@@ -319,6 +321,7 @@ print.power_array = function(x){
 ##' See PowerGrid for details
 ##' @title Summary of power_grid object.
 ##' @param x array of class power_grid
+##' @export
 ##' @author Gilles Dutilh
 summary.power_array = function(x){
   aa = attributes(x)
