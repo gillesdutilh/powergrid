@@ -82,7 +82,7 @@ PlotPowerLines = function(x,
   ## translator for labels; translates if label is available
   Trans = function(x){
     if(!is.null(par_labels)){
-      for(i in seq_along(length(x))){
+      for(i in seq_along(x)){
         if(x[i] %in% names(par_labels)){x[i] = par_labels[x[i]]}
       }
     }
@@ -132,7 +132,7 @@ PlotPowerLines = function(x,
   graphics::abline(v = at_x,
                    h = at_y,
                    col = grDevices::grey.colors(1, .95, .95))
-  for(i in seq_along(ncol(y_rec))){
+  for(i in 1:ncol(y_rec)){
     ys = y_rec[, i]
     xs = as.numeric(dimnames(y_rec)[[x_par]])
     if(smooth){
