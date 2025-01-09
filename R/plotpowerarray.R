@@ -52,7 +52,7 @@
 ##' @param summary_function If \code{x} is an object of class \code{power_array}
 ##'   where attribute \code{summarized} is FALSE (and individual iterations are
 ##'   stored in dimension \code{sim}, the iterations dimension is aggregated by
-##'   \çode{summary_fun}. Otherwise ignored.
+##'   \code{summary_fun}. Otherwise ignored.
 ##' @param target_levels For which levels of power (or any other variable) are
 ##'   lines drawn.
 ##' @param shades_of_grey Logical indicating whether greylevels are painted in
@@ -98,20 +98,24 @@ PlotPower =
   ## process input
   ## =======================================================
   ##
-  ## ============================================
-  ## handle input from old sse package
-  if(all(class(x) == 'power')){
+  ## Get the powergrid from old sse package input and turn into an array like
+  ## power_array.
+  if(all(class(x) == 'power')){ # `powEx` output sse (which contains `powCalc`)
     power_array = drop(GetPowergrid(x))
+    ## create as-if input:
     example = list(theta = sse::tex(x, type = 'theta'))
     target = x@power.example
+    par_to_search = 'n'
     slicer = list(xi = x@xi.example)
-  } else if(all(class(x) == 'powCalc')){
-    power_array = drop(GetPowergrid(x))
+    ## translate to Example object
+    example_list = Example(x)
+  } else if(all(class(x) == 'powCalc')){ # `powCal` output sse
+    power_array = drop(GetPowergrid(x)) # take the power_array-like array
     ## handle PowerGrid input
   } else if (all(class(x) == 'power_array')){
     copy_attr = attributes(x)
     if(!attr(x, which = 'summarized')){ # iterations kept
-      warning(paste0(strwrap('Note that the object in argument `x` is summarized across iterations by function passed in argument `summary_function`.',
+      warning(paste0(strwrap('Note that the object in argument `x` is automatically summarized across iterations by function passed in argument `summary_function`.',
                              60), '\n'))
       if(any(is.na(x))){cat('Some of the cells of input array (after eventual slicing) were empty.\n')}
       power_array = apply(x, 1:(length(dim(x)) - 1), summary_function)
@@ -125,6 +129,19 @@ PlotPower =
     }
   } else if (is.array(x)){
     power_array = x} # if just any array
+
+  ## create example (when the input was not a sse `power` example
+  if (!is.null(example)){ # if example requested, create example
+    if (all(class(x) != 'power')){ # when there is not yet an example
+      example_list = Example(power_array, example = append(slicer, example),
+                             target = target, minimal_target = minimal_target,
+                             find_min = find_min, method = method)
+    }
+    ## Prepare example for figrue.
+    y_ex_value = example_list$required_value
+    x_ex_name = names(example)
+    x_ex_value = example[[x_ex_name]]
+  }
 
   ## ============================================
   ## take slice that should be plotted
@@ -285,18 +302,6 @@ PlotPower =
 
   graphics::axis(1);graphics::axis(2);graphics::box(bty = 'l')
   ## ============================================
-  ## Process Example input
-  if (!is.null(example)){
-    ## extract (from sse) or calculate (from power_array) example info
-    example_list = Example(power_array, example = append(slicer, example),
-                           target = target, minimal_target = minimal_target,
-                           find_min = find_min, method = method)
-    ## Prepare example for figure. Note that it is possible to have any
-    ## parameter on x and y, whereas the default is to have 'n' on y.
-    y_ex_value = example_list$required_value
-    x_ex_name = names(example)
-    x_ex_value = example[[x_ex_name]]
-  }
   ## note that "y_ex_name" is not defined, this is par_to_search
   ## Draw Example Arrow
   if(!is.null(example)){
