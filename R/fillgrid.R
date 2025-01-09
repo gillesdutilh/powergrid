@@ -4,7 +4,7 @@
 ## - output in form of an array (may be converted to grid)
 
 ##' FillGrid Is an apply-like function, allowing to evaluate a function at the
-##' crossings of a set of parameters. The results is saved in an array with
+##' crossings of a set of parameters. The result is saved in an array with
 ##' attributes that optimize further usage by functions in package
 ##' \code{powergrid}. In particular, performing a function iteratively (using
 ##' parallel computing if required) is implemented conveniently. The typical use
@@ -37,7 +37,7 @@
 ##' @param n_iter If not NA, function \code{fun} is applied \code{n_iter} times
 ##'   at each point in the grid defined by \code{pars}.
 ##' @param summarize Logical indicating whether iterations (if \code{n_iter} is
-##'   given) are to be sunmmarized by \code{summary_function}.
+##'   given) are to be summarized by \code{summary_function}.
 ##' @param summary_function A function to be applied to aggregate across
 ##'   simulations. Defaults to \code{mean}, ignored when \code{keep_sims} ==
 ##'   TRUE or when \code{is.na(n_iter)}.
@@ -233,8 +233,14 @@ FillGrid = function(pars, fun, more_args = NULL, n_iter = NA,
   attr(out_array, which = 'more_args') = more_args
   attr(out_array, which = 'summarized') = summarize
   attr(out_array, which = 'n_iter') = n_iter
-  attr(out_array, which = 'summary_function') =
-    substitute(summary_function)
+  attr(out_array, which = "summary_function") = summary_function
+  attr(out_array, which = "summary_function_name") =
+    ## if it has a name, take the name
+    ifelse (class(substitute(summary_function)) == 'name',
+            substitute(summary_function),
+            ## otherwise ananymous
+            "anonymous function"
+            )
   attr(out_array,
        which = 'n_iter') = ifelse(is.na(n_iter), NA, n_iter)
   return(out_array)
@@ -263,14 +269,46 @@ FillGrid = function(pars, fun, more_args = NULL, n_iter = NA,
 ##' @param ... index
 ##' @param drop drop
 ##' @export
-`[.power_array` <- function(x, ..., drop=TRUE) {
+`[.power_array` = function(x, ..., drop = TRUE) {
   the_attributes = attributes(x)
   x = NextMethod(x)
-  the_attributes$dim = dim(x)
-  the_attributes$dimnames = dimnames(x)
+  if (is.null(dim(x))){ # vector to become 1-dim array
+    the_attributes$dim = length(x)
+    the_attributes$dimnames = list('dropped_name' = NULL)
+  } else { # array
+    the_attributes$dim = dim(x)
+    the_attributes$dimnames = dimnames(x)
+  }
+  ## copy the current dimnames to replace the pars, but only those dimensions
+  ## the have name that is in pars.
+  the_attributes$pars[
+                   intersect(names(the_attributes$pars),
+                             names(the_attributes$dimnames))] =
+    lapply(
+      the_attributes$dimnames[
+                       intersect(names(the_attributes$pars),
+                                 names(the_attributes$dimnames))],
+      as.numeric)
   if (all(names(dimnames(x)) != 'fun_out')){
     the_attributes$sim_function_nval = 1
   } else {the_attributes$sim_function_nval = length(dimnames(x)$fun_out)}
+  ## if there are sims, and these are selected with index, update n_iter
+  if (!the_attributes$summarized && !is.na(the_attributes$n_iter))
+  {
+    if (!('sim' %in% names(dimnames(x))))
+    {
+      the_attributes$n_iter = 1 # sim dimension dropped, stil n_iter
+    } else {
+      the_attributes$n_iter =
+        dim(x)[
+          which(names(dimnames(x)) == 'sim')]
+    }
+  }
+  ## update pars if reduced by indexing.
+  if (is.null(dimnames(x)))
+  {
+    x = as.array(x)
+  }
   attributes(x) = the_attributes
   return(x)
 }
@@ -285,30 +323,54 @@ FillGrid = function(pars, fun, more_args = NULL, n_iter = NA,
 ##' its contents.
 ##' @title print
 ##' @param x object of class power_array
-##' @return object of class power_array
 ##' @export
 ##' @author Gilles Dutilh
 print.power_array = function(x){
   print.table(x)
-  cat(
-    paste0('Array of class "power_array" created using FillGrid, ',
-           ifelse(!is.na(attr(x, which = 'n_iter')) &
-                  !attr(x, which = 'summarized'),
-                  '\nkeeping individual simulations,\n',
-                  ''),
-           ifelse(attr(x, which = 'sim_function_nval') > 1,
-                  paste0(attr(x, which = 'sim_function_nval'), ' output values from each application of fun,\n'), ''),
-           'yielding dimensions:\n',
-           paste(names(dimnames(x)), collapse = ', '), '. ',
-           ifelse(!is.na(attr(x, which = 'n_iter')),
-                  paste0('\nResults from ', attr(x, which = 'n_iter'), ' iterations\n'),
-                  paste0('')
-                  ),
-           ifelse(!is.na(attr(x, which = 'n_iter')) & attr(x, which = 'summarized'),
-                  "summarized by `summary_function` (see attributes).", ""),
-           '\n'
-           )
+  note_type_created_by = paste0(
+    'Array of class `power_array` created using FillGrid',
+    ## Are individual sims in object?
+    ifelse(!is.na(attr(x, which = 'n_iter')) &
+           !attr(x, which = 'summarized'),
+           ', keeping individual simulations',
+           ''),
+    ## Are there multiple outputs from function?
+    ifelse(attr(x, which = 'sim_function_nval') > 1,
+           paste0(', containing ', attr(x, which = 'sim_function_nval'),
+                  ' output values from each application of the function given in attribute `sim_function`.'), '.')
   )
+  note_resulting_array =
+    ## Description of resulting dimensions of object:
+    ifelse(length(dim(x)) == 1,
+           " One resulting dimension (dimension's name was dropped by indexing).",
+           paste0('Resulting dimensions:\n ',
+                  paste(names(dimnames(x)), collapse = ', '), '.')
+           )
+  ## If there are simulations (summarized or not), show n_iter
+  note_iterations =
+    ifelse(!is.na(attr(x, which = 'n_iter')),
+           paste0('Results from ', attr(x, which = 'n_iter'), ' iteration',
+                  ifelse(attr(x, which = 'n_iter') > 1, 's', '')),
+           '' # if no iterations
+           )
+  ## If these are summarized, show summary function
+  note_summary_function =
+    ifelse(!is.na(attr(x, which = 'n_iter')) &
+           attr(x, which = 'summarized'),
+           paste0(" summarized by function `",
+                  attr(x, which = 'summary_function_name'),
+                  "` (for function definition, see attribute `summary_function`)."),
+           "")
+  ## print all notes together, wrapping what may be wrapped
+  cat(paste0(
+    PrintWrap(note_type_created_by),
+    '\n ',
+    note_resulting_array,
+    '\n',
+    PrintWrap(paste(
+      note_iterations,
+      note_summary_function)),
+    '\n', sep = ''))
 }
 
 ## ==================================================================
@@ -325,38 +387,50 @@ print.power_array = function(x){
 ##' @author Gilles Dutilh
 summary.power_array = function(x){
   aa = attributes(x)
-  parnames = names(aa$dimnames)
+  parnames = names(aa$dimnames[!(names(aa$dimnames) %in% c('sim', 'fun_out'))])
   if(!is.na(aa$n_iter) && aa$summarized){
-    iter_summary_text = paste0(paste(strwrap(paste0('- Containing summary statistic over ',
-                                                    aa$n_iter, ' iterations. See attribute summary_function for the applied summary statistic.'), width = 50), collapse = '\n  '), '\n')
+    note_summary_iter =
+      paste0("Containing summary over ", aa$n_iter,
+             " iterations, summarized by function `",
+             attr(x, which = 'summary_function_name'),
+             "` (for function definition, see attribute `summary_function`).")
+  } else {
+    if(!is.na(aa$n_iter) && !aa$summarized){
+      note_summary_iter =
+        paste0('Containing output of ', aa$n_iter, ' individual iteration',
+               ifelse(aa$n_iter > 1, 's', ''), '.')
+    } else {
+      note_summary_iter = ''
+    }
   }
-  if(!is.na(aa$n_iter) && !aa$summarized){
-    iter_summary_text = paste0('- Containing output of ', aa$n_iter, ' individual iterations.\n')
-    parnames = parnames[-length(parnames)] # get rid of the sim dimension
-  }
-  if(is.na(aa$n_iter)){
-    iter_summary_text = ''
-  }
-  cat(paste0(
-    "- Object of class: ", aa$class, "\n",
-    iter_summary_text,
-    "- Range of values: ",
-    ifelse('fun_out' %in% names(dimnames(x)),
-           paste0('\n    ', dimnames(x)$fun_out, ': ',
-                  apply(apply(x, 'fun_out', range, na.rm = TRUE),
-                        2, function(x)
-                        {paste0(
-                           '[', paste0(round(x, 2), collapse = ', '), ']')}), collapse = '')
-         , paste0('[', paste0(round(range(x, na.rm = TRUE), 2), collapse = ', '), ']')
-           )
-  , "\n- Evaluated at:\n",
-    ## paste(format(parnames, width = max(nchar(parnames) + 2), justify = 'right'),
-    ##       lapply(aa$dimnames, paste, collapse = ', '),
-    ##       sep = ': ', collapse = '\n'),
+  note_range =
+    paste0(
+      " Range of values:\n",
+      ifelse('fun_out' %in% names(dimnames(x)),
+             paste0(paste0('      ', dimnames(x)$fun_out), ': ',
+                    apply(apply(x, 'fun_out', range, na.rm = TRUE),
+                          2, function(x)
+                          {paste0(
+                             '[', paste0(round(x, 2), collapse = ', '), ']')}),
+                    collapse = '\n'),
+             paste0('[', paste0(round(range(x, na.rm = TRUE), 2),
+                                collapse = ', '), ']')
+             )
+    )
+  note_grid = paste0(
+    "\n Evaluated at:\n",
     paste(mapply(function(x, y){
       paste(format(as.list(x), width = max(nchar(parnames) + 2), justify = 'right'),
             strwrap(paste(y, collapse = ', '), width = 50), collapse = '\n')},
-      x = as.list(parnames), y = aa$dimnames[parnames]), collapse = '\n'),
+      x = as.list(parnames), y = aa$dimnames[parnames]), collapse = '\n')
+    )
+  cat(paste0(
+    " Object of class: ", aa$class, "\n",
+    PrintWrap(note_summary_iter),
+    '\n',
+    note_range,
+    ' ',
+    note_grid,
     '\n')
     )
 }
