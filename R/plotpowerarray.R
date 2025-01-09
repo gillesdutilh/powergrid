@@ -111,6 +111,8 @@ PlotPower =
     example_list = Example(x)
   } else if(all(class(x) == 'powCalc')){ # `powCal` output sse
     power_array = drop(GetPowergrid(x)) # take the power_array-like array
+    ## give it a class to handle in Example
+    class(power_array) = "pseudo_power_array"
     ## handle PowerGrid input
   } else if (all(class(x) == 'power_array')){
     copy_attr = attributes(x)
