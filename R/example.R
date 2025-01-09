@@ -20,7 +20,8 @@
 ##' to search, for example, for the minimal sample size where the expected
 ##' confidence interval is smaller than a certain desired width.
 ##'
-##' @title Find Combination of Parameters Yielding Desired Power.
+##' @title Find Combination of Parameters Yielding Desired Value (typically
+##'   power).
 ##' @param x Object of class \code{power_array} or \code{power}
 ##' @param example List with named elements pointing at the assumptions at which
 ##'   the example should be based. List names should match the dimension names
@@ -80,25 +81,44 @@ Example = function(x,
                    minimal_target = TRUE,
                    find_min = TRUE,
                    method = 'step'){
+  ## general warning lm
   if (method == 'lm' && any(target %in% 0:1)){
-    stop("Method is set to 'lm', which only makes sense for power as a function of n. Searching for a power of 1 or 0 is not supported by this package. For help achieving a power of 1 or 0, see a priest or a shrink, respectively.")}
+    stop(PrintWrap("Method is set to 'lm', which only makes sense for power as a function of n. Searching for a power of 1 or 0 is not supported by this package. For help achieving a power of 1 or 0, see a priest or a shrink, respectively."))}
+  ## warnings for atypical input
+  if(inherits(x, 'power')) {
+    warning(PrintWrap("You supplied an object x of type `power`, likely from the sse package. This will only work correctly when the sse package is loaded."))
+  } else {
+    if (!(class(x) %in% c("power_array", "pseudo_power_array"))){
+      warning(PrintWrap("You supplied an object x that does not have class `power_array`. You may have summarized an object of class `power_array` using an apply function. In that case, better feed `Example` with function with the original `power_array` and use the build-in functionality governed by `summary_function`. Otherwise, this function may work well, but that is unpredictable."))
+    } else {
+      if (all(class(x) == 'power_array') && !is.na(attr(x, which = 'n_iter')) &&
+          !attr(x, which = 'summarized')){
+        warning(PrintWrap("A sensible example cannot be calculated for individual iterations. This function automatically summarized iterations using function `summary_function`"))}
+    }
+  }
+  ## This function may get input with class `power` from sse package (typically
+  ## when applied inside the plot function). Such input is turned into class
+  ## 'power_example'.
   if(inherits(x, 'power')) {
     ## translate info from powEx output (class: power) Example() output
-    requested_example = list(theta = sse::tex(x, type = 'theta'))
-    required_value = sse::tex(x, type = 'nRec')
-    required_name = 'n'
+    ## requested_example = list(theta = sse::tex(x, type = 'theta'))
+    ## required_value = sse::tex(x, type = 'nRec')
+    ## required_name = 'n'
     ## at_value = sse::tex(x, type = 'theta')
     ## at_name = 'theta'
-    example_list = list(requested_example = requested_example,
-                        required_value = required_value,
-                        required_name = required_name,
-                        searched = 'min',
-                        objective = 'min')
+    example_list = list(
+      requested_example = list(theta = sse::tex(x, type = 'theta')),
+      objective = 'achieve target or higher',
+      target = sse::tex(ex_out_sse, type = 'power'),
+      required_name = 'n',
+      required_value = sse::tex(x, type = 'nRec'),
+      searched = 'min',
+      method = attr(x, which = "method"),
+      objective = 'achieve target or higher'
+      )
     ## at_value = at_value,
     ## at_name = at_name)
-  } else {
-    ## use Example to take the example from a desired onedimensional slice (vector)
-    requested_example = example
+  } else { # when it is a regular `power_array` object
     slice_to_search = ArraySlicer(x, example)
     required_value = FindTarget(slice_to_search, target = target,
                                 minimal_target = minimal_target,
@@ -110,19 +130,23 @@ Example = function(x,
     ## x_ex_name = names(margins_toplot)[names(margins_toplot) != par_to_search]
     ## x_ex_value = example[[x_ex_name]]
     ## note that "y_ex_name" is not defined, this is par_to_search
-    example_list = list(requested_example = requested_example,
-                        required_value = required_value,
-                        required_name = required_name,
-                        searched = ifelse(find_min, 'min', 'max'),
-                        objective = ifelse(minimal_target, 'min', 'max'),
-                        target = target,
-                        method = method)
+    example_list = list(
+      requested_example = example,
+      objective = ifelse(minimal_target,
+                         'achieve target or higher',
+                         'achieve target or lower'),
+      target = target,
+      required_name = required_name,
+      required_value = required_value,
+      searched = ifelse(find_min, 'min', 'max'),
+      method = method)
   }
-  if (method == 'step' & is.na(required_value)){
-    warning(paste0('No value of ', required_name, ' evaluated where target of ',
-                   target,
-                   ' was achieved.\nConsider using method = "lm" for extrapolation.'))
-    }
+  if (method == 'step' & is.na(example_list$required_value)){
+    warning(
+      paste0('No value of ', required_name, ' evaluated where target of ',
+             target,
+             ' was achieved.\nConsider using method = "lm" for extrapolation.'))
+  }
   class(example_list) = 'power_example'
   return(example_list)
 }
@@ -136,19 +160,48 @@ Example = function(x,
 ##' @return nothing
 ##' @author Gilles Dutilh
 print.power_example = function(x){
-  cat('================================================\n')
-  cat(paste0('For a ', ifelse(x$objective == 'min', 'minimal', 'maximal'), ' power of ',
-             x$target, ' assuming\n',
+  description =
+    ifelse(x$method == 'lm',
+           paste0('\nDescription: Method "lm" was chosen to use interpolation to approach the ',
+                  ifelse(x$searched == 'min', 'lowest ', 'highest '),
+                  x$required_name, ' that yields a target (e.g., power) of ',
+                  ifelse(x$objective == 'achieve target or higher',
+                         'at least ', 'at most '), x$target,
+                  '.\nThis interpolation only makes sense for studying the relation between n and power.'),
+           paste0('\nDescription: Method "step" was used to find the ',
+                  ifelse(x$searched == 'min', 'lowest ', 'highest '),
+                  x$required_name,
+                  ' in the searched grid that yields a target (typically power) of',
+                  ifelse(x$objective == 'achieve target or higher',
+                         ' at least ', ' at most '), x$target, '.')
+           )
+  content = paste0('To achieve the target of ',
+             ifelse(x$objective == 'achieve target or higher',
+                    'at least ', 'at most '),
+             x$target,
+             ' assuming\n',
              paste(names(x$requested_example),
-                   x$requested_example, sep = ' = ', collapse = '\n'), '\n',
-             ifelse(x$searched == 'min', 'Minimal required ', 'Maximal persmissible '),
+                   x$requested_example, sep = ' = ', collapse = '\n'),
+             ',\n',
+             ifelse(x$searched == 'min', 'the minimal required ', 'maximal permissible '),
              x$required_name, ' = ', x$required_value,
-             ifelse(x$method == 'lm',
-                    '\nMethod "lm" was used to approach the required n,
-which makes sense only for studying the relation
-between n and power.',
-                    '')
+             '\n------------------------------------------------\n',
+             paste0(strwrap(description, 48), collapse = '\n')
              )
-      )
+  cat('================================================\n')
+  cat(content)
   cat('\n================================================\n')
 }
+
+##' Summary method for class \code{power_example}.
+##'
+##' Print longer informative output for object of class \code{power_example}.
+##'
+##' @title Print Example
+##' @param x object of class \code{power_example}
+##' @return nothing
+##' @author Gilles Dutilh
+summary.power_example = function(x){
+  data.frame('example' = unlist(ex_out))
+}
+
