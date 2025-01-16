@@ -97,6 +97,7 @@ Example = function(x,
     stop(PrintWrap("Method is set to 'lm', which only makes sense for power as a function of n. Searching for a power of 1 or 0 is not supported by this package. For help achieving a power of 1 or 0, see a priest or a shrink, respectively."))}
 
   if (all(class(x) != 'power_array' &
+          class(x) != 'pseudo_power_array_by_plotpower' &
           !inherits(x, 'power'))){
     ## just throw an error (may be implemented later)
     stop("The object 'x' should be of class 'power_array' or 'powCalc' (from package 'sse'). ")
@@ -120,7 +121,8 @@ Example = function(x,
       method = attr(x, which = "method"),
       objective = 'achieve target or higher'
     )
-  } else if (all(class(x) == 'power_array')) {
+  } else if (all(class(x) %in% c('power_array',
+                                 'pseudo_power_array_by_plotpower'))){
     ## when it is a regular `power_array` object, find the min/max for target
     slice_to_search = ArraySlicer(x, example)
     required_value = FindTarget(slice_to_search,
