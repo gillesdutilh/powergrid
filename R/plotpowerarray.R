@@ -112,25 +112,17 @@ PlotPower =
   } else if(all(class(x) == 'powCalc')){ # `powCal` output sse
     power_array = drop(GetPowergrid(x)) # take the power_array-like array
     ## give it a class to handle in Example
-    class(power_array) = "pseudo_power_array"
+    class(power_array) = "pseudo_power_array_by_plotpower"
     ## handle PowerGrid input
   } else if (all(class(x) == 'power_array')){
-    copy_attr = attributes(x)
     if(!attr(x, which = 'summarized')){ # iterations kept
-      warning(paste0(strwrap('Note that the object in argument `x` is automatically summarized across iterations by function passed in argument `summary_function`.',
-                             60), '\n'))
-      if(any(is.na(x))){cat('Some of the cells of input array (after eventual slicing) were empty.\n')}
-      power_array = apply(x, 1:(length(dim(x)) - 1), summary_function)
-      copy_attr$dim = dim(power_array)
-      copy_attr$dimnames = dimnames(power_array)
-      copy_attr$summarized = TRUE
-      copy_attr$summary_function = summary_function
-      attributes(power_array) = copy_attr
+      stop("The object 'x' you supplied contains individual iterations. For sensible plotting, these should be summarized first")
     } else {
       power_array = x # power_array
     }
-  } else if (is.array(x)){
-    power_array = x} # if just any array
+  } else {
+    stop("The object 'x' should be of class 'power_array', 'power' or 'powCalc' (from package 'sse'). ")
+    power_array = x} # if just any array, give it a try
 
   ## create example (when the input was not a sse `power` example
   if (!is.null(example)){ # if example requested, create example
