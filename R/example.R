@@ -81,31 +81,35 @@ Example = function(x,
                    minimal_target = TRUE,
                    find_min = TRUE,
                    method = 'step'){
+  ## =======================================================
+  ## Warnings and Errors depending on input
+  ## warnings for atypical input
+  if(inherits(x, 'power')) {
+    warning(PrintWrap("You supplied an object x of type 'power', likely from the sse package. This will only work correctly when the sse package is loaded."))
+  } else {
+    if (all(class(x) == 'power_array') && !is.na(attr(x, which = 'n_iter')) &&
+        !attr(x, which = 'summarized')){
+      stop(PrintWrap("A sensible example cannot be calculated for an object containing individual iterations."))}
+  }
+
   ## general warning lm
   if (method == 'lm' && any(target %in% 0:1)){
     stop(PrintWrap("Method is set to 'lm', which only makes sense for power as a function of n. Searching for a power of 1 or 0 is not supported by this package. For help achieving a power of 1 or 0, see a priest or a shrink, respectively."))}
-  ## warnings for atypical input
-  if(inherits(x, 'power')) {
-    warning(PrintWrap("You supplied an object x of type `power`, likely from the sse package. This will only work correctly when the sse package is loaded."))
-  } else {
-    if (!(class(x) %in% c("power_array", "pseudo_power_array"))){
-      warning(PrintWrap("You supplied an object x that does not have class `power_array`. You may have summarized an object of class `power_array` using an apply function. In that case, better feed `Example` with function with the original `power_array` and use the build-in functionality governed by `summary_function`. Otherwise, this function may work well, but that is unpredictable."))
-    } else {
-      if (all(class(x) == 'power_array') && !is.na(attr(x, which = 'n_iter')) &&
-          !attr(x, which = 'summarized')){
-        warning(PrintWrap("A sensible example cannot be calculated for individual iterations. This function automatically summarized iterations using function `summary_function`"))}
-    }
+
+  if (all(class(x) != 'power_array' &
+          !inherits(x, 'power'))){
+    ## just throw an error (may be implemented later)
+    stop("The object 'x' should be of class 'power_array' or 'powCalc' (from package 'sse'). ")
   }
+
+  ## =======================================================
+  ## If the input is not rejected, adjust atypical input.
+  ##
   ## This function may get input with class `power` from sse package (typically
-  ## when applied inside the plot function). Such input is turned into class
-  ## 'power_example'.
+  ## when applied inside the plot function). Confusingly, such object is the
+  ## result from powEx and thus already contains the example. 'power' input is
+  ## turned into class 'power_example'.
   if(inherits(x, 'power')) {
-    ## translate info from powEx output (class: power) Example() output
-    ## requested_example = list(theta = sse::tex(x, type = 'theta'))
-    ## required_value = sse::tex(x, type = 'nRec')
-    ## required_name = 'n'
-    ## at_value = sse::tex(x, type = 'theta')
-    ## at_name = 'theta'
     example_list = list(
       requested_example = list(theta = sse::tex(x, type = 'theta')),
       objective = 'achieve target or higher',
@@ -115,12 +119,12 @@ Example = function(x,
       searched = 'min',
       method = attr(x, which = "method"),
       objective = 'achieve target or higher'
-      )
-    ## at_value = at_value,
-    ## at_name = at_name)
-  } else { # when it is a regular `power_array` object
+    )
+  } else if (all(class(x) == 'power_array')) {
+    ## when it is a regular `power_array` object, find the min/max for target
     slice_to_search = ArraySlicer(x, example)
-    required_value = FindTarget(slice_to_search, target = target,
+    required_value = FindTarget(slice_to_search,
+                                target = target,
                                 minimal_target = minimal_target,
                                 search_par = 'this is ignored for vector',
                                 find_min = find_min,
@@ -141,6 +145,7 @@ Example = function(x,
       searched = ifelse(find_min, 'min', 'max'),
       method = method)
   }
+
   if (method == 'step' & is.na(example_list$required_value)){
     warning(
       paste0('No value of ', required_name, ' evaluated where target of ',
