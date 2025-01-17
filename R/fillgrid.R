@@ -405,17 +405,20 @@ summary.power_array = function(x){
   }
   note_range =
     paste0(
-      " Range of values:\n",
-      ifelse('fun_out' %in% names(dimnames(x)),
-             paste0(paste0('      ', dimnames(x)$fun_out), ': ',
-                    apply(apply(x, 'fun_out', range, na.rm = TRUE),
-                          2, function(x)
-                          {paste0(
-                             '[', paste0(round(x, 2), collapse = ', '), ']')}),
-                    collapse = '\n'),
-             paste0('[', paste0(round(range(x, na.rm = TRUE), 2),
-                                collapse = ', '), ']')
-             )
+      " Range of values: ",
+      ifelse(
+        'fun_out' %in% names(dimnames(x)),
+        paste0('\n',
+               paste0(
+                 paste0('      ', dimnames(x)$fun_out), ': ',
+                 apply(apply(x, 'fun_out', range, na.rm = TRUE),
+                       2, function(x)
+                       {paste0(
+                          '[', paste0(round(x, 2), collapse = ', '), ']')}),
+                 collapse = '\n')),
+        paste0('[', paste0(round(range(x, na.rm = TRUE), 2),
+                           collapse = ', '), ']')
+      )
     )
   note_grid = paste0(
     "\n Evaluated at:\n",
