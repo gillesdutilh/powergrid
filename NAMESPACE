@@ -1,1 +1,7 @@
 exportPattern("^[[:alpha:]]+")
+S3method(print, power_array)
+S3method(summary, power_array)
+S3method("[", power_array)
+S3method(print, power_example)
+S3method(summary, power_example)
+export("[.power_array")
