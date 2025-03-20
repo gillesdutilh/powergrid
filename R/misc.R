@@ -29,3 +29,39 @@ PrintWrap = function(x,
     paste0(' ', paste0(strwrap(x, width = width), collapse = '\n '))
   }
 }
+
+##' @title Summary of object that has simulations saved.
+##' @description Summarizes objects of class `power_array` that have individual
+##'   simulations saved across simulations.
+##' @param x Object of class `power_array`
+##' @param summary_fun function to apply across simulations
+##' @param ... Further arguments passed to 'summary_fun'
+##' @return An object of class `power_array`, with attributes \code{summarized =
+##'   TRUE}.
+##' @author Gilles Dutilh
+PowerApply = function(x, summary_function, ...){
+  if(attr(x, which = 'summarized') | class(x) != 'power_array'){
+    stop('Object x should be an object of class `power_array`, where attribute `summarized` is FALSE; containing individual simulations.')
+  }
+  aa = attributes(x)
+  summarized_x = apply(x, names(dimnames(x))[names(dimnames(x)) != 'sim'],
+                       summary_function, ...)
+  new_attributes = attributes(summarized_x)
+  for (cur_attribute in names(aa)[!(names(aa) %in% c('dim', 'dimnames'))])
+    { # copy attributes
+      new_attributes[[cur_attribute]] = aa[[cur_attribute]]
+    }
+  ## change summary-related attributes
+  new_attributes$summarized = TRUE
+  new_attributes$summary_function = summary_function
+  new_attributes$summary_function_name =
+    ifelse (class(substitute(summary_function)) == 'name',
+            substitute(summary_function),
+            ## if created on the fly, it's an ananymous function
+            "anonymous function"
+            )
+  attributes(summarized_x) = new_attributes
+  return(summarized_x)
+}
+
+
