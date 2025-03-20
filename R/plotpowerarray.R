@@ -85,7 +85,7 @@ PlotPower =
              method = 'step',
              target = .9, # the minimum (or maximum, see below)
              minimal_target = TRUE,
-             summary_function = function(x){mean(x, na.rm = TRUE)},
+             summary_function = mean,
              target_levels = c(.8, .9, .95), # which power iso lines to draw
              shades_of_grey = TRUE, # do you want shades of grey on background
              shades_legend = FALSE, # do you want a legend for the shades
@@ -100,7 +100,8 @@ PlotPower =
   ##
   ## Get the powergrid from old sse package input and turn into an array like
   ## power_array.
-  if(all(class(x) == 'power')){ # `powEx` output sse (which contains `powCalc`)
+  if(all(class(x) == 'power'))
+  { # `powEx` output sse (which contains `powCalc`)
     power_array = drop(GetPowergrid(x))
     ## create as-if input:
     example = list(theta = sse::tex(x, type = 'theta'))
@@ -109,14 +110,17 @@ PlotPower =
     slicer = list(xi = x@xi.example)
     ## translate to Example object
     example_list = Example(x)
-  } else if(all(class(x) == 'powCalc')){ # `powCal` output sse
+  } else if(all(class(x) == 'powCalc'))
+  { # `powCal` output sse
     power_array = drop(GetPowergrid(x)) # take the power_array-like array
     ## give it a class to handle in Example
     class(power_array) = "pseudo_power_array_by_plotpower"
     ## handle PowerGrid input
-  } else if (all(class(x) == 'power_array')){
+  } else if (all(class(x) == 'power_array'))
+  {
     if(!attr(x, which = 'summarized')){ # iterations kept
-      stop("The object 'x' you supplied contains individual iterations. For sensible plotting, these should be summarized first")
+      power_array = PowerApply(x, mean)
+      warning(PrintWrap("The object 'x' you supplied contains individual iterations. For sensible plotting, these were automatically summarized across iteration using the default `summary_function`."))
     } else {
       power_array = x # power_array
     }
@@ -150,13 +154,13 @@ PlotPower =
                        1, 0)
   }
   if(left_dims != 2){
-    stop(paste0(strwrap(
+    stop(PrintWrap(
       paste0(
         ifelse(is.null(slicer),
                "Input 'x' was no 2-dimensionsonal array, ",
                "Slicing 'x' by 'slicer' did not yield the necessary 2-dimensional, "),
-        "but a ", left_dims, "-dimensional array instead."), 75), collapse = '\n'))
-  } ##
+        "but a ", left_dims, "-dimensional array instead.")))
+} ##
 
   dimnms = names(dimnames(array_toplot))
   dimorder = c(par_to_search, dimnms[dimnms != par_to_search])
