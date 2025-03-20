@@ -41,23 +41,26 @@
 ##'   the sse package by Thomas Fabbro.
 ##' @return Returns a list containing:
 ##'
-##' - requested_example: the parameters at which the power was evaluated to
-##'   search n
-##'
-##' - required_value: the minimum (or maximum if slot searched = 'max') for n
-##'   (or other required_name)
-##'
-##' - required_name: the parameter minimized (or maximized if slot searched =
-##'   'max')
-##'
-##' - searched: was the "min" or "max" for \code{required_name} searched?
+##' - requested_example: the parameters at which the power (or whatever the
+##'   values represent) was searched to achieve level \code{target} (typically
+##'   the minimal power, e.g., .9), searching along parameter \code{required
+##'   name} (typically n).
 ##'
 ##' - objective: was \code{required_name} searched to find the "min" or "max" of
 ##'   x.
 ##'
 ##' - target: which value should the power (or any other value) have.
 ##'
-##' - minimal_target: At minimum (TRUE) or maximum (FALSE)
+##' - required_name: the parameter searched along to find the minimum (or
+##'   maximized if slot `searched` = 'max') to achieve objective. (typically n)
+##'
+##' - required_value: the minimum (or maximum if \code{searched` = 'max'} for
+##'   parameter \code{required_name} (which is typically n)
+##'
+##' - searched: was the "min" or "max" for \code{required_name} searched?
+##'
+##' - minimal_target: Is the target a minimum (TRUE, as typical for power) or a
+##'   maximum (FALSE, e.g., an expected uncertainty level)
 ##' @author Gilles Dutilh
 ##' @examples
 ##' sse_pars = list(
@@ -90,12 +93,12 @@ Example = function(x,
   } else {
     if (all(class(x) == 'power_array') && !is.na(attr(x, which = 'n_iter')) &&
         !attr(x, which = 'summarized')){
-      stop(PrintWrap("A sensible example cannot be calculated for an object containing individual iterations."))}
+      stop(PrintWrap("A sensible example cannot be calculated for an object containing individual iterations. Use function `PowerApply` to summarize first."))}
   }
-  if (is.null(target)){
+  if (!inherits(x, 'power') & is.null(target)){
     stop("An example can only be found when `target` is given (currently, target = NULL).")
   }
-  if ((length(dimnames(x)) - length(example)) != 1){
+  if (!inherits(x, 'power') & (length(dimnames(x)) - length(example)) != 1){
     stop("The argument `example` should slice out a one-dimensional vector from `x` to find the example on.")
     }
   ## general warning lm
