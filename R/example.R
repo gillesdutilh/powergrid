@@ -26,7 +26,8 @@
 ##' @param example List with named elements pointing at the assumptions at which
 ##'   the example should be based. List names should match the dimension names
 ##'   of \code{x}, assumptions should be exact values at these dimensions.
-##' @param target Which value should be achieved at the example
+##' @param target Which value (of typically power) should be achieved at the
+##'   example.
 ##' @param minimal_target Logical. Should target be minimally achieved (e.g.,
 ##'   power), or maximially allowed (e.g., estimation uncertainty).
 ##' @param find_min Logical, indicating whether the example should be found that
@@ -91,7 +92,12 @@ Example = function(x,
         !attr(x, which = 'summarized')){
       stop(PrintWrap("A sensible example cannot be calculated for an object containing individual iterations."))}
   }
-
+  if (is.null(target)){
+    stop("An example can only be found when `target` is given (currently, target = NULL).")
+  }
+  if ((length(dimnames(x)) - length(example)) != 1){
+    stop("The argument `example` should slice out a one-dimensional vector from `x` to find the example on.")
+    }
   ## general warning lm
   if (method == 'lm' && any(target %in% 0:1)){
     stop(PrintWrap("Method is set to 'lm', which only makes sense for power as a function of n. Searching for a power of 1 or 0 is not supported by this package. For help achieving a power of 1 or 0, see a priest or a shrink, respectively."))}
@@ -123,7 +129,10 @@ Example = function(x,
     )
   } else if (all(class(x) %in% c('power_array',
                                  'pseudo_power_array_by_plotpower'))){
+    ## =========================================================================
+    ## Standard situation: -----------------------------------------------------
     ## when it is a regular `power_array` object, find the min/max for target
+    ## =========================================================================
     slice_to_search = ArraySlicer(x, example)
     required_value = FindTarget(slice_to_search,
                                 target = target,
