@@ -309,6 +309,9 @@ FillGrid = function(pars, fun, more_args = NULL, n_iter = NA,
   {
     x = as.array(x)
   }
+  ## fill in NA for attributes that ArraySlicer can create, but indexing can't
+  the_attributes$sliced_at = NA
+  the_attributes$dims_left = NA
   attributes(x) = the_attributes
   return(x)
 }
@@ -420,13 +423,19 @@ summary.power_array = function(x){
                            collapse = ', '), ']')
       )
     )
-  note_grid = paste0(
-    "\n Evaluated at:\n",
-    paste(mapply(function(x, y){
-      paste(format(as.list(x), width = max(nchar(parnames) + 2), justify = 'right'),
-            strwrap(paste(y, collapse = ', '), width = 50), collapse = '\n')},
-      x = as.list(parnames), y = aa$dimnames[parnames]), collapse = '\n')
-    )
+  note_grid =
+    ifelse(all(names(aa$dimnames) == 'dropped_name'), "", # if no name for dim
+           paste0(
+             "\n Evaluated at:\n",
+             paste(mapply(function(x, y){
+               paste(format(as.list(x), width = max(nchar(parnames) + 2),
+                            justify = 'right'),
+                     strwrap(paste(y, collapse = ', '), width = 50),
+                     collapse = '\n')},
+               x = as.list(parnames), y = aa$dimnames[parnames]),
+               collapse = '\n')
+           )
+           )
   cat(paste0(
     " Object of class: ", aa$class, "\n",
     PrintWrap(note_summary_iter),
