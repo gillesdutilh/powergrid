@@ -23,12 +23,12 @@
 ##'   in arrays where some crossings of parameters include more iterations than
 ##'   others. This is a feature, not a bug. May result in less aesthetic
 ##'   plotting, however.
-##' @param old the power_array object to extend
+##' @param old the object of class `power_array` to extend
 ##' @param n_iter_add the number of iterations to *add* to old
 ##' @param pars the new parameter grid to evaluate across
 ##' @param ... further arguments passed on to FillGrid internally.
-##' @return object of class power_array, containing old, extended by \code{pars}
-##'   and/or \code{n_iter_add}.
+##' @return object of class `power_array`, containing old, extended by
+##'   \code{pars} and/or \code{n_iter_add}.
 ##' @author Gilles Dutilh
 ##' @examples
 ##' ## very simple example with one parameter THAT DOES NOT WORK
@@ -95,10 +95,10 @@ Update = function(old, n_iter_add = 1, pars = NULL, ...){
   ## Note that I reuse object name to save memory space, making code much
   ## less easy to read.
   old = stats::ftable(old, col.vars = 'sim') # flat table
-  attr(old, 'col.vars')$sim = seq_along(ncol(old))
+  attr(old, 'col.vars')$sim = as.character(1:ncol(old))
   old = as.data.frame(old) # expanded grid pars * sims
   new = stats::ftable(new, col.vars = 'sim') # flat table
-  attr(new, 'col.vars')$sim = seq_along(ncol(new))
+  attr(new, 'col.vars')$sim = as.character(1:ncol(new))
   new = as.data.frame(new)# expanded grid pars * sims
   ## Labels for sims need unique names between sets
   old$sim = paste0('old_', sprintf(paste0('%0', nzeros, '.0f'), old$sim))
@@ -119,7 +119,7 @@ Update = function(old, n_iter_add = 1, pars = NULL, ...){
     new[, names(new) != 'Freq'], unique)),
     new, all.x = TRUE)
   ## change back grid values to numeric:
-  old[, seq_along(length(pars))] = lapply(old[, seq_along(length(pars))],
+  old[, seq_along(length(pars))] = sapply(old[, seq_along(length(pars))],
                                  function(x)as.numeric(as.character(x)))
   ## sort (in a rather complicated way, since we do not know the number
   ## of columns):
