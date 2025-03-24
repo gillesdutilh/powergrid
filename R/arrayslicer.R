@@ -6,7 +6,7 @@
 ##'   order in the \code{slicer} argument. The resulting slice is always an
 ##'   array, also if only one dimension is left. \code{dimnames} are kept
 ##'   intact.
-##' @param power_array An array, in most common use cases an array of class
+##' @param x An array, in most common use cases an array of class
 ##'   \code{power_array}, but may be any array with named dimensions.
 ##' @param slicer A list whose named elements define at which dimension (the
 ##'   list element names), at which values (the list element values) a slice is
@@ -48,9 +48,9 @@
 ##' ArraySlicer(power_array,
 ##'             slicer = list(alpha = .1, sd = c(.9, .7)))
 
-ArraySlicer = function(power_array, slicer)
+ArraySlicer = function(x, slicer)
 {
-  dimnms = dimnames(power_array)
+  dimnms = dimnames(x)
   ## input feedback
   if(!all(names(slicer) %in% names(dimnms))){
     no_el = names(slicer)[!(names(slicer) %in% names(dimnms))]
@@ -65,11 +65,11 @@ ArraySlicer = function(power_array, slicer)
       stop(paste0("Slicer element '", i,
                   "' contains a value that does not occur in dimension '",
                   i,
-                  "' of power_array"))
+                  "' of x"))
     }
   }
   ## Because we cannot assume that slicer has the right order of
-  ## arguments, we need to loop over the dimensions of the power_array (or
+  ## arguments, we need to loop over the dimensions of x (or
   ## find a better solution later).
   index_list = dimnms # index_list will contain the desired dimnms
   for(cur_dim in names(dimnms)){
@@ -86,7 +86,7 @@ ArraySlicer = function(power_array, slicer)
                             paste0("c('", paste0(x, collapse = "', '"), "')"))}
                  ),
           collapse = ', ')
-  slice = eval(parse(text = paste0("power_array[", index_string, "]")))
+  slice = eval(parse(text = paste0("x[", index_string, "]")))
   ## Deal with one-dimensional output
   index_lengths = sapply(index_list, length)
   if(sum(index_lengths > 1) == 1) # that is, only a vector left in slice
