@@ -70,6 +70,8 @@
 ##'   .35. Functionality implemented for consistency with \code{sse} package,
 ##'   but use is discouraged, since regressing the contour values flattens the
 ##'   contour plot, thereby biasing the contour lines.
+##' @param summary_function When x' attribute `summarized` is FALSE, x is
+##'   summarized across sims using this function.
 ##' @param ... Further arguments are passed on to function `image`
 ##'   internally. Most useful for zooming with xlim and ylim.
 
@@ -77,7 +79,7 @@
 ##' @return
 ##' @author
 PlotPower =
-    function(x, # power_array or powEx output (class = power)
+    function(x, # object of class `power_array` or powEx output (class `power`)
              slicer = NULL, # which plain of the grid
              par_to_search = 'n', # default, for what should we find the min/max
              find_min = TRUE, # search for min or max in par_to_search
@@ -110,6 +112,10 @@ PlotPower =
     slicer = list(xi = x@xi.example)
     ## translate to Example object
     example_list = Example(x)
+    ## Prepare example for figure
+    y_ex_value = example_list$required_value
+    x_ex_name = names(example)
+    x_ex_value = example[[x_ex_name]]
   } else if(all(class(x) == 'powCalc'))
   { # `powCal` output sse
     power_array = drop(GetPowergrid(x)) # take the power_array-like array
@@ -119,8 +125,8 @@ PlotPower =
   } else if (all(class(x) == 'power_array'))
   {
     if(!attr(x, which = 'summarized')){ # iterations kept
-      power_array = PowerApply(x, mean)
-      warning(PrintWrap("The object 'x' you supplied contains individual iterations. For sensible plotting, these were automatically summarized across iteration using the default `summary_function`."))
+      power_array = PowerApply(x, summary_function)
+      warning(PrintWrap("The object 'x' you supplied to PlotPower contains individual iterations. For sensible plotting, these were automatically summarized across simulations using the function given in argument `summary_function`."), call. = FALSE)
     } else {
       power_array = x # power_array
     }
@@ -131,20 +137,30 @@ PlotPower =
   ## create example (when the input was not a sse `power` example
   if (!is.null(example)){ # if example requested, create example
     if (all(class(x) != 'power')){ # when there is not yet an example
-      example_list = Example(power_array, example = append(slicer, example),
-                             target = target, minimal_target = minimal_target,
-                             find_min = find_min, method = method)
+      ## check whether there are equal number of examples for each par:
+      ns_example = sapply(example, function(x)length(x))[[1]]
+      ## Prepare example for figure.
+      y_ex_value = numeric(ns_example)
+      x_ex_name = numeric(ns_example)
+      x_ex_value = numeric(ns_example)
+      for (example_i in 1:ns_example){
+        cur_example = lapply(example, function(x)x[example_i])
+        example_list =
+          Example(power_array,
+                  example = append(slicer, cur_example),
+                  target = target, minimal_target = minimal_target,
+                  find_min = find_min, method = method)
+        y_ex_value[example_i] = example_list$required_value
+        x_ex_name[example_i] = names(cur_example)
+        x_ex_value[example_i] = cur_example[[x_ex_name[example_i]]]
+      }
     }
-    ## Prepare example for figrue.
-    y_ex_value = example_list$required_value
-    x_ex_name = names(example)
-    x_ex_value = example[[x_ex_name]]
   }
 
   ## ============================================
   ## take slice that should be plotted
   if(!is.null(slicer)){
-    array_toplot = ArraySlicer(power_array = power_array, slicer = slicer)
+    array_toplot = ArraySlicer(x = power_array, slicer = slicer)
   } else {array_toplot = power_array}
 
   ## feedback if the number of dimension are not correct
@@ -160,15 +176,15 @@ PlotPower =
                "Input 'x' was no 2-dimensionsonal array, ",
                "Slicing 'x' by 'slicer' did not yield the necessary 2-dimensional, "),
         "but a ", left_dims, "-dimensional array instead.")))
-} ##
+  } ##
 
-  dimnms = names(dimnames(array_toplot))
-  dimorder = c(par_to_search, dimnms[dimnms != par_to_search])
-  array_toplot = aperm(array_toplot, dimorder)
-  margins_toplot = dimnames(array_toplot) # what are the values on the axes
-  ##
-  ## =======================================================
-  ## Graphical preparation
+    dimnms = names(dimnames(array_toplot))
+    dimorder = c(par_to_search, dimnms[dimnms != par_to_search])
+    array_toplot = aperm(array_toplot, dimorder)
+    margins_toplot = dimnames(array_toplot) # what are the values on the axes
+    ##
+    ## =======================================================
+    ## Graphical preparation
   ## =======================================================
   ##
   ## ============================================
@@ -309,7 +325,7 @@ PlotPower =
            x1 = x_ex_value, y1 = y_ex_value, length = .15, code = 0)
     graphics::arrows(x0 = x_ex_value, y0 = y_ex_value,
            x1 = x0, y1 = y_ex_value, length = .15)
-    graphics::points(rep(x_ex_value, 2), rep(y_ex_value, 2),
+    graphics::points(rep(x_ex_value, each = 2), rep(y_ex_value, each = 2),
                      pch = c(19, 1), cex = c(1, 3))
     graphics::text(x = x0, y = y_ex_value, labels = y_ex_value, adj = c(0, -1))
   }
@@ -332,16 +348,24 @@ AddExample = function(x, slicer = NULL, example, target = .9,
                       minimal_target = TRUE, find_min = TRUE,
                       method = 'step', col = 1, ...)
 {
-  ## extract (from sse) or calculate (from power_array) example info
-  example_list = Example(x, example = append(slicer, example),
-                         target = target, minimal_target = minimal_target,
-                         find_min = find_min, method = method)
-  ## Prepare example for figure. Note that it is possible to have any
-  ## parameter on x and y, whereas the default is to have 'n' on y.
-  y_ex_value = example_list$required_value
-  x_ex_name = names(example)
-  x_ex_value = example[[x_ex_name]]
-
+  ns_example = sapply(example, function(x)length(x))[[1]]
+      ## Prepare example for figure.
+  y_ex_value = numeric(ns_example)
+  x_ex_name = numeric(ns_example)
+  x_ex_value = numeric(ns_example)
+  for (example_i in 1:ns_example){
+    cur_example = lapply(example, function(x)x[example_i])
+    example_list =
+      Example(x,
+              example = append(slicer, cur_example),
+              target = target, minimal_target = minimal_target,
+              find_min = find_min, method = method)
+    ## Prepare example for figure. Note that it is possible to have any
+    ## parameter on x and y, whereas the default is to have 'n' on y.
+    y_ex_value[example_i] = example_list$required_value
+    x_ex_name[example_i] = names(cur_example)
+    x_ex_value[example_i] = cur_example[[x_ex_name[example_i]]]
+  }
   ## note that "y_ex_name" is not defined, this is par_to_search
   ## Draw Example Arrow
   x0 = grDevices::extendrange(graphics::par()$usr[1:2], f = -.02)[1]
@@ -351,7 +375,7 @@ AddExample = function(x, slicer = NULL, example, target = .9,
                    code = 0, col = col, ...)
   graphics::arrows(x0 = x_ex_value, y0 = y_ex_value,
          x1 = x0, y1 = y_ex_value, length = .15, col = col, ...)
-  graphics::points(rep(x_ex_value, 2), rep(y_ex_value, 2),
+  graphics::points(rep(x_ex_value, each = 2), rep(y_ex_value, each = 2),
                    pch = c(19, 1), cex = c(1, 3), col = col)
   graphics::text(x = x0, y = y_ex_value, labels = y_ex_value, adj = c(0, -1), col = col)
 }
