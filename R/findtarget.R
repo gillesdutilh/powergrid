@@ -11,7 +11,7 @@
 ##' where the array contains a value of at least (\code{minimal_target} = TRUE)
 ##' .9 (the \code{target}), thus finding the minimal sample size required to
 ##' achieve a power of 90%. These arguments may seem a bit confusing at first,
-##' but they allow for two additional purposes:
+##' but they allow for three additional purposes:
 ##'
 ##' First, the implementation also allows to search for a value that is *at
 ##' most* the \code{target}, by setting \code{minimal_target} to FALSE. This may
