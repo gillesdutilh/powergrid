@@ -105,7 +105,7 @@ Example = function(x,
   } else {
     if (all(class(x) == 'power_array') && !is.na(attr(x, which = 'n_iter')) &&
         !attr(x, which = 'summarized')){
-      x = PowerApply(x, summary_function)
+      x = SummarizeSims(x, summary_function)
       warning(PrintWrap("The object 'x' you supplied to Example() contains individual iterations. For sensible plotting, these were automatically summarized across simulations using the function given in argument `summary_function`."), call. = FALSE)
       }
   }
