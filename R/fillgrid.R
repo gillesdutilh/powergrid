@@ -3,7 +3,7 @@
 ## - take a list of parameters apply function to grid of parameters form usable
 ## - output in form of an array (may be converted to grid)
 
-##' FillGrid Is an apply-like function, allowing to evaluate a function at the
+##' PowerGrid Is an apply-like function, allowing to evaluate a function at the
 ##' crossings of a set of parameters. The result is saved in an array with
 ##' attributes that optimize further usage by functions in package
 ##' \code{powergrid}. In particular, performing a function iteratively (using
@@ -60,7 +60,7 @@
 ##'                      sig.level = 0.05)
 ##'   return(ptt$power)
 ##' }
-##' power_array = FillGrid(pars = sse_pars, fun = PowFun, n_iter = NA)
+##' power_array = PowerGrid(pars = sse_pars, fun = PowFun, n_iter = NA)
 ##' ##'
 ##' summary(power_array)
 ##'
@@ -77,7 +77,7 @@
 ##'   n = seq(from = 10, to = 60, by = 2),
 ##'   delta = seq(from = 0.5, to = 1.5, by = 0.2),
 ##'   sd = seq(.5, 1.5, .2))
-##' array_two_returns = FillGrid(sse_pars, TwoValuesFun)
+##' array_two_returns = PowerGrid(sse_pars, TwoValuesFun)
 ##' ## multiple outputs result in an additional dimension:
 ##' dimnames(array_two_returns)
 ##' summary(array_two_returns)
@@ -96,11 +96,11 @@
 ##'   sd = seq(.5, 1.5, .2))
 ##' ##
 ##' n_iter = 20
-##' power_array = FillGrid(pars = sse_pars, fun = PowFun,
+##' power_array = PowerGrid(pars = sse_pars, fun = PowFun,
 ##'                        n_iter = n_iter)
 ##' dimnames(power_array)
 
-FillGrid = function(pars, fun, more_args = NULL, n_iter = NA,
+PowerGrid = function(pars, fun, more_args = NULL, n_iter = NA,
                     summarize = TRUE, summary_function = mean,
                     parallel = FALSE,
                     n_cores = future::availableCores()-1) {
@@ -110,7 +110,8 @@ FillGrid = function(pars, fun, more_args = NULL, n_iter = NA,
   ##
   ## catch the very unlikely case someone takes e1d42fl5z7b6 as a
   ## parameter name, or a parameter name including funout_
-  if ('e1d42fl5z7b6' %in% names(pars) || any(grepl('funout_', names(pars)))) {
+  if ('e1d42fl5z7b6' %in% names(pars) || any(grepl('funout_', names(pars))) ||
+      any(grepl('sim', names(pars)))) {
     stop('You chose one of few parameter names that are not allowed (e1d42fl5z7b6 or funout_...)')}
   ## All pars arguments of fun?
   if (!all(names(pars) %in% methods::formalArgs(fun))){
@@ -331,7 +332,7 @@ FillGrid = function(pars, fun, more_args = NULL, n_iter = NA,
 print.power_array = function(x){
   print.table(x)
   note_type_created_by = paste0(
-    'Array of class `power_array` created using FillGrid',
+    'Array of class `power_array` created using PowerGrid',
     ## Are individual sims in object?
     ifelse(!is.na(attr(x, which = 'n_iter')) &
            !attr(x, which = 'summarized'),
@@ -447,7 +448,63 @@ summary.power_array = function(x){
     )
 }
 
-## summary(out_single)
-## attributes(out_single)
+##' @title Summary of object that has simulations saved.
+##' @description Summarizes objects of class `power_array` that have individual
+##'   simulations saved across simulations.
+##' @param x Object of class `power_array`
+##' @param summary_fun function to apply across simulations
+##' @param ... Further arguments passed to 'summary_fun'
+##' @return An object of class `power_array`, with attributes \code{summarized =
+##'   TRUE}.
+##' @author Gilles Dutilh
+PowerApply = function(x, summary_function, ...){
+  if(attr(x, which = 'summarized') | class(x) != 'power_array'){
+    stop('Object x should be an object of class `power_array`, where attribute `summarized` is FALSE; containing individual simulations.')
+  }
+  aa = attributes(x)
+  summarized_x = apply(x, names(dimnames(x))[names(dimnames(x)) != 'sim'],
+                       summary_function, ...)
+  new_attributes = attributes(summarized_x)
+  for (cur_attribute in names(aa)[!(names(aa) %in% c('dim', 'dimnames'))])
+    { # copy attributes
+      new_attributes[[cur_attribute]] = aa[[cur_attribute]]
+    }
+  ## change summary-related attributes
+  new_attributes$summarized = TRUE
+  new_attributes$summary_function = summary_function
+  new_attributes$summary_function_name =
+    ifelse (class(substitute(summary_function)) == 'name',
+            substitute(summary_function),
+            ## if created on the fly, it's an ananymous function
+            "anonymous function"
+            )
+  attributes(summarized_x) = new_attributes
+  return(summarized_x)
+}
+
+
+##' @title Transform power_array into power_df
+##' @description Transforms an object of class `power_array` to a data.frame,
+##'   where values are stored in column x, and all other dimensions are
+##'   columns. The class of the data.frame becomes `c("power_df", "data.frame"),
+##'   enabling generics for data.frame. Note that this class has currently no
+##'   use ans is included for future compatibility.
+##' @param x Object of class `power_array`
+##' @return An object of with classes c("power_df", "data.frame"), with the same
+##'   attributes as `x`, aside from array-native attributes (dimnames, dim),
+##'   plus the data.frame attributes `names` and `row_names`.
+##' @author Gilles Dutilh
+PowerFlat = function(x){
+  flat = as.data.frame(ftable(x, row.vars = seq_along(dim(gg))))
+  colnames(flat)[length(dim(x)) + 1] = 'x'
+  aa = attributes(x)
+  aa = aa[names(aa) != 'class']
+  names(aa)[names(aa) == 'dimnames'] = 'orig_dimnames'
+  names(aa)[names(aa) == 'dim'] = 'orig_dim'
+  aa = append(attributes(flat), aa)
+  attributes(flat) = aa
+  class(flat) = c('power_df', class(flat))
+  return(flat)
+}
 
 
