@@ -43,8 +43,8 @@
 ##'   \code{l_par} and \code{x_par} an example arrow should be drawn. List
 ##'   element names indicate the parameter, element value indicate the values at
 ##'   which the example is drawn.
-##' @param target The target power (or any other value stored in the
-##'   power_array) that should be matched
+##' @param target The target power (or any other value stored in x) that should
+##'   be matched.
 ##' @param method The method to find the required parameter values, see
 ##'   \code{Example} and \code{FindTarget}.
 ##' @param minimal_target Logical. Should target be minimally achieved (e.g.,
@@ -62,7 +62,7 @@
 ##'   points constituting each line for smoothing.
 ##' @return
 ##' @author
-PlotPowerLines = function(x,
+GridPlot = function(x,
                           slicer = NULL,
                           y_par = NULL,
                           x_par = NULL,
