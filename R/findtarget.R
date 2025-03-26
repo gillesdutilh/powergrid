@@ -71,8 +71,6 @@
 ##'                  example = list(delta = .7, sd = .7),
 ##'                  target = .9)
 ##' ex_out
-
-
 FindTarget = function(power_slice,
                       target = .9,
                       minimal_target = TRUE,
