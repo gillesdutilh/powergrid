@@ -457,7 +457,7 @@ summary.power_array = function(x){
 ##' @return An object of class `power_array`, with attributes \code{summarized =
 ##'   TRUE}.
 ##' @author Gilles Dutilh
-PowerApply = function(x, summary_function, ...){
+SummarizeSims = function(x, summary_function, ...){
   if(attr(x, which = 'summarized') | class(x) != 'power_array'){
     stop('Object x should be an object of class `power_array`, where attribute `summarized` is FALSE; containing individual simulations.')
   }
