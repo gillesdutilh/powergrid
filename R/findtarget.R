@@ -66,7 +66,7 @@
 ##'                      sig.level = 0.05)
 ##'   return(ptt$power)
 ##' }
-##' power_array = FillGrid(pars = sse_pars, fun = PowFun, n_iter = NA)
+##' power_array = PowerGrid(pars = sse_pars, fun = PowFun, n_iter = NA)
 ##' ex_out = Example(power_array,
 ##'                  example = list(delta = .7, sd = .7),
 ##'                  target = .9)
