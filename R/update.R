@@ -9,7 +9,7 @@
 
 ##' @title Refine or Extend Power Array
 ##' @description Add further results to an existing power_array (created by
-##'   PowerGrid or by another call of Update), adding further values in
+##'   PowerGrid or by another call of Refine), adding further values in
 ##'   \code{pars} and/or by larger \code{n_iter}.
 ##' @details If \code{pars == NULL}, update extends \code{old} by adding
 ##'   iterations \code{n_iter_add} to the existing power_array. If \code{pars}
@@ -26,7 +26,7 @@
 ##' @param old the object of class `power_array` to extend
 ##' @param n_iter_add the number of iterations to *add* to old
 ##' @param pars the new parameter grid to evaluate across
-##' @param ... further arguments passed on to FillGrid internally.
+##' @param ... further arguments passed on to PowerGrid internally.
 ##' @return object of class `power_array`, containing old, extended by
 ##'   \code{pars} and/or \code{n_iter_add}.
 ##' @author Gilles Dutilh
@@ -34,41 +34,41 @@
 ##' ## very simple example with one parameter THAT DOES NOT WORK
 ##' ## pars = list(x = 1:2)
 ##' ## fun = function(x){round(x+runif(1, 0, .2), 3)}
-##' ## original = FillGrid(pars = pars,
-##' ##                     fun = fun,
-##' ##                     n_iter = 3,
-##' ##                     summarize = FALSE)
+##' ## original = PowerGrid(pars = pars,
+##' ##                      fun = fun,
+##' ##                      n_iter = 3,
+##' ##                      summarize = FALSE)
 ##'
 ##' ## example of both adding samples (for pars x = 2),
 ##' ## for leaving one par value out (x = 0)
 ##' ## or adding one additional par value (x = 3)
 ##' ## original
-##' ## updated = Update(original, n_iter_add = 2, pars = list(x = 2:3))
+##' ## updated = Refine(original, n_iter_add = 2, pars = list(x = 2:3))
 ##' ## updated
 ##' ## attributes(updated)
 ##'
 ##' ## example with 2 parameters
 ##' pars = list(x = 1:2, y = 1:2)
 ##' fun = function(x, y){round(x * 10 + y + runif(1, 0, .2), 3)}
-##' original = FillGrid(pars = pars,
-##'                     fun = fun,
-##'                     n_iter = 3,
-##'                     summarize = FALSE)
-##' updated = Update(original, n_iter_add = 2, pars = list(x = 2:3, y = 4:5))
+##' original = PowerGrid(pars = pars,
+##'                      fun = fun,
+##'                      n_iter = 3,
+##'                      summarize = FALSE)
+##' updated = Refine(original, n_iter_add = 2, pars = list(x = 2:3, y = 4:5))
 ##'
 ##' ## ## example with 2 parameters, two-outcome-function THAT DOES NOT WORK
 ##' ## pars = list(x = 1:2, y = 1:2)
 ##' ## fun = function(x, y){
 ##' ##   c('bla' = round(x * 10 + y + runif(1, 0, .2), 3),
 ##' ##   'bli' = sum(x, y))}
-##' ## original = FillGrid(pars = pars,
-##' ##                     fun = fun,
-##' ##                     n_iter = 3,
-##' ##                     summarize = FALSE)
-##' ## updated = Update(original, n_iter_add = 2, pars = list(x = 2:3, y = 4:5))
+##' ## original = PowerGrid(pars = pars,
+##' ##                      fun = fun,
+##' ##                      n_iter = 3,
+##' ##                      summarize = FALSE)
+##' ## updated = Refine(original, n_iter_add = 2, pars = list(x = 2:3, y = 4:5))
 ##' ## updated[, ,'bli', ]
 
-Update = function(old, n_iter_add = 1, pars = NULL, ...){
+Refine = function(old, n_iter_add = 1, pars = NULL, ...){
   if (is.null(pars)) {pars = attr(old, 'pars')}
   ## copy the original attributes to add later
   copy_attr = attributes(old)
@@ -77,11 +77,11 @@ Update = function(old, n_iter_add = 1, pars = NULL, ...){
                ceiling(log(attr(old, 'n_iter'), 10)))
   ## Perform simulation in grid, using, where relevant, the attributes
   ## of old.
-  new = FillGrid(pars = pars,
-                 fun = copy_attr$sim_function,
-                 n_iter = n_iter_add,
-                 more_args = copy_attr$more_args,
-                 summarize = FALSE, ...)
+  new = PowerGrid(pars = pars,
+                  fun = copy_attr$sim_function,
+                  n_iter = n_iter_add,
+                  more_args = copy_attr$more_args,
+                  summarize = FALSE, ...)
   ## =================================
   ## The next chunk combines the old and new arrays into an array,
   ## thereby taking care that the result has missing values for eventual
