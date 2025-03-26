@@ -125,7 +125,7 @@ PowerPlot =
   } else if (all(class(x) == 'power_array'))
   {
     if(!attr(x, which = 'summarized')){ # iterations kept
-      power_array = PowerApply(x, summary_function)
+      power_array = SummarizeSims(x, summary_function)
       warning(PrintWrap("The object 'x' you supplied to PowerPlot contains individual iterations. For sensible plotting, these were automatically summarized across simulations using the function given in argument `summary_function`."), call. = FALSE)
     } else {
       power_array = x # power_array
