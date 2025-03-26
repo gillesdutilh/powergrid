@@ -78,7 +78,7 @@
 ##' @param ...
 ##' @return
 ##' @author
-PlotPower =
+PowerPlot =
     function(x, # object of class `power_array` or powEx output (class `power`)
              slicer = NULL, # which plain of the grid
              par_to_search = 'n', # default, for what should we find the min/max
@@ -126,7 +126,7 @@ PlotPower =
   {
     if(!attr(x, which = 'summarized')){ # iterations kept
       power_array = PowerApply(x, summary_function)
-      warning(PrintWrap("The object 'x' you supplied to PlotPower contains individual iterations. For sensible plotting, these were automatically summarized across simulations using the function given in argument `summary_function`."), call. = FALSE)
+      warning(PrintWrap("The object 'x' you supplied to PowerPlot contains individual iterations. For sensible plotting, these were automatically summarized across simulations using the function given in argument `summary_function`."), call. = FALSE)
     } else {
       power_array = x # power_array
     }
@@ -335,7 +335,7 @@ PlotPower =
 ## for plotting example =======================================================
 ##' @title Add an example to an existing power plot
 ##' @description Add an example arrow to an existing power plot created by
-##'   PlotPower.
+##'   PowerPlot.
 ##' @param x,slicer,example,target,minimal_target,find_min,method See help for
 ##'   \code{PLotPower}.
 ##'
