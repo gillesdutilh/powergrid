@@ -26,7 +26,7 @@
 ##'                      sig.level = alpha)
 ##'   return(ptt$power)
 ##' }
-##' power_array = FillGrid(pars = sse_pars, fun = PowFun, n_iter = NA)
+##' power_array = PowerGrid(pars = sse_pars, fun = PowFun, n_iter = NA)
 ##' ## cut out a 2-dimensional plane:
 ##' ArraySlicer(power_array,
 ##'             slicer = list(alpha = .1, sd = .9))
@@ -99,3 +99,4 @@ ArraySlicer = function(x, slicer)
   ## this attribute is only used in Example
   return(slice)
 }
+
