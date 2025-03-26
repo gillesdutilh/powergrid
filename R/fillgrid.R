@@ -488,13 +488,13 @@ PowerApply = function(x, summary_function, ...){
 ##'   where values are stored in column x, and all other dimensions are
 ##'   columns. The class of the data.frame becomes `c("power_df", "data.frame"),
 ##'   enabling generics for data.frame. Note that this class has currently no
-##'   use ans is included for future compatibility.
+##'   use and is included for future compatibility.
 ##' @param x Object of class `power_array`
 ##' @return An object of with classes c("power_df", "data.frame"), with the same
 ##'   attributes as `x`, aside from array-native attributes (dimnames, dim),
 ##'   plus the data.frame attributes `names` and `row_names`.
 ##' @author Gilles Dutilh
-PowerFlat = function(x){
+PowerDF = function(x){
   flat = as.data.frame(ftable(x, row.vars = seq_along(dim(gg))))
   colnames(flat)[length(dim(x)) + 1] = 'x'
   aa = attributes(x)
