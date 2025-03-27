@@ -37,7 +37,8 @@
 ##'   maximally allows SD).
 ##' @param example If not NULL, a list of length one, defining at which value
 ##'   (list element value) of which parameter (list element name) the example is
-##'   drawn for a power of \code{target}. (see \code{?Example} for details).
+##'   drawn for a power of \code{target}. You may supply a vector longer than 1
+##'   for multiple examples.
 ##' @param method Method used for finding the required \code{search_par} needed
 ##'   to achieve \code{target}. Either \code{'step'}: walking in steps along
 ##'   \code{search_par} or \code{'lm'}: Interpolating assuming a linear relation
@@ -74,7 +75,6 @@
 ##'   summarized across sims using this function.
 ##' @param ... Further arguments are passed on to function `image`
 ##'   internally. Most useful for zooming with xlim and ylim.
-
 ##' @param ...
 ##' @return
 ##' @author
