@@ -52,7 +52,7 @@
 ##' @param find_min Logical, indicating whether the example should be found that
 ##'   minimizes an assumption (e.g., minimal required n) to achieve the
 ##'   \code{target} or an example that maximizes this assumption (e.g.,
-##'   maximally allows SD).
+##'   maximally allowed SD).
 ##' @param col A vector with the length of \code{l_par} defining the color(s) of
 ##'   the lines.
 ##' @param title Character string, if not \code{NULL}, replaces default figure
@@ -60,7 +60,7 @@
 ##' @param xlim,ylim See \code{?graphics::plot}.
 ##' @param smooth Logical. If TRUE, a 5th order polynomial is fitted though the
 ##'   points constituting each line for smoothing.
-##' @return
+##' @return A list with graphical information to use in further plotting.
 ##' @author
 GridPlot = function(x,
                           slicer = NULL,
@@ -162,8 +162,8 @@ GridPlot = function(x,
   graphics::title(title)
   ## reset previous par settings
   graphics::par(old_par)
-  return(list('at_x' = at_x,
-              'at_y' = at_y,
-              'line_colors' = col))
+  invisible(list('at_x' = at_x,
+                 'at_y' = at_y,
+                 'line_colors' = col))
 }
 
