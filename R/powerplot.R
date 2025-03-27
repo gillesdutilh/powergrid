@@ -337,10 +337,9 @@ PowerPlot =
 ##' @description Add an example arrow to an existing power plot created by
 ##'   PowerPlot.
 ##' @param x,slicer,example,target,minimal_target,find_min,method See help for
-##'   \code{PLotPower}.
-##'
+##'   \code{PowerPlot}.
 ##' @param col Color or arrow drawn.
-##' @param ... Further arguments are passed the two calls of function
+##' @param ... Further arguments are passed to the two calls of function
 ##'   \code{graphics::arrows} drawing the nicked arrow.
 ##' @return Nothing
 ##' @author Gilles Dutilh
