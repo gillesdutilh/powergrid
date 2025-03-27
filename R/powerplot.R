@@ -178,13 +178,22 @@ PowerPlot =
         "but a ", left_dims, "-dimensional array instead.")))
   } ##
 
-    dimnms = names(dimnames(array_toplot))
-    dimorder = c(par_to_search, dimnms[dimnms != par_to_search])
-    array_toplot = aperm(array_toplot, dimorder)
-    margins_toplot = dimnames(array_toplot) # what are the values on the axes
-    ##
-    ## =======================================================
-    ## Graphical preparation
+  dimnms = names(dimnames(array_toplot)) # dimension names to plot
+  first_dim = dimnms[1]
+  if(par_to_search == 'n' & !(par_to_search %in% dimnms)){
+    warning(
+      PrintWrap(
+        paste0("Argument `par_to_search` was set to 'n' (the default), but you probably want to search along ",
+               first_dim, ". If you want to search along another dimension, please set par_to_search accordingly")
+      ))
+    par_to_search = first_dim
+  }
+  dimorder = c(par_to_search, dimnms[dimnms != par_to_search])
+  array_toplot = aperm(array_toplot, dimorder)
+  margins_toplot = dimnames(array_toplot) # what are the values on the axes
+  ##
+  ## =======================================================
+  ## Graphical preparation
   ## =======================================================
   ##
   ## ============================================
