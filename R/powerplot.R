@@ -19,32 +19,32 @@
 ##'   Further, in the classic use case, one aims at a *minimal* level of
 ##'   power. One may however also aim at, e.g., a *maximal* width of a
 ##'   confidence interval. For this purpose, set \code{minimal_target} to
-##'   \code{FALSE}.
-##' @param x An object of class `power_array' (from powergrid), "power" (from
-##'   sse::powEx) or `powCalc' (from sse::powCalc), or just any 2-dimensional
-##'   array or matrix.
+##'   \code{FALSE}. See Example for more details about `find_min` and
+##'   `minimal_target`.
+##' @param x An object of class "power_array" (from powergrid), "power" (from
+##'   sse::powEx) or "powCalc" (from sse::powCalc).
 ##' @param slicer If the parameter grid for which `x' was constructed has more
 ##'   than 2 dimensions, a 2-dimensional slice may be cut out using
-##'   \code{slicer}, a list whose elements define at which values (the list
-##'   element value) of which parameter (the list element name) the slice should
-##'   be cut.
+##'   \code{slicer}, which is a list whose elements define at which values (the
+##'   list element value) of which parameter (the list element name) the slice
+##'   should be cut out.
 ##' @param par_to_search The variable whose minimum (or maximum, when
 ##'   \code{find_min == FALSE}) is searched for achieving the
 ##'   \code{target_levels}.
 ##' @param find_min Logical, indicating whether the example should be found that
 ##'   minimizes an assumption (e.g., minimal required n) to achieve the
 ##'   \code{target} or an example that maximizes this assumption (e.g.,
-##'   maximally allows SD).
+##'   maximally allowed SD).
 ##' @param example If not NULL, a list of length one, defining at which value
 ##'   (list element value) of which parameter (list element name) the example is
 ##'   drawn for a power of \code{target}. You may supply a vector longer than 1
 ##'   for multiple examples.
 ##' @param method Method used for finding the required \code{search_par} needed
-##'   to achieve \code{target}. Either \code{'step'}: walking in steps along
-##'   \code{search_par} or \code{'lm'}: Interpolating assuming a linear relation
-##'   between \code{search_par} and \code{(qnorm(x) + qnorm(1 - 0.05)) ^
-##'   2}. Setting 'lm' is inspired on the implementation in the \code{sse}
-##'   package by Thomas Fabbro.
+##'   to achieve \code{target}. Either "step": walking in steps along
+##'   \code{search_par} or "lm": Interpolating assuming a linear relation
+##'   between \code{search_par} and \code{(qnorm(x) + qnorm(1 - 0.05)) ^ 2}. The
+##'   setting "lm" is inspired on the implementation in the \code{sse} package
+##'   by Thomas Fabbro.
 ##' @param target The power (or any other value) for which the example, if
 ##'   requested, is drawn. Also defines which of the power lines is drawn with a
 ##'   thinker line width.
@@ -54,13 +54,13 @@
 ##'   where attribute \code{summarized} is FALSE (and individual iterations are
 ##'   stored in dimension \code{sim}, the iterations dimension is aggregated by
 ##'   \code{summary_fun}. Otherwise ignored.
-##' @param target_levels For which levels of power (or any other variable) are
-##'   lines drawn.
+##' @param target_levels For which levels of power (or any whichever variable is
+##'   contained in x) lines are drawn.
 ##' @param shades_of_grey Logical indicating whether greylevels are painted in
 ##'   addition to isolines to show power levels.
 ##' @param shades_legend Logical indicating whether a legend for the shading is
 ##'   added. Note that this legend is drawn in a separate plotting region, and
-##'   does effect setting \code{par(mfrow)}.
+##'   does effect setting \code{par(mfrow)} of the current plotting device.
 ##' @param title Character string, if not \code{NULL}, replaces default figure
 ##'   title.
 ##' @param par_labels Named vector with elements named as the parameters
@@ -70,14 +70,42 @@
 ##'   regressing the contour values on the x and y-axis. Suggested value is
 ##'   .35. Functionality implemented for consistency with \code{sse} package,
 ##'   but use is discouraged, since regressing the contour values flattens the
-##'   contour plot, thereby biasing the contour lines.
+##'   contour plot, thereby *biasing* the contour lines.
 ##' @param summary_function When x' attribute `summarized` is FALSE, x is
 ##'   summarized across sims using this function.
 ##' @param ... Further arguments are passed on to function `image`
 ##'   internally. Most useful for zooming with xlim and ylim.
-##' @param ...
-##' @return
-##' @author
+##' @return Nothing
+##' @author Gilles Dutilh
+##' @examples
+## ============================================
+## Typical use case: minimal n for power
+## ============================================
+##' sse_pars = list(
+##'   n = seq(from = 10, to = 60, by = 4),
+##'   delta = seq(from = 0.5, to = 1.5, by = 0.2), ## effect size
+##'   sd = seq(.1, 1.1, .2)) ## Standard deviation
+##' PowFun <- function(n, delta, sd){ # power for a t-test at alpha = .05
+##'   ptt = power.t.test(n = n/2, delta = delta, sd = sd,
+##'                      sig.level = 0.05)
+##'   return(ptt$power)
+##' }
+##' power_array = PowerGrid(pars = sse_pars, fun = PowFun, n_iter = NA)
+##' PowerPlot(power_array,
+##'           slicer = list(sd = .7))
+##' ## note that you can easily change what you search for: At each n, what would be
+##' ## the minimal delta?
+##' PowerPlot(power_array,
+##'           par_to_search = 'delta',
+##'           slicer = list(sd = .7))
+##'
+##' ## You're not limited to n at all, nor to searching a minimum: If n is 30, what
+##' ## is the largest sd at which we still find enough power? (as a function of
+##' ## delta on the y-axis)
+##' PowerPlot(power_array,
+##'           par_to_search = 'sd',
+##'           find_min = FALSE,
+##'           slicer = list(n = 30))
 PowerPlot =
     function(x, # object of class `power_array` or powEx output (class `power`)
              slicer = NULL, # which plain of the grid
