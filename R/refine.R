@@ -10,7 +10,7 @@
 ##' @title Refine or Extend Power Array
 ##' @description Add further results to an existing power_array (created by
 ##'   PowerGrid or by another call of Refine), adding further values in
-##'   \code{pars} and/or by larger \code{n_iter}.
+##'   \code{pars} and/or larger \code{n_iter}.
 ##' @details If \code{pars == NULL}, update extends \code{old} by adding
 ##'   iterations \code{n_iter_add} to the existing power_array. If \code{pars}
 ##'   is given, the function that was evaluated in \code{old} (attribute
@@ -31,43 +31,77 @@
 ##'   \code{pars} and/or \code{n_iter_add}.
 ##' @author Gilles Dutilh
 ##' @examples
-##' ## very simple example with one parameter THAT DOES NOT WORK
-##' ## pars = list(x = 1:2)
-##' ## fun = function(x){round(x+runif(1, 0, .2), 3)}
-##' ## original = PowerGrid(pars = pars,
-##' ##                      fun = fun,
-##' ##                      n_iter = 3,
-##' ##                      summarize = FALSE)
-##'
-##' ## example of both adding samples (for pars x = 2),
-##' ## for leaving one par value out (x = 0)
-##' ## or adding one additional par value (x = 3)
-##' ## original
-##' ## updated = Refine(original, n_iter_add = 2, pars = list(x = 2:3))
-##' ## updated
-##' ## attributes(updated)
-##'
-##' ## example with 2 parameters
-##' pars = list(x = 1:2, y = 1:2)
-##' fun = function(x, y){round(x * 10 + y + runif(1, 0, .2), 3)}
+##' ## ============================================
+##' ## very simple example with one parameter
+##' ## ============================================
+##' pars = list(x = 1:2)
+##' fun = function(x){round(x+runif(1, 0, .2), 3)} # nonsense function
+##' set.seed(1)
 ##' original = PowerGrid(pars = pars,
 ##'                      fun = fun,
 ##'                      n_iter = 3,
 ##'                      summarize = FALSE)
-##' updated = Refine(original, n_iter_add = 2, pars = list(x = 2:3, y = 4:5))
+##' refined = Refine(original, n_iter_add = 2, pars = list(x = 2:3))
+##' ## note that refined does not have each parameter sampled in each simulation
 ##'
-##' ## ## example with 2 parameters, two-outcome-function THAT DOES NOT WORK
-##' ## pars = list(x = 1:2, y = 1:2)
-##' ## fun = function(x, y){
-##' ##   c('bla' = round(x * 10 + y + runif(1, 0, .2), 3),
-##' ##   'bli' = sum(x, y))}
-##' ## original = PowerGrid(pars = pars,
-##' ##                      fun = fun,
-##' ##                      n_iter = 3,
-##' ##                      summarize = FALSE)
-##' ## updated = Refine(original, n_iter_add = 2, pars = list(x = 2:3, y = 4:5))
-##' ## updated[, ,'bli', ]
-
+##' ## ============================================
+##' ## a realistic example, simply increasing n_iter
+##' ## ============================================
+##' PowFun <- function(n, delta){
+##'   x1 = rnorm(n = n/2, sd = 1)
+##'   x2 = rnorm(n = n/2, mean = delta, sd = 1)
+##'   t.test(x1, x2)$p.value < .05
+##' }
+##' sse_pars = list(
+##'   n = seq(10, 100, 5),
+##'   delta = seq(.5, 1.5, .1))
+##' ##
+##' n_iter = 20
+##' set.seed(1)
+##' power_array = PowerGrid(pars = sse_pars,
+##'                         fun = PowFun,
+##'                         n_iter = n_iter,
+##'                         summarize = FALSE)
+##' summary(power_array)
+##' ## add iterations
+##' power_array_up = Refine(power_array, n_iter_add = 30)
+##' summary(power_array_up)
+##'
+##' ## ============================================
+##' ## Starting coarsely, then zooming in
+##' ## ============================================
+##' sse_pars = list(
+##'   n = c(10, 50, 100, 200), # finding n "ballpark"
+##'   delta = c(.5,  1, 1.5)) # finding delta "ballpark"
+##' n_iter = 60
+##' power_array = PowerGrid(pars = sse_pars,
+##'                         fun = PowFun,
+##'                         n_iter = n_iter,
+##'                         summarize = FALSE)
+##' summary(power_array)
+##' PowerPlot(power_array)
+##' ## Based on figure above, let's look at n between 50 and 100, delta around .9
+##' sse_pars = list(
+##'   n = seq(50, 100, 5),
+##'   delta = seq(.7, 1.1, .05))
+##' set.seed(1)
+##' power_array_up = Refine(power_array, n_iter_add = 555, pars = sse_pars)
+##' summary(power_array_up)
+##' PowerPlot(power_array_up) # that looks funny! It's because the default summary
+##'                           # mean does not deal with the empty value in the
+##'                           # grid. Solution is in illustration below.
+##'
+##' ## A visual illustration of this zooming in, in three figures
+##' layout(t(1:3))
+##' PowerPlot(power_array, title = 'Course grid to start with')
+##' PowerPlot(power_array_up, summary_function = function(x)mean(x, na.rm = TRUE),
+##'           title = 'Extra samples at finer parameter grid (does not look good)')
+##' PowerPlot(power_array_up,
+##'           slicer = list(n = seq(50, 100, 5),
+##'                         delta = seq(.7, 1.1, .05)),
+##'           summary_function = function(x)mean(x, na.rm = TRUE),
+##'           title = 'Zoomed in')
+##' layout(1)
 Refine = function(old, n_iter_add = 1, pars = NULL, ...){
   if (is.null(pars)) {pars = attr(old, 'pars')}
   ## copy the original attributes to add later
