@@ -488,9 +488,11 @@ SummarizeSims = function(x, summary_function, ...){
 ##' @title Transform power_array into power_df
 ##' @description Transforms an object of class `power_array` to a data.frame,
 ##'   where values are stored in column x, and all other dimensions are
-##'   columns. The class of the data.frame becomes `c("power_df", "data.frame"),
-##'   enabling generics for data.frame. Note that this class has currently no
-##'   use and is included for future compatibility.
+##'   columns. Some may find this "more tidy" to work with.
+##'
+##' The class of the data.frame becomes `c("power_df", "data.frame"), enabling
+##'   generics for data.frame. Note that the class "power_df" has currently no
+##'   use but is included for future compatibility.
 ##' @param x Object of class `power_array`
 ##' @return An object of with classes c("power_df", "data.frame"), with the same
 ##'   attributes as `x`, aside from array-native attributes (dimnames, dim),
