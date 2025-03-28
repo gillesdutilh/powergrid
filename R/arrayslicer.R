@@ -1,6 +1,8 @@
 ##' @title Cut Slice From Array
 ##' @description Cut out a slice from an array. The resulting slice may be
-##'   single- or multidimensional.
+##'   single- or multidimensional. The function is intended for arrays of class
+##'   "power_array". Slicing an object will result in an object with added
+##'   attributes that may be used in functionality of the powergrid package.
 ##' @details Internally, indexing ([) is used, but the implementation in
 ##'   ArraySlicer is very flexible allowing for any number of dimensions in any
 ##'   order in the \code{slicer} argument. The resulting slice is always an
