@@ -1,44 +1,35 @@
-##' @title Plot Combinations of Parameters for Achieving Target Powerlevel
-##' @description Plots the relation between up to three parameters and
-##'   power.
-##' @details Assuming the value of the parameter on the x-axis, and the value of
-##'   the parameter represented by each line line, the y-axis shows the
-##'   *minimal* sample size required to achieve a power of *at least*
-##'   \code{target}. The former defines the default behavior which reflects the
-##'   most common use case. However, above, *minimal* and *at least* are
-##'   governed by two arguments that allow for more flexible plotting:
+##' @title Plot Combinations of Parameters for Achieving Target
+##' @description Plots the relation between up to three parameters and,
+##'   typically, power. Two parameters are represented by x- and y-axes, one by
+##'   separate lines.
+##' @details In the most typical use case, the y-axis shows the *minimal* sample
+##'   size required to achieve a power of *at least* \code{target}, assuming the
+##'   value of the parameter on the x-axis, and the value of the parameter
+##'   represented by each line.
 ##'
-##' First, *minimal* is defined by the default value TRUE of argument
-##' \code{find_min}. If \code{find_min} is FALSE, the maximum is searched. This
-##' is useful in the situation where one searches for the highest standard
-##' deviation at which it is still possible to find a desirable power.
+##' The use of this function is, however, not limited to finding a minimum n to
+##' achieve at least a certain power. See help of `Example` to understand the
+##' use of `minimal_target` and `fin_min`.
 ##'
-##' Second, *at least* is defined by the default value TRUE
-##' argument\code{minimal_target}. Setting \code{minimal_target} to FALSE allows
-##' to search, for example, for the minimal sample size where the expected
-##' confidence interval is smaller than a certain desired width.
+##' Note that a line may stop in a corner of the plotting region, not reaching
+##' the margin. This is often natural behavior, when the \code{target} level is
+##' not reached anywhere in that corner of the parameter range. In case n is on
+##' the y-axis, this may easily be solved by adding larger sample sizes to the
+##' grid (consider \code{Update}), and then adjusting the y-limit to only
+##' include the values of interest.
 ##'
-##' Note that a line may stop in a corner of the plotting region. This is often
-##' natural behavior, when the \code{target} level is not reached anywhere in
-##' that corner of the parameter range. In case n is on the y-axis, this may
-##' easily be solved by adding larger sample sizes to the grid (consider
-##' \code{Update}), and then adjusting the y-limit to only include the values of
-##' interest.
-##'
-##' @param x An object of class `power_array' (from powergrid), "power" (from
-##'   sse::powEx) or `powCalc' (from sse::powCalc). Other arrays or matrices may
-##'   work as well.
-##' @param slicer If the parameter grid for which `x' was constructed has more
-##'   than 3 dimensions, a 3-dimensional slice may be cut out using
-##'   \code{slicer}, a list whose elements define at which values (the list
-##'   element value) of which parameter (the list element name) the slice should
-##'   be cut.
+##' @param x An object of class "power_array" (from `powergrid`), "power" (from
+##'   sse::powEx) or "powCalc" (from sse::powCalc).
+##' @param slicer If the parameter grid of `x` has more than 3 dimensions, a
+##'   3-dimensional slice must be cut out using \code{slicer}, a list whose
+##'   elements define at which values (the list element value) of which
+##'   parameter (the list element name) the slice should be cut.
 ##' @param y_par,x_par,l_par Which parameter is varied on the x- and y-axis, and
 ##'   between lines, respectively. If NULL, \code{y_par} is set to the first,
 ##'   \code{x_par} to the second, and \code{l_par} to the third dimension name
 ##'   of \code{x}.
-##' @param par_labels Named vector with elements named as the parameters
-##'   plotted, with as values the desired labels.
+##' @param par_labels Named vector where elements names represent the parameters
+##'   that are plotted, and the values set the desired labels.
 ##' @param example A list defining for which combination of levels of
 ##'   \code{l_par} and \code{x_par} an example arrow should be drawn. List
 ##'   element names indicate the parameter, element value indicate the values at
@@ -61,7 +52,57 @@
 ##' @param smooth Logical. If TRUE, a 5th order polynomial is fitted though the
 ##'   points constituting each line for smoothing.
 ##' @return A list with graphical information to use in further plotting.
-##' @author
+##' @author Gilles Dutilh
+##' @examples
+## ============================================
+## Typical use case: minimal n for power
+## ============================================
+##' sse_pars = list(
+##'   n = seq(from = 2, to = 100, by = 2),
+##'   delta = seq(from = 0.1, to = 1.5, by = 0.05), ## effect size
+##'   sd = seq(.1, .9, .1)) ## Standard deviation
+##' PowFun <- function(n, delta, sd){
+##'   ptt = power.t.test(n = n/2, delta = delta, sd = sd,
+##'                      sig.level = 0.05)
+##'   return(ptt$power)
+##' }
+##' power_array = PowerGrid(pars = sse_pars, fun = PowFun, n_iter = NA)
+##' GridPlot(power_array, target = .8)
+##' ## If that's too many lines, cut out a desired number of slices
+##' GridPlot(power_array,
+##'          slicer = list(sd = seq(.1, .9, .2)),
+##'          target = .8)
+##'
+##' ## adjust labels, add example
+##' GridPlot(power_array, target = .8,
+##'          slicer = list(sd = seq(.1, .9, .2)),
+##'          y_par = 'n',
+##'          x_par = 'delta',
+##'          l_par = 'sd',
+##'          par_labels = c('n' = 'Sample Size',
+##'                         'delta' = 'Arm Difference',
+##'                         'sd' = 'Standard Deviation'),
+##'          example = list(sd = .7, delta = .6))
+##' ## Above, GridPlot used the default: The first dimension is what you search
+##' ## (often n), the 2nd and 3rd define the grid of parameters at which the search
+##' ## is done. Setting this explicitly, with x, y, and l-par, it looks like:
+##' GridPlot(power_array, target = .8,
+##'          slicer = list(sd = seq(.1, .9, .2)),
+##'          y_par = 'n', # search the smallest n where target is achieved
+##'          x_par = 'delta',
+##'          l_par = 'sd')
+##'
+##' ## You may also want to have different parameters on lines and axes:
+##' GridPlot(power_array, target = .8,
+##'          y_par = 'delta', # search the smallest delta where target is achieved
+##'          x_par = 'sd',
+##'          l_par = 'n')
+##' ## Too many lines! Take some slices again:
+##' GridPlot(power_array, target = .8,
+##'          slicer = list(n = c(seq(10, 70, 16))),
+##'          y_par = 'delta',
+##'          x_par = 'sd',
+##'          l_par = 'n', method = 'step')
 GridPlot = function(x,
                           slicer = NULL,
                           y_par = NULL,
