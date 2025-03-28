@@ -3,7 +3,7 @@
 ## - take a list of parameters apply function to grid of parameters form usable
 ## - output in form of an array (may be converted to grid)
 
-##' PowerGrid Is an apply-like function, allowing to evaluate a function at the
+##' PowerGrid is an apply-like function, allowing to evaluate a function at the
 ##' crossings of a set of parameters. The result is saved in an array with
 ##' attributes that optimize further usage by functions in package
 ##' \code{powergrid}. In particular, performing a function iteratively (using
@@ -17,20 +17,21 @@
 ##' array will have an additional dimension, with levels named after the names
 ##' of the returned vector (if given). If n_iter is not NA, function \code{fun}
 ##' is evaluated n_iter times. This will add to the resulting array an
-##' additional dimension "sim".
+##' additional dimension 'sim'.
 ##'
 ##' The elements of \code{pars} must match the argument names of fun. If input
 ##' parameters are not to be part of the grid, but rather further settings,
-##' these can be passed on in a named list to \code{fun} through the argument
-##' \code{more_args}.
+##' these can be passed on to \code{fun} through the argument \code{more_args}
+##' as a list with names reflecting the arguments of `fun` to be set.
 ##'
 ##' @title Evaluate Function (iteratively) at Grid of Input Arguments
 ##' @param pars A list where each element is a vector of values named as one of
-##'   the arguments of \code{fun}. Fun will be applied to the full grid crossing
+##'   the arguments of \code{fun}. `fun` is applied to the full grid crossing
 ##'   the values of each of these parameters.
 ##' @param fun Function applied at each combination of \code{pars}. Arguments
 ##'   may contain all element names of \code{pars} and \code{more_args}. Output
-##'   should be a single number or a vector.
+##'   should be a vector, typically of length one, but more outputs are
+##'   generally handled properly in further functions of powergrid.
 ##' @param more_args Fixed arguments to \code{fun} that are not in
 ##'   \code{pars}. (internally used in \code{.mapply} for supplying argument
 ##'   \code{MoreArgs})
@@ -41,8 +42,8 @@
 ##' @param summary_function A function to be applied to aggregate across
 ##'   simulations. Defaults to \code{mean}, ignored when \code{keep_sims} ==
 ##'   TRUE or when \code{is.na(n_iter)}.
-##' @param parallel Should parallel computing be applied. If TRUE,
-##'   future::future_replicate is used.
+##' @param parallel Logical indicating whether parallel computing should be
+##'   applied. If TRUE, future::future_replicate is used internally.
 ##' @param n_cores Passed on to future_replicate
 ##' @return An array of class "power_array"
 ##' @author Gilles Dutilh
@@ -99,6 +100,7 @@
 ##' power_array = PowerGrid(pars = sse_pars, fun = PowFun,
 ##'                        n_iter = n_iter)
 ##' dimnames(power_array)
+##' summary(power_array)
 
 PowerGrid = function(pars, fun, more_args = NULL, n_iter = NA,
                     summarize = TRUE, summary_function = mean,
