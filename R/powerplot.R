@@ -159,7 +159,7 @@ PowerPlot =
       power_array = x # power_array
     }
   } else {
-    stop("The object 'x' should be of class 'power_array', 'power' or 'powCalc' (from package 'sse'). ")
+    stop("The object 'x' should be of class 'power_array', 'power' or 'powCalc' (from package 'sse'). ", call. = FALSE)
     power_array = x} # if just any array, give it a try
 
   ## create example (when the input was not a sse `power` example
@@ -213,7 +213,7 @@ PowerPlot =
       PrintWrap(
         paste0("Argument `par_to_search` was set to 'n' (the default), but you probably want to search along ",
                first_dim, ". If you want to search along another dimension, please set par_to_search accordingly")
-      ))
+      ), call. = FALSE)
     par_to_search = first_dim
   }
   dimorder = c(par_to_search, dimnms[dimnms != par_to_search])
