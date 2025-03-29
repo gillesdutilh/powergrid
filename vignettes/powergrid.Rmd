@@ -13,7 +13,8 @@ vignette: >
 ```{r, include = FALSE}
 knitr::opts_chunk$set(
   collapse = TRUE,
-  comment = "#>"
+  comment = "#>",
+  dpi=100
 )
 ```
 
@@ -117,15 +118,17 @@ str(sse_example) # a list
 ```
 
 ## Exploring the uncertainty about power
-The example I chose above does not reflect the uncertainty about my study: I do
-not know what SD to expect. And I may wanna explore for which effect size I may
-have enough power. To explore the uncertainty about power in my study,
-`powergrid` offers two plotting functions: `PowerPlot` and `GridPlot`.
+The example that was calcaulted above does not reflect the uncertainty
+about my study. I set sd to .9, but I do not really know what SD to
+expect. And I may want to explore how my power depends on the effect
+size I want to detect. To explore the uncertainty about power in a
+study design study, `powergrid` offers two plotting functions:
+`PowerPlot` and `GridPlot`.
 
 ### PowerPlot
 
-First, I can plot the required
-n for different effect sizes and a chosen SD to achieve a certain power.
+First, I can plot the required n for different effect sizes and a
+chosen SD to achieve a certain power.
 
 Below, I show how to do this when I aim to focus on the assumption that the
 standard deviation equals .9. In the example below, I want to point at the
@@ -225,3 +228,6 @@ A couple of notes:
   lines.
 * As in PowerPlot, any dimension of the `power_array` may be represented by the
   x-axis, y-axis, and lines.
+
+
+
