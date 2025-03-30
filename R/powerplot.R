@@ -125,6 +125,7 @@
 ##'           par_to_search = 'sd',
 ##'           find_min = FALSE,
 ##'           slicer = list(n = 30))
+##' @export
 PowerPlot =
     function(x, # object of class `power_array` or powEx output (class `power`)
              slicer = NULL, # which plain of the grid
@@ -399,6 +400,7 @@ PowerPlot =
 ##'   \code{graphics::arrows} drawing the nicked arrow.
 ##' @return Nothing
 ##' @author Gilles Dutilh
+##' @export
 AddExample = function(x, slicer = NULL, example, target = .9,
                       minimal_target = TRUE, find_min = TRUE,
                       method = 'step', col = 1, ...)
