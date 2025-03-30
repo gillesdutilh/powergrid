@@ -102,6 +102,7 @@
 ##'           summary_function = function(x)mean(x, na.rm = TRUE),
 ##'           title = 'Zoomed in')
 ##' layout(1)
+##' @export
 Refine = function(old, n_iter_add = 1, pars = NULL, ...){
   if (is.null(pars)) {pars = attr(old, 'pars')}
   ## copy the original attributes to add later
