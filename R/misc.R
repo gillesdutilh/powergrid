@@ -23,7 +23,7 @@ ScaleRange = function(x, a, b){
 ##'   width
 ##' @author Gilles Dutilh
 ##' @export
-##' PrintWrap = function(x,
+PrintWrap = function(x,
                      ## width = 0.5 * (getOption("width") - 3), ...){
                      width = 48, ...){
   if (x == ''){
