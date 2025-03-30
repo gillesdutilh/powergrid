@@ -103,6 +103,7 @@
 ##'          y_par = 'delta',
 ##'          x_par = 'sd',
 ##'          l_par = 'n', method = 'step')
+##' @export
 GridPlot = function(x,
                           slicer = NULL,
                           y_par = NULL,
