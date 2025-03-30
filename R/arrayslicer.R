@@ -49,7 +49,7 @@
 ##' ## Cut out multiple levels from one dimension
 ##' ArraySlicer(power_array,
 ##'             slicer = list(alpha = .1, sd = c(.9, .7)))
-
+##' @export
 ArraySlicer = function(x, slicer)
 {
   dimnms = dimnames(x)
