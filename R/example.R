@@ -73,6 +73,7 @@
 ##' - "minimal_target": Is the target a minimum (TRUE, as typical for power) or a
 ##'   maximum (FALSE, e.g., an expected uncertainty level)
 ##' @author Gilles Dutilh
+##' @export
 ##' @examples
 ##' ## ============================================
 ##' ## Typical use case: find lowest n for power
