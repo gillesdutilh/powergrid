@@ -1,5 +1,5 @@
 ---
-title: "Typical use of powergrid"
+title: "powergrid"
 output:
  rmarkdown::html_vignette:
   toc: true
@@ -22,22 +22,33 @@ knitr::opts_chunk$set(
 library(powergrid)
 ```
 
-# Introduction 
-The powergrid package offers a number of functions that facilitate exploring the
-statistical power of a study. In a typical use case (which I also show in this
-vignette) you want to explore the relation between statistical power, sample
-size, the effect size of interest and the assumed variability of the data. The
-interrelation of these parameters is defined by the assumed distributional form
-of your data, and the statistical test that you aim to perform.
+# Introduction to the typical use of powergrid
+The powergrid package offers a number of functions that facilitate
+exploring the statistical power of a study. In a typical use case
+(which I also show in this vignette) you want to explore the relation
+between statistical power, sample size, the effect size of interest
+and the assumed variability of the data. The interrelation of these
+parameters is defined by the assumed distributional form of your data,
+and the statistical test that you aim to perform.
 
-This package does not dictate any of the above ingredients for you. It just
-allows you to evaluate a function at a grid of parameters and visualize the
-interrelation in plots that are fine-tuned for analyses of power and sample
-size. You may, however use it for very different purposes. An example close to a
-power analysis would be an analysis of the precision you may expect of a study
-design. As a more remote application, you can think of a coverage study for
-different confidence intervals. Or an exploration for planning recruitment under
+This package does not dictate any of the above ingredients for you. It
+just allows you to evaluate a function at a grid of parameters and
+visualize the interrelation in plots that are fine-tuned for analyses
+of power and sample size. You may, however use it for very different
+purposes. An example close to a power analysis would be an analysis of
+the precision you may expect of a study design. As a more remote
+application, you can think of a coverage study for different
+confidence intervals. Or an exploration for planning recruitment under
 various scenarios.
+
+## Functions covered
+T his vignette covers the following functions of `powergrid`
+
+- `PowerGrid` for evaluating the power across a grid, with and without simualtion
+- `Example` for inspecting the relation between power and sample size
+  in a specific scenario
+- `Powerplot` Graphical exploration of power under different scenarios
+- `GridPlot` Graphical exploration of power under even more scenarios
 
 # Typical use case
 I describe two basic use cases here. Both concern studying the relation between
@@ -51,7 +62,7 @@ t-test. In this situation, the situation concerning power can be summarized in
 the following ingredients:
 
 1. total sample size
-2. effect sizes of interest
+2. effect size of interest
 3. expected standard deviation in the study arms
 4. the objective (planned statistical test)
 
@@ -178,7 +189,7 @@ Note that there are many options in this plot. See the help file of `GridPlot`
 for more info.
 
 ## Power evaluation using simulation and resampling
-Assume we have about the same situation as above, but we do not have the a
+Assume we have about the same situation as above, but we do not have a
 simple solution to calculate the power: we only have a limited pilot data set
 that looks as follows:
 ```{r, pilot data}
