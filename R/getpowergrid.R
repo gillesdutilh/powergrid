@@ -5,6 +5,7 @@
 ##' @param x Output object from \code{sse::powCal} or \code{sse::powEx}
 ##' @return array with appropriately named dimensions
 ##' @author Gilles Dutilh
+##' @export
 GetPowergrid = function(x){
   ## x is an object of either class power or powCalc
   ## x = pow
