@@ -101,7 +101,7 @@
 ##'                        n_iter = n_iter)
 ##' dimnames(power_array)
 ##' summary(power_array)
-
+##' @export
 PowerGrid = function(pars, fun, more_args = NULL, n_iter = NA,
                     summarize = TRUE, summary_function = mean,
                     parallel = FALSE,
@@ -459,6 +459,7 @@ summary.power_array = function(x){
 ##' @return An object of class `power_array`, with attributes \code{summarized =
 ##'   TRUE}.
 ##' @author Gilles Dutilh
+##' @export
 SummarizeSims = function(x, summary_function, ...){
   if(attr(x, which = 'summarized') | class(x) != 'power_array'){
     stop('Object x should be an object of class `power_array`, where attribute `summarized` is FALSE; containing individual simulations.')
@@ -498,6 +499,7 @@ SummarizeSims = function(x, summary_function, ...){
 ##'   attributes as `x`, aside from array-native attributes (dimnames, dim),
 ##'   plus the data.frame attributes `names` and `row_names`.
 ##' @author Gilles Dutilh
+##' @export
 PowerDF = function(x){
   flat = as.data.frame(ftable(x, row.vars = seq_along(dim(gg))))
   colnames(flat)[length(dim(x)) + 1] = 'x'
