@@ -78,12 +78,12 @@
 ##' @return Nothing
 ##' @author Gilles Dutilh
 ##' @examples
-## ============================================
-## Typical use case: minimal n for power
-## ============================================
+##' ## ============================================
+##' ## Typical use case: minimal n for power
+##' ## ============================================
 ##' sse_pars = list(
 ##'   n = seq(from = 10, to = 60, by = 4),
-##'   delta = seq(from = 0.5, to = 1.5, by = 0.2), ## effect size
+##'   delta = seq(from = 0.5, to = 1.5, by = 0.1), ## effect size
 ##'   sd = seq(.1, 1.1, .2)) ## Standard deviation
 ##' PowFun <- function(n, delta, sd){ # power for a t-test at alpha = .05
 ##'   ptt = power.t.test(n = n/2, delta = delta, sd = sd,
@@ -91,8 +91,27 @@
 ##'   return(ptt$power)
 ##' }
 ##' power_array = PowerGrid(pars = sse_pars, fun = PowFun, n_iter = NA)
+##' ## explore power graphically in teh situation where sd = .7, including example
 ##' PowerPlot(power_array,
-##'           slicer = list(sd = .7))
+##'           slicer = list(sd = .7),
+##'           example = list(delta = .9)
+##'           )
+##' ## Some graphical adjustments. Note that example is drawn on top of
+##' ## PowerPlot now.
+##' PowerPlot(power_array,
+##'           slicer = list(sd = .7),
+##'           par_labels = c(n = 'Total Sample Size',
+##'                          delta = 'Effect Size',
+##'                          sd = 'Standard Deviation'),
+##'           target_levels = c(.8, .9), # draw fewer power isolines
+##'           target = NULL # no specific power target (no line thicker)
+##'           )
+##' AddExample(power_array,
+##'            slicer = list(sd = .7),
+##'            example = list(delta = .9),
+##'            method = 'lm',
+##'            target = .9,
+##'            col = 'Orange', lwd = 3)
 ##' ## note that you can easily change what you search for: At each n, what would be
 ##' ## the minimal delta?
 ##' PowerPlot(power_array,
@@ -384,6 +403,8 @@ AddExample = function(x, slicer = NULL, example, target = .9,
                       minimal_target = TRUE, find_min = TRUE,
                       method = 'step', col = 1, ...)
 {
+  args = list(...)
+  if('lwd' %in% names(args)){lwd = args$lwd}else{lwd = 1}
   ns_example = sapply(example, function(x)length(x))[[1]]
       ## Prepare example for figure.
   y_ex_value = numeric(ns_example)
@@ -410,8 +431,14 @@ AddExample = function(x, slicer = NULL, example, target = .9,
                    x1 = x_ex_value, y1 = y_ex_value, length = .15,
                    code = 0, col = col, ...)
   graphics::arrows(x0 = x_ex_value, y0 = y_ex_value,
-         x1 = x0, y1 = y_ex_value, length = .15, col = col, ...)
-  graphics::points(rep(x_ex_value, each = 2), rep(y_ex_value, each = 2),
-                   pch = c(19, 1), cex = c(1, 3), col = col)
-  graphics::text(x = x0, y = y_ex_value, labels = y_ex_value, adj = c(0, -1), col = col)
+                   x1 = x0, y1 = y_ex_value, length = .15, col = col, ...)
+  ## point
+  graphics::points(x_ex_value, y_ex_value,
+                   pch = 19, cex = 1, col = col, lwd = lwd)
+  ## circle
+  graphics::points(x_ex_value, y_ex_value,
+                   pch = 1, cex = 3, col = col,
+                   lwd = 1)
+  graphics::text(x = x0, y = y_ex_value, labels = y_ex_value,
+                 adj = c(0, -1), col = col, lwd = lwd)
 }
