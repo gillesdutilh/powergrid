@@ -294,6 +294,7 @@ print.power_example = function(x){
 ##' @param x object of class `power_example`
 ##' @return nothing
 ##' @author Gilles Dutilh
+##' @export
 summary.power_example = function(x){
   data.frame('example' = unlist(ex_out))
 }
