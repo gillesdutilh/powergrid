@@ -5,6 +5,7 @@
 ##' @param b The desired maxmum
 ##' @return a vector with the desired minimum and maximum
 ##' @author Gilles Dutilh
+##' @export
 ScaleRange = function(x, a, b){
   (b - a) * (x - min(x)) / (max(x) - min(x)) + a
 }
@@ -21,7 +22,8 @@ ScaleRange = function(x, a, b){
 ##' @return a character string with returns placed such to achieve the desired
 ##'   width
 ##' @author Gilles Dutilh
-PrintWrap = function(x,
+##' @export
+##' PrintWrap = function(x,
                      ## width = 0.5 * (getOption("width") - 3), ...){
                      width = 48, ...){
   if (x == ''){
