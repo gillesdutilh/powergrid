@@ -251,6 +251,7 @@ Example = function(x,
 ##' @param x object of class `power_example`
 ##' @return nothing
 ##' @author Gilles Dutilh
+##' @export
 print.power_example = function(x){
   description =
     ifelse(x$method == 'lm',
