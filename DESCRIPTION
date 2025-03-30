@@ -1,6 +1,6 @@
 Package: powergrid
 Title: Tools for Power Analyis Using Simulations
-Version: 0.0.0.9000
+Version: 0.1.0
 Authors@R: 
     person(given = "Gilles",
     family = "Dutilh", email = "gilles.dutilh@gmail.com", role = c("aut", "cre"),
