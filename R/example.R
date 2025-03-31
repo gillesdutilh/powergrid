@@ -296,6 +296,6 @@ print.power_example = function(x){
 ##' @author Gilles Dutilh
 ##' @export
 summary.power_example = function(x){
-  data.frame('example' = unlist(ex_out))
+  data.frame('example' = unlist(x))
 }
 
