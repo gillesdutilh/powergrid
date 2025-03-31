@@ -501,7 +501,7 @@ SummarizeSims = function(x, summary_function, ...){
 ##' @author Gilles Dutilh
 ##' @export
 PowerDF = function(x){
-  flat = as.data.frame(ftable(x, row.vars = seq_along(dim(gg))))
+  flat = as.data.frame(stats::ftable(x, row.vars = seq_along(dim(x))))
   colnames(flat)[length(dim(x)) + 1] = 'x'
   aa = attributes(x)
   aa = aa[names(aa) != 'class']

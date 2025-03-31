@@ -197,7 +197,7 @@ Example = function(x,
     example_list = list(
       requested_example = list(theta = sse::tex(x, type = 'theta')),
       objective = 'achieve target or higher',
-      target = sse::tex(ex_out_sse, type = 'power'),
+      target = sse::tex(x, type = 'power'),
       required_name = 'n',
       required_value = sse::tex(x, type = 'nRec'),
       searched = 'min',
@@ -296,6 +296,6 @@ print.power_example = function(x){
 ##' @author Gilles Dutilh
 ##' @export
 summary.power_example = function(x){
-  data.frame('example' = unlist(ex_out))
+  data.frame('example' = unlist(x))
 }
 
