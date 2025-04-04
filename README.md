@@ -19,5 +19,5 @@ devtools::install_github("SwissClinicalTrialOrganisation/powergrid",
 ```
 
 Please don't hesitate making an issue above or contributing through a
-pull request. You can write me an [email](info@gillesdutilh.com).
+pull request. You can write me an [email](mailto:info@gillesdutilh.com).
 
