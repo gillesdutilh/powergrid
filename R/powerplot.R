@@ -231,8 +231,9 @@ PowerPlot =
   if(par_to_search == 'n' & !(par_to_search %in% dimnms)){
     warning(
       PrintWrap(
-        paste0("Argument `par_to_search` was set to 'n' (the default), but you probably want to search along ",
-               first_dim, ". If you want to search along another dimension, please set par_to_search accordingly")
+        paste0("Argument `par_to_search` was set to 'n' (the default). However, you probably want to search along ",
+               first_dim,
+               ", with which `par_to_search` was replaced automatically. If you want to search along another dimension, please set `par_to_search` accordingly")
       ), call. = FALSE)
     par_to_search = first_dim
   }
