@@ -252,7 +252,7 @@ Example = function(x,
 ##' @return nothing
 ##' @author Gilles Dutilh
 ##' @export
-print.power_example = function(x){
+power_example = function(x, ...){
   description =
     ifelse(x$method == 'lm',
            paste0('\nDescription: Method "lm" was chosen to use interpolation to approach the ',
@@ -282,7 +282,7 @@ print.power_example = function(x){
              paste0(strwrap(description, 48), collapse = '\n')
              )
   cat('================================================\n')
-  cat(content)
+  cat(content, ...)
   cat('\n================================================\n')
 }
 
@@ -295,7 +295,7 @@ print.power_example = function(x){
 ##' @return nothing
 ##' @author Gilles Dutilh
 ##' @export
-summary.power_example = function(x){
-  data.frame('example' = unlist(x))
+summary.power_example = function(x, ...){
+  data.frame('example' = unlist(x), ...)
 }
 
