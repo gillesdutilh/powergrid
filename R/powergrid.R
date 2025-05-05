@@ -331,7 +331,7 @@ PowerGrid = function(pars, fun, more_args = NULL, n_iter = NA,
 ##' @param x object of class power_array
 ##' @export
 ##' @author Gilles Dutilh
-print.power_array = function(x){
+print.power_array = function(x, ...){
   print.table(x)
   note_type_created_by = paste0(
     'Array of class `power_array` created using PowerGrid',
@@ -391,14 +391,14 @@ print.power_array = function(x){
 ##' @param x array of class power_grid
 ##' @export
 ##' @author Gilles Dutilh
-summary.power_array = function(x){
-  aa = attributes(x)
+summary.power_array = function(object){
+  aa = attributes(object)
   parnames = names(aa$dimnames[!(names(aa$dimnames) %in% c('sim', 'fun_out'))])
   if(!is.na(aa$n_iter) && aa$summarized){
     note_summary_iter =
       paste0("Containing summary over ", aa$n_iter,
              " iterations, summarized by function `",
-             attr(x, which = 'summary_function_name'),
+             attr(object, which = 'summary_function_name'),
              "` (for function definition, see attribute `summary_function`).")
   } else {
     if(!is.na(aa$n_iter) && !aa$summarized){
@@ -413,16 +413,16 @@ summary.power_array = function(x){
     paste0(
       " Range of values: ",
       ifelse(
-        'fun_out' %in% names(dimnames(x)),
+        'fun_out' %in% names(dimnames(object)),
         paste0('\n',
                paste0(
-                 paste0('      ', dimnames(x)$fun_out), ': ',
-                 apply(apply(x, 'fun_out', range, na.rm = TRUE),
+                 paste0('      ', dimnames(object)$fun_out), ': ',
+                 apply(apply(object, 'fun_out', range, na.rm = TRUE),
                        2, function(x)
                        {paste0(
                           '[', paste0(round(x, 2), collapse = ', '), ']')}),
                  collapse = '\n')),
-        paste0('[', paste0(round(range(x, na.rm = TRUE), 2),
+        paste0('[', paste0(round(range(object, na.rm = TRUE), 2),
                            collapse = ', '), ']')
       )
     )
