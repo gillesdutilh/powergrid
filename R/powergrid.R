@@ -391,7 +391,7 @@ print.power_array = function(x, ...){
 ##' @param x array of class power_grid
 ##' @export
 ##' @author Gilles Dutilh
-summary.power_array = function(object){
+summary.power_array = function(object, ...){
   aa = attributes(object)
   parnames = names(aa$dimnames[!(names(aa$dimnames) %in% c('sim', 'fun_out'))])
   if(!is.na(aa$n_iter) && aa$summarized){
