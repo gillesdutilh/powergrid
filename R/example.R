@@ -249,6 +249,7 @@ Example = function(x,
 ##'
 ##' @title Print Example
 ##' @param x object of class `power_example`
+##' @param ... passed on to `cat`
 ##' @return nothing
 ##' @author Gilles Dutilh
 ##' @export
@@ -292,6 +293,7 @@ print.power_example = function(x, ...){
 ##'
 ##' @title Print Example
 ##' @param x object of class `power_example`
+##' @param ... passed on to `data.frame` (which is the thing that is printed)
 ##' @return nothing
 ##' @author Gilles Dutilh
 ##' @export
