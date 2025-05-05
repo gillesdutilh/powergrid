@@ -454,8 +454,8 @@ summary.power_array = function(x){
 ##' @description Summarizes objects of class `power_array` that have individual
 ##'   simulations saved across simulations.
 ##' @param x Object of class `power_array`
-##' @param summary_fun function to apply across simulations
-##' @param ... Further arguments passed to 'summary_fun'
+##' @param summary_function function to apply across simulations
+##' @param ... Further arguments passed to 'summary_function'
 ##' @return An object of class `power_array`, with attributes \code{summarized =
 ##'   TRUE}.
 ##' @author Gilles Dutilh
