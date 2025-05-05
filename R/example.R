@@ -295,7 +295,7 @@ power_example = function(x, ...){
 ##' @return nothing
 ##' @author Gilles Dutilh
 ##' @export
-summary.power_example = function(x, ...){
-  data.frame('example' = unlist(x), ...)
+summary.power_example = function(object, ...){
+  data.frame('example' = unlist(object), ...)
 }
 
