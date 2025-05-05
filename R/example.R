@@ -252,7 +252,7 @@ Example = function(x,
 ##' @return nothing
 ##' @author Gilles Dutilh
 ##' @export
-power_example = function(x, ...){
+print.power_example = function(x, ...){
   description =
     ifelse(x$method == 'lm',
            paste0('\nDescription: Method "lm" was chosen to use interpolation to approach the ',
