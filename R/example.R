@@ -292,7 +292,7 @@ print.power_example = function(x, ...){
 ##' Print longer informative output for object of class `power_example`.
 ##'
 ##' @title Print Example
-##' @param x object of class `power_example`
+##' @param object object of class `power_example`
 ##' @param ... passed on to `data.frame` (which is the thing that is printed)
 ##' @return nothing
 ##' @author Gilles Dutilh
