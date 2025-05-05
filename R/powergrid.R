@@ -329,6 +329,7 @@ PowerGrid = function(pars, fun, more_args = NULL, n_iter = NA,
 ##' its contents.
 ##' @title print
 ##' @param x object of class power_array
+##' @param ... passed on to `cat`
 ##' @export
 ##' @author Gilles Dutilh
 print.power_array = function(x, ...){
@@ -376,7 +377,7 @@ print.power_array = function(x, ...){
     PrintWrap(paste(
       note_iterations,
       note_summary_function)),
-    '\n', sep = ''))
+    '\n', sep = ''), ...)
 }
 
 ## ==================================================================
@@ -388,7 +389,8 @@ print.power_array = function(x, ...){
 ##' ##'
 ##' See PowerGrid for details
 ##' @title Summary of power_grid object.
-##' @param x array of class power_grid
+##' @param object array of class power_grid
+##' @param ... passed on to `cat`
 ##' @export
 ##' @author Gilles Dutilh
 summary.power_array = function(object, ...){
@@ -447,7 +449,7 @@ summary.power_array = function(object, ...){
     ' ',
     note_grid,
     '\n')
-    )
+    , ...)
 }
 
 ##' @title Summary of object that has simulations saved.
