@@ -99,7 +99,7 @@
 ##' ## Illustration argument `find_min`
 ##' ## ============================================
 ##' ##
-##' ## In this example, we search for the *highest sd* for which the power is at
+##' ## In this examplee, we search for the *highest sd* for which the power is at
 ##' ## least .9.
 ##' ex_out = Example(power_array,
 ##'                  example = list(n = 40, delta = .7),
