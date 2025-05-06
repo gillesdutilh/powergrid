@@ -17,10 +17,10 @@
 ##'
 ##' Two complications are made to allow for complete flexibility:
 ##'
-##' 1) In the above description, *minimal* can be changed to *maximal* by setting argument
-##' `find_min` to FALSE. This is useful in the situation where one, e.g.,
-##' searches for the highest standard deviation at which it is still possible to
-##' find a desirable power.
+##' 1) In the above description, *minimal* can be changed to *maximal* by
+##' setting argument `find_min` to FALSE. This is useful in the situation where
+##' one, e.g., searches for the highest standard deviation at which it is still
+##' possible to find a desirable power.
 ##'
 ##' 2) In the above description, *at least* can be changed to *at most* by
 ##' setting `minimal_target` to FALSE. This allows to search, for example, for
@@ -36,9 +36,10 @@
 ##'   values available at these dimensions. See example for an illustration.
 ##' @param target Which value (of typically power) should be achieved at the
 ##'   example.
-##' @param minimal_target Logical. Should target be minimally achieved (e.g., a
-##'   power of at least a certain value), or maximially allowed (e.g., a maximum
-##'   expected estimation uncertainty)?
+##' @param minimal_target Logical. Set to TRUE if you aim to achieve a minimum
+##'   value (e.g., a power of *at least* 90%), or FALSE if you want to allow a
+##'   maximum value (e.g., the width of the expected CI may be *at most* a
+##'   certain value).
 ##' @param find_min Logical, indicating whether the example should be found that
 ##'   minimizes a parameter (typically: minimal required n) to achieve the
 ##'   `target` or maximizes this assumption (e.g., maximal allowed SD).
