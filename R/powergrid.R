@@ -463,7 +463,7 @@ summary.power_array = function(object, ...){
 ##' @author Gilles Dutilh
 ##' @export
 SummarizeSims = function(x, summary_function, ...){
-  if(attr(x, which = 'summarized') | class(x) != 'power_array'){
+  if(attr(x, which = 'summarized') | !inherits(x, 'power_array')){
     stop('Object x should be an object of class `power_array`, where attribute `summarized` is FALSE; containing individual simulations.')
   }
   aa = attributes(x)
