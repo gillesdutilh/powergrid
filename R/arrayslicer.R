@@ -12,7 +12,7 @@
 ##'   \code{power_array}, but may be any array with named dimensions.
 ##' @param slicer A list whose named elements define at which dimension (the
 ##'   list element names), at which values (the list element values) a slice is
-##'   taken from \code{power_array}
+##'   taken from \code{power_array}. Default NULL returns the unchanged array.
 ##' @return An array with reduced dimensions as given by \code{slicer}. Note
 ##'   that, relative to a standard array, some additional attributes are passed
 ##'   to be used in the functions in package \code{powergrid}
@@ -50,7 +50,7 @@
 ##' ArraySlicer(power_array,
 ##'             slicer = list(alpha = .1, sd = c(.9, .7)))
 ##' @export
-ArraySlicer = function(x, slicer)
+ArraySlicer = function(x, slicer = NULL)
 {
   dimnms = dimnames(x)
   ## input feedback
