@@ -211,7 +211,6 @@ Example = function(x,
     ## Standard situation: -----------------------------------------------------
     ## when it is a regular `power_array` object, find the min/max for target
     ## =========================================================================
-    browser()
     slice_to_search = ArraySlicer(x, example)
     required_value = FindTarget(slice_to_search,
                                 target = target,
