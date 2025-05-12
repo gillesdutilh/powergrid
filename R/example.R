@@ -270,22 +270,32 @@ print.power_example = function(x, ...){
                   ifelse(x$objective == 'achieve target or higher',
                           ' at least ', ' at most '), x$target, '.')
            )
-  content = paste0('To achieve the target of ',
-             ifelse(x$objective == 'achieve target or higher',
-                    'at least ', 'at most '),
-             x$target,
-             ' assuming\n',
-             paste(names(x$requested_example),
-                   x$requested_example, sep = ' = ', collapse = '\n'),
-             ',\n',
-             ifelse(x$searched == 'min', 'the minimal required ', 'maximal permissible '),
-             x$required_name, ' = ', x$required_value,
-             '\n------------------------------------------------\n',
-             paste0(strwrap(description, 48), collapse = '\n')
-             )
-  cat('================================================\n')
-  cat(content, ...)
-  cat('\n================================================\n')
+  example_in_words =
+    paste0('To achieve the target of ',
+           ifelse(x$objective == 'achieve target or higher',
+                  'at least ', 'at most '),
+           x$target,
+           ifelse(all(is.null(x$requested_example)),
+                  ", ", # if only one dimension left
+                  paste0(' assuming\n',
+                         paste(names(x$requested_example),
+                               x$requested_example, sep = ' = ', collapse = '\n'),
+                         ',\n')),
+           ifelse(x$searched == 'min', 'the minimal required ', 'maximal permissible '),
+           x$required_name, ' = ', x$required_value)
+  content = paste0(
+    ifelse(all(is.null(x$requested_example)),
+           PrintWrap(example_in_words), example_in_words),
+    '\n',
+    PrintDashes('-'),
+    '\n',
+    PrintWrap(description)
+  )
+  cat_print = paste0(paste(c(
+    PrintDashes(),
+    content,
+    PrintDashes()), collapse = '\n'), '\n') 
+  cat(cat_print, ...)
 }
 
 ##' Summary method for class `power_example`.
