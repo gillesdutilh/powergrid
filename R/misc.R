@@ -1,3 +1,4 @@
+
 ##' @title Scale to desired range
 ##' @description Linear scaling of a vector to a vector with a required range.
 ##' @param x A vector
