@@ -4,7 +4,7 @@
 \alias{ArraySlicer}
 \title{Cut Slice From Array}
 \usage{
-ArraySlicer(x, slicer)
+ArraySlicer(x, slicer = NULL)
 }
 \arguments{
 \item{x}{An array, in most common use cases an array of class
@@ -12,7 +12,7 @@ ArraySlicer(x, slicer)
 
 \item{slicer}{A list whose named elements define at which dimension (the
 list element names), at which values (the list element values) a slice is
-taken from \code{power_array}}
+taken from \code{power_array}. Default NULL returns the unchanged array.}
 }
 \value{
 An array with reduced dimensions as given by \code{slicer}. Note

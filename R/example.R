@@ -17,10 +17,10 @@
 ##'
 ##' Two complications are made to allow for complete flexibility:
 ##'
-##' 1) In the above description, *minimal* can be changed to *maximal* by setting argument
-##' `find_min` to FALSE. This is useful in the situation where one, e.g.,
-##' searches for the highest standard deviation at which it is still possible to
-##' find a desirable power.
+##' 1) In the above description, *minimal* can be changed to *maximal* by
+##' setting argument `find_min` to FALSE. This is useful in the situation where
+##' one, e.g., searches for the highest standard deviation at which it is still
+##' possible to find a desirable power.
 ##'
 ##' 2) In the above description, *at least* can be changed to *at most* by
 ##' setting `minimal_target` to FALSE. This allows to search, for example, for
@@ -36,9 +36,10 @@
 ##'   values available at these dimensions. See example for an illustration.
 ##' @param target Which value (of typically power) should be achieved at the
 ##'   example.
-##' @param minimal_target Logical. Should target be minimally achieved (e.g., a
-##'   power of at least a certain value), or maximially allowed (e.g., a maximum
-##'   expected estimation uncertainty)?
+##' @param minimal_target Logical. Set to TRUE if you aim to achieve a minimum
+##'   value (e.g., a power of *at least* 90%), or FALSE if you want to allow a
+##'   maximum value (e.g., the width of the expected CI may be *at most* a
+##'   certain value).
 ##' @param find_min Logical, indicating whether the example should be found that
 ##'   minimizes a parameter (typically: minimal required n) to achieve the
 ##'   `target` or maximizes this assumption (e.g., maximal allowed SD).
@@ -249,10 +250,11 @@ Example = function(x,
 ##'
 ##' @title Print Example
 ##' @param x object of class `power_example`
+##' @param ... passed on to `cat`
 ##' @return nothing
 ##' @author Gilles Dutilh
 ##' @export
-print.power_example = function(x){
+print.power_example = function(x, ...){
   description =
     ifelse(x$method == 'lm',
            paste0('\nDescription: Method "lm" was chosen to use interpolation to approach the ',
@@ -268,22 +270,32 @@ print.power_example = function(x){
                   ifelse(x$objective == 'achieve target or higher',
                           ' at least ', ' at most '), x$target, '.')
            )
-  content = paste0('To achieve the target of ',
-             ifelse(x$objective == 'achieve target or higher',
-                    'at least ', 'at most '),
-             x$target,
-             ' assuming\n',
-             paste(names(x$requested_example),
-                   x$requested_example, sep = ' = ', collapse = '\n'),
-             ',\n',
-             ifelse(x$searched == 'min', 'the minimal required ', 'maximal permissible '),
-             x$required_name, ' = ', x$required_value,
-             '\n------------------------------------------------\n',
-             paste0(strwrap(description, 48), collapse = '\n')
-             )
-  cat('================================================\n')
-  cat(content)
-  cat('\n================================================\n')
+  example_in_words =
+    paste0('To achieve the target of ',
+           ifelse(x$objective == 'achieve target or higher',
+                  'at least ', 'at most '),
+           x$target,
+           ifelse(all(is.null(x$requested_example)),
+                  ", ", # if only one dimension left
+                  paste0(' assuming\n',
+                         paste(names(x$requested_example),
+                               x$requested_example, sep = ' = ', collapse = '\n'),
+                         ',\n')),
+           ifelse(x$searched == 'min', 'the minimal required ', 'maximal permissible '),
+           x$required_name, ' = ', x$required_value)
+  content = paste0(
+    ifelse(all(is.null(x$requested_example)),
+           PrintWrap(example_in_words), example_in_words),
+    '\n',
+    PrintDashes('-'),
+    '\n',
+    PrintWrap(description)
+  )
+  cat_print = paste0(paste(c(
+    PrintDashes(),
+    content,
+    PrintDashes()), collapse = '\n'), '\n') 
+  cat(cat_print, ...)
 }
 
 ##' Summary method for class `power_example`.
@@ -291,11 +303,12 @@ print.power_example = function(x){
 ##' Print longer informative output for object of class `power_example`.
 ##'
 ##' @title Print Example
-##' @param x object of class `power_example`
+##' @param object object of class `power_example`
+##' @param ... passed on to `data.frame` (which is the thing that is printed)
 ##' @return nothing
 ##' @author Gilles Dutilh
 ##' @export
-summary.power_example = function(x){
-  data.frame('example' = unlist(x))
+summary.power_example = function(object, ...){
+  data.frame('example' = unlist(object), ...)
 }
 

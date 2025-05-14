@@ -26,9 +26,10 @@ values available at these dimensions. See example for an illustration.}
 \item{target}{Which value (of typically power) should be achieved at the
 example.}
 
-\item{minimal_target}{Logical. Should target be minimally achieved (e.g., a
-power of at least a certain value), or maximially allowed (e.g., a maximum
-expected estimation uncertainty)?}
+\item{minimal_target}{Logical. Set to TRUE if you aim to achieve a minimum
+value (e.g., a power of \emph{at least} 90\%), or FALSE if you want to allow a
+maximum value (e.g., the width of the expected CI may be \emph{at most} a
+certain value).}
 
 \item{find_min}{Logical, indicating whether the example should be found that
 minimizes a parameter (typically: minimal required n) to achieve the
@@ -83,10 +84,10 @@ the target power is achieved.
 
 Two complications are made to allow for complete flexibility:
 \enumerate{
-\item In the above description, \emph{minimal} can be changed to \emph{maximal} by setting argument
-\code{find_min} to FALSE. This is useful in the situation where one, e.g.,
-searches for the highest standard deviation at which it is still possible to
-find a desirable power.
+\item In the above description, \emph{minimal} can be changed to \emph{maximal} by
+setting argument \code{find_min} to FALSE. This is useful in the situation where
+one, e.g., searches for the highest standard deviation at which it is still
+possible to find a desirable power.
 \item In the above description, \emph{at least} can be changed to \emph{at most} by
 setting \code{minimal_target} to FALSE. This allows to search, for example, for
 the minimal sample size where the expected confidence interval is smaller

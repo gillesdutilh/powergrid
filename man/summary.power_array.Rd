@@ -4,10 +4,12 @@
 \alias{summary.power_array}
 \title{Summary of power_grid object.}
 \usage{
-\method{summary}{power_array}(x)
+\method{summary}{power_array}(object, ...)
 }
 \arguments{
-\item{x}{array of class power_grid}
+\item{object}{array of class power_grid}
+
+\item{...}{passed on to \code{cat}}
 }
 \description{
 Offers a short summary of the power_array object, summarizing the

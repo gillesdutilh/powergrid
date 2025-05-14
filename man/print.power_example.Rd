@@ -4,10 +4,12 @@
 \alias{print.power_example}
 \title{Print Example}
 \usage{
-\method{print}{power_example}(x)
+\method{print}{power_example}(x, ...)
 }
 \arguments{
 \item{x}{object of class \code{power_example}}
+
+\item{...}{passed on to \code{cat}}
 }
 \value{
 nothing

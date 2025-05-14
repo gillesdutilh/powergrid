@@ -29,8 +29,12 @@ PrintWrap = function(x,
   if (x == ''){
     x
   } else {
-    paste0('', paste0(strwrap(x, width = width), collapse = '\n '))
+    paste0('', paste0(strwrap(x, width = width), collapse = '\n'))
   }
 }
-
+PrintDashes = function(symbol = '=', width = 48, ...)
+{
+  paste(rep(symbol, width), collapse = '')
+}
+  
 

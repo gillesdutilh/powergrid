@@ -329,9 +329,10 @@ PowerGrid = function(pars, fun, more_args = NULL, n_iter = NA,
 ##' its contents.
 ##' @title print
 ##' @param x object of class power_array
+##' @param ... passed on to `cat`
 ##' @export
 ##' @author Gilles Dutilh
-print.power_array = function(x){
+print.power_array = function(x, ...){
   print.table(x)
   note_type_created_by = paste0(
     'Array of class `power_array` created using PowerGrid',
@@ -376,7 +377,7 @@ print.power_array = function(x){
     PrintWrap(paste(
       note_iterations,
       note_summary_function)),
-    '\n', sep = ''))
+    '\n', sep = ''), ...)
 }
 
 ## ==================================================================
@@ -388,17 +389,18 @@ print.power_array = function(x){
 ##' ##'
 ##' See PowerGrid for details
 ##' @title Summary of power_grid object.
-##' @param x array of class power_grid
+##' @param object array of class power_grid
+##' @param ... passed on to `cat`
 ##' @export
 ##' @author Gilles Dutilh
-summary.power_array = function(x){
-  aa = attributes(x)
+summary.power_array = function(object, ...){
+  aa = attributes(object)
   parnames = names(aa$dimnames[!(names(aa$dimnames) %in% c('sim', 'fun_out'))])
   if(!is.na(aa$n_iter) && aa$summarized){
     note_summary_iter =
       paste0("Containing summary over ", aa$n_iter,
              " iterations, summarized by function `",
-             attr(x, which = 'summary_function_name'),
+             attr(object, which = 'summary_function_name'),
              "` (for function definition, see attribute `summary_function`).")
   } else {
     if(!is.na(aa$n_iter) && !aa$summarized){
@@ -413,16 +415,16 @@ summary.power_array = function(x){
     paste0(
       " Range of values: ",
       ifelse(
-        'fun_out' %in% names(dimnames(x)),
+        'fun_out' %in% names(dimnames(object)),
         paste0('\n',
                paste0(
-                 paste0('      ', dimnames(x)$fun_out), ': ',
-                 apply(apply(x, 'fun_out', range, na.rm = TRUE),
+                 paste0('      ', dimnames(object)$fun_out), ': ',
+                 apply(apply(object, 'fun_out', range, na.rm = TRUE),
                        2, function(x)
                        {paste0(
                           '[', paste0(round(x, 2), collapse = ', '), ']')}),
                  collapse = '\n')),
-        paste0('[', paste0(round(range(x, na.rm = TRUE), 2),
+        paste0('[', paste0(round(range(object, na.rm = TRUE), 2),
                            collapse = ', '), ']')
       )
     )
@@ -447,21 +449,21 @@ summary.power_array = function(x){
     ' ',
     note_grid,
     '\n')
-    )
+    , ...)
 }
 
 ##' @title Summary of object that has simulations saved.
 ##' @description Summarizes objects of class `power_array` that have individual
 ##'   simulations saved across simulations.
 ##' @param x Object of class `power_array`
-##' @param summary_fun function to apply across simulations
-##' @param ... Further arguments passed to 'summary_fun'
+##' @param summary_function function to apply across simulations
+##' @param ... Further arguments passed to 'summary_function'
 ##' @return An object of class `power_array`, with attributes \code{summarized =
 ##'   TRUE}.
 ##' @author Gilles Dutilh
 ##' @export
 SummarizeSims = function(x, summary_function, ...){
-  if(attr(x, which = 'summarized') | class(x) != 'power_array'){
+  if(attr(x, which = 'summarized') | !inherits(x, 'power_array')){
     stop('Object x should be an object of class `power_array`, where attribute `summarized` is FALSE; containing individual simulations.')
   }
   aa = attributes(x)

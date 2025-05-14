@@ -4,10 +4,12 @@
 \alias{print.power_array}
 \title{print}
 \usage{
-\method{print}{power_array}(x)
+\method{print}{power_array}(x, ...)
 }
 \arguments{
 \item{x}{object of class power_array}
+
+\item{...}{passed on to \code{cat}}
 }
 \description{
 Method for printing objects of class power_array.
