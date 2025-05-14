@@ -9,9 +9,9 @@ SummarizeSims(x, summary_function, ...)
 \arguments{
 \item{x}{Object of class \code{power_array}}
 
-\item{...}{Further arguments passed to 'summary_fun'}
+\item{summary_function}{function to apply across simulations}
 
-\item{summary_fun}{function to apply across simulations}
+\item{...}{Further arguments passed to 'summary_function'}
 }
 \value{
 An object of class \code{power_array}, with attributes \code{summarized =

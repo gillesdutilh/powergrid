@@ -4,10 +4,12 @@
 \alias{summary.power_example}
 \title{Print Example}
 \usage{
-\method{summary}{power_example}(x)
+\method{summary}{power_example}(object, ...)
 }
 \arguments{
-\item{x}{object of class \code{power_example}}
+\item{object}{object of class \code{power_example}}
+
+\item{...}{passed on to \code{data.frame} (which is the thing that is printed)}
 }
 \value{
 nothing
