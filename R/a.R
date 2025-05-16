@@ -4,4 +4,5 @@
 ## build_vignettes()
 ## test edit
 ## After creating branch dev
+## how to merge
 
