@@ -127,22 +127,22 @@
 ##'           slicer = list(n = 30))
 ##' @export
 PowerPlot =
-    function(x, # object of class `power_array` or powEx output (class `power`)
-             slicer = NULL, # which plain of the grid
-             par_to_search = 'n', # default, for what should we find the min/max
-             find_min = TRUE, # search for min or max in par_to_search
-             example = NULL, # a list(<parameter> = <value>)
-             method = 'step',
-             target = .9, # the minimum (or maximum, see below)
-             minimal_target = TRUE,
-             summary_function = mean,
-             target_levels = c(.8, .9, .95), # which power iso lines to draw
-             shades_of_grey = TRUE, # do you want shades of grey on background
-             shades_legend = FALSE, # do you want a legend for the shades
-             title = NULL,
-             par_labels = NULL,
-             smooth = NA,
-             ...) # dictionary vector of <varname> = <varlabel>
+  function(x, # object of class `power_array` or powEx output (class `power`)
+           slicer = NULL, # which plain of the grid
+           par_to_search = 'n', # default, for what should we find the min/max
+           find_min = TRUE, # search for min or max in par_to_search
+           example = NULL, # a list(<parameter> = <value>)
+           method = 'step',
+           target = .9, # the minimum (or maximum, see below)
+           minimal_target = TRUE,
+           summary_function = mean,
+           target_levels = c(.8, .9, .95), # which power iso lines to draw
+           shades_of_grey = TRUE, # do you want shades of grey on background
+           shades_legend = FALSE, # do you want a legend for the shades
+           title = NULL,
+           par_labels = NULL,
+           smooth = NA,
+           ...) # dictionary vector of <varname> = <varlabel>
 {
   ## =======================================================
   ## process input
@@ -217,23 +217,22 @@ PowerPlot =
     left_dims = ifelse(length(array_toplot) > 0,
                        1, 0)
   }
-  if(left_dims != 2){
+  if(!(left_dims %in% c(2, 1))){
     stop(PrintWrap(
       paste0(
         ifelse(is.null(slicer),
-               "Input 'x' was no 2-dimensionsonal array, ",
-               "Slicing 'x' by 'slicer' did not yield the necessary 2-dimensional, "),
+               "Input 'x' should be a 2- or 1-dimensionsonal array, ",
+               "Slicing 'x' by 'slicer' did not yield the necessary 2- or 1-dimensional, "),
         "but a ", left_dims, "-dimensional array instead.")))
   } ##
-
   dimnms = names(dimnames(array_toplot)) # dimension names to plot
   first_dim = dimnms[1]
   if(par_to_search == 'n' & !(par_to_search %in% dimnms)){
     warning(
       PrintWrap(
-        paste0("Argument `par_to_search` was set to 'n' (the default). However, you probably want to search along ",
+        paste0("Argument `par_to_search` was automatically changed from 'n' (the default) to '",
                first_dim,
-               ", with which `par_to_search` was replaced automatically. If you want to search along another dimension, please set `par_to_search` accordingly")
+               "'. If you want to search along another dimension, please set `par_to_search` accordingly.")
       ), call. = FALSE)
     par_to_search = first_dim
   }
@@ -287,105 +286,99 @@ PowerPlot =
   ## =======================================================
   ## Draw figure
   ## =======================================================
-  ## ============================================
-  ## Legend plot if needed (shades of grey & shades legend are requested)
-  ## is a separate plotting region
-  if(shades_of_grey && shades_legend) {
-    graphics::layout(t(2:1), widths = c(5, 1)) # in this order, so that
+  ## if input is a 1-dimensional array, create simple plot
+  if (left_dims == 1){
+    plot(as.numeric(names(array_toplot)), array_toplot, type = 'n', axes = FALSE,
+         xlab = names(dimnames(array_toplot)), ylab = 'Power')
+    graphics::abline(v = as.numeric(names(array_toplot)), col = 'lightgrey')
+    graphics::lines(as.numeric(names(array_toplot)), array_toplot)
+    graphics::axis(1, at = as.numeric(names(array_toplot)))
+    graphics::axis(2, las = 1)
+    graphics::box(bty = 'l')
+    ## simple plot always gets example (otherwise, the argument 'example' would
+    ## have to be redefined only for this special case). Example is drawn with
+    ## the same code as the normal case
+    x_ex_value = FindTarget(array_toplot,
+                            target = target,
+                            minimal_target = minimal_target,
+                            search_par = names(dimnames(array_toplot)),
+                            find_min = find_min,
+                            method = method)
+    y_ex_value = round(array_toplot[as.character(x_ex_value)], 3)
+  } else {
+    ## the most typical case:
+    ## ============================================
+    ## Legend plot if needed (shades of grey & shades legend are requested)
+    ## is a separate plotting region
+    if(shades_of_grey && shades_legend) {
+      graphics::layout(t(2:1), widths = c(5, 1)) # in this order, so that
                                         # you can edit the main fig afterwards
-    graphics::par(mar = c(10, 1, 10, 3))
-    graphics::image(1, seq_along(legend_ats), t(rev(legend_ats)),
-          axes = FALSE, xlab = '', ylab = '', col = rev(legend_cols))
-    graphics::text(1, seq_along(legend_ats),
-                   labels = sprintf('%1.1f', legend_ats),
-         cex = 1.5, col = grDevices::grey.colors(1, .2, .2))
-    graphics::mtext(side = 3, line = 2, text = 'Power')
-  }
-  ## ============================================
-  ## Main plot.
-  ## Image contains shades of grey or white, creating higher level plot
-  graphics::par(las = 1, mar = c(5.1, 4.1, 4.1, 2.1))
-  graphics::image(as.numeric(margins_toplot[[2]]),
-        as.numeric(margins_toplot[[1]]),
-        t(array_toplot),
-        ylab = Trans(names(margins_toplot)[[1]]),
-        xlab = Trans(names(margins_toplot)[[2]]),
-        axes = FALSE, col = image_cols, main = title, ...)
-  ## XXX below is work on the legend inside the plot.
-  ## axis(1)
-  ## axis(1, at = margins_toplot[[2]], line = 2)
-  ## num_margins_toplot = lapply(margins_toplot, as.numeric)
-  ## image_x_lim_min = num_margins_toplot[[2]][1] -
-  ##   (num_margins_toplot[[2]][2] - num_margins_toplot[[2]][1])/2
-  ## image_x_lim_max = rev(num_margins_toplot[[2]])[1] +
-  ##   (rev(num_margins_toplot[[2]])[1] - rev(num_margins_toplot[[2]])[2])/2
-  ## xlim = c(image_x_lim_min,
-  ##          image_x_lim_min + (image_x_lim_max - image_x_lim_min) * 1.2)
-  ## graphics::image(as.numeric(margins_toplot[[2]]),
-  ##       as.numeric(margins_toplot[[1]]),
-  ##       t(array_toplot),
-  ##       ylab = Trans(names(margins_toplot)[[1]]),
-  ##       xlab = Trans(names(margins_toplot)[[2]]),
-  ##       axes = FALSE, col = image_cols, main = main,
-  ##       xlim = xlim)
-  ## axis(1);axis(2)
-  ## legend_x = mean(c(image_x_lim_max, xlim[2]))
-  ## y_range = extendrange(as.numeric(margins_toplot[[1]]), f = -0.15)
-  ## legend_y = ScaleRange(legend_ats, y_range[1], y_range[2])
-  ## graphics::image(legend_x, legend_y, t(rev(legend_ats)), add = TRUE,
-  ##       axes = FALSE, xlab = '', ylab = '', col = rev(legend_cols),
-  ##       xlim = c(1.5, 1.9))
-  ## graphics::text(legend_x, seq_along(legend_ats), labels = sprintf('%1.1f', legend_ats),
-  ##      cex = 1.5, col = grDevices::grey.colors(1, .2, .2))
-  ## graphics::mtext(side = 3, line = 2, text = 'Power')
-  ## graphics::box()
-  ## ,
-  ##         xlim = range(as.numeric(margins_toplot[[2]])))
-  ##
-  ##
-  ## grid lines
-  graphics::abline(h = margins_toplot[[1]], v = margins_toplot[[2]], col = 'white')
-  ## power contour lines
-  power_lwds = ifelse(target_levels == target, 2, 1)
-  ## Contour lines
-  if (is.na(smooth)){ # no smoothing
-    graphics::contour(as.numeric(margins_toplot[[2]]),
-            as.numeric(margins_toplot[[1]]),
-            t(array_toplot), add = TRUE, labcex = 1.2,
-            levels = target_levels, lwd = power_lwds,
-            col = grDevices::grey.colors(1, .2, .2))
+      graphics::par(mar = c(10, 1, 10, 3))
+      graphics::image(1, seq_along(legend_ats), t(rev(legend_ats)),
+                      axes = FALSE, xlab = '', ylab = '', col = rev(legend_cols))
+      graphics::text(1, seq_along(legend_ats),
+                     labels = sprintf('%1.1f', legend_ats),
+                     cex = 1.5, col = grDevices::grey.colors(1, .2, .2))
+      graphics::mtext(side = 3, line = 2, text = 'Power')
+    }
+    ## ============================================
+    ## Main plot.
+    ## Image contains shades of grey or white, creating higher level plot
+    graphics::par(las = 1, mar = c(5.1, 4.1, 4.1, 2.1))
+    graphics::image(as.numeric(margins_toplot[[2]]),
+                    as.numeric(margins_toplot[[1]]),
+                    t(array_toplot),
+                    ylab = Trans(names(margins_toplot)[[1]]),
+                    xlab = Trans(names(margins_toplot)[[2]]),
+                    axes = FALSE, col = image_cols, main = title, ...)
+    ##
+    ## grid lines
+    graphics::abline(h = margins_toplot[[1]], v = margins_toplot[[2]], col = 'white')
+    ## power contour lines
+    power_lwds = ifelse(target_levels == target, 2, 1)
+    ## Contour lines
+    if (is.na(smooth)){ # no smoothing
+      graphics::contour(as.numeric(margins_toplot[[2]]),
+                        as.numeric(margins_toplot[[1]]),
+                        t(array_toplot), add = TRUE, labcex = 1.2,
+                        levels = target_levels, lwd = power_lwds,
+                        col = grDevices::grey.colors(1, .2, .2))
 
-  } else { # smoothing
-    smooth_pred_grid = as.matrix(expand.grid(as.numeric(margins_toplot[[2]]),
-                                             as.numeric(margins_toplot[[1]])))
-    smooth_z =
-      stats::fitted(
-               stats::loess(
-                        as.vector(ftable(array_toplot, row.vars = 1:2)) ~
-                          smooth_pred_grid, span = smooth, degree = 2))
-    smooth_z_m =
-      stats::xtabs(smooth_z ~ smooth_pred_grid[, 1] + smooth_pred_grid[, 2])
-    graphics::contour(as.numeric(margins_toplot[[2]]),
-            as.numeric(margins_toplot[[1]]),
-            z = smooth_z_m, add = TRUE, labcex = 1.2,
-            levels = target_levels, lwd = power_lwds,
-            col = grDevices::grey.colors(1, .2, .2))
+    } else { # smoothing
+      smooth_pred_grid = as.matrix(expand.grid(as.numeric(margins_toplot[[2]]),
+                                               as.numeric(margins_toplot[[1]])))
+      smooth_z =
+        stats::fitted(
+                 stats::loess(
+                          as.vector(ftable(array_toplot, row.vars = 1:2)) ~
+                            smooth_pred_grid, span = smooth, degree = 2))
+      smooth_z_m =
+        stats::xtabs(smooth_z ~ smooth_pred_grid[, 1] + smooth_pred_grid[, 2])
+      graphics::contour(as.numeric(margins_toplot[[2]]),
+                        as.numeric(margins_toplot[[1]]),
+                        z = smooth_z_m, add = TRUE, labcex = 1.2,
+                        levels = target_levels, lwd = power_lwds,
+                        col = grDevices::grey.colors(1, .2, .2))
+    }
+    graphics::axis(1);graphics::axis(2);graphics::box(bty = 'l')
+    ## ============================================
   }
-
-  graphics::axis(1);graphics::axis(2);graphics::box(bty = 'l')
-  ## ============================================
-  ## note that "y_ex_name" is not defined, this is par_to_search
   ## Draw Example Arrow
-  if(!is.null(example)){
+  if(!is.null(example) | left_dims == 1){
     x0 = grDevices::extendrange(graphics::par()$usr[1:2], f = -.02)[1]
     y0 = grDevices::extendrange(graphics::par()$usr[3:4], f = -.02)[1]
     graphics::arrows(x0 = x_ex_value, y0 = y0,
-           x1 = x_ex_value, y1 = y_ex_value, length = .15, code = 0)
+                     x1 = x_ex_value, y1 = y_ex_value, length = .15, code = 0)
     graphics::arrows(x0 = x_ex_value, y0 = y_ex_value,
-           x1 = x0, y1 = y_ex_value, length = .15)
+                     x1 = x0, y1 = y_ex_value, length = .15)
     graphics::points(rep(x_ex_value, each = 2), rep(y_ex_value, each = 2),
                      pch = c(19, 1), cex = c(1, 3))
-    graphics::text(x = x0, y = y_ex_value, labels = y_ex_value, adj = c(0, -1))
+    if (!is.null(example)){
+      ## When the example is drawn automaticaly when array_toplot is
+      ## 1-dimensional, no value at arrow head.
+      graphics::text(x = x0, y = y_ex_value,
+                     labels = y_ex_value, adj = c(0, -1))
+    }
   }
 }
 
