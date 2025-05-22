@@ -33,6 +33,16 @@ PrintWrap = function(x,
     paste0('', paste0(strwrap(x, width = width), collapse = '\n'))
   }
 }
+
+##' @title Draw a line of dashes, or something else with a certain width.
+##' @description Draw a line of dashes, or something else with a certain
+##'   width. Is used in package in combination with PrintWrap.
+##' @param symbol Symbol to repeat `width` times. 
+##' @param width The desired width (number of symbols)
+##' @param ... Further arguments passed to 'strwrap()'
+##' @return a character string of nchar `width`
+##' @author Gilles Dutilh
+##' @export
 PrintDashes = function(symbol = '=', width = 48, ...)
 {
   paste(rep(symbol, width), collapse = '')
