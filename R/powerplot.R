@@ -286,7 +286,7 @@ PowerPlot =
   ## =======================================================
   ## Draw figure
   ## =======================================================
-  ## if input is a 1-dimensional array, create simple plot
+  ## if input is a 1-dimensional array, create simple line plot
   if (left_dims == 1){
     plot(as.numeric(names(array_toplot)), array_toplot, type = 'n', axes = FALSE,
          xlab = names(dimnames(array_toplot)), ylab = 'Power')
@@ -295,6 +295,8 @@ PowerPlot =
     graphics::axis(1, at = as.numeric(names(array_toplot)))
     graphics::axis(2, las = 1)
     graphics::box(bty = 'l')
+    graphics::title(paste('Power as a function of',
+                          Trans(names(margins_toplot)[[1]])))
     ## simple plot always gets example (otherwise, the argument 'example' would
     ## have to be redefined only for this special case). Example is drawn with
     ## the same code as the normal case
