@@ -148,10 +148,10 @@ PowerPlot =
   ## process input
   ## =======================================================
   ##
-  ## Get the powergrid from old sse package input and turn into an array like
-  ## power_array.
-  if(all(class(x) == 'power'))
-  { # `powEx` output sse (which contains `powCalc`)
+  ## Deal with output from package sse
+  ##
+  if(all(class(x) == 'power')) # This is output from sse::powEx
+  {
     power_array = drop(GetPowergrid(x))
     ## create as-if input:
     example = list(theta = sse::tex(x, type = 'theta'))
@@ -164,28 +164,38 @@ PowerPlot =
     y_ex_value = example_list$required_value
     x_ex_name = names(example)
     x_ex_value = example[[x_ex_name]]
-  } else if(all(class(x) == 'powCalc'))
-  { # `powCal` output sse
+  } else if(all(class(x) == 'powCalc')) # This is output from sse::powCalc
+  {
     power_array = drop(GetPowergrid(x)) # take the power_array-like array
     ## give it a class to handle in Example
     class(power_array) = "pseudo_power_array_by_plotpower"
     ## handle PowerGrid input
-  } else if (all(class(x) == 'power_array'))
+  } else
+    ## Deal with power_array from powergrid (this) package
+    if (all(class(x) == 'power_array')) # made using powergrid functions
   {
     if(!attr(x, which = 'summarized')){ # iterations kept
       power_array = SummarizeSims(x, summary_function)
-      warning(PrintWrap("The object 'x' you supplied to PowerPlot contains individual iterations. For sensible plotting, these were automatically summarized across simulations using the function given in argument `summary_function`."), call. = FALSE)
-    } else {
-      power_array = x # power_array
+      warning(PrintWrap(paste0(
+        "The object 'x' you supplied to PowerPlot contains individual ",
+        "iterations. For sensible plotting, these were automatically ",
+        "summarized across simulations using the function given in ",
+        "argument `summary_function`.")), call. = FALSE)
+    } else # power_array that is ready to use
+    {
+      power_array = x
     }
   } else {
     stop("The object 'x' should be of class 'power_array', 'power' or 'powCalc' (from package 'sse'). ", call. = FALSE)
     power_array = x} # if just any array, give it a try
 
-  ## create example (when the input was not a sse `power` example
-  if (!is.null(example)){ # if example requested, create example
-    if (all(class(x) != 'power')){ # when there is not yet an example
-      ## check whether there are equal number of examples for each par:
+  ## =======================================================
+  ## Create Example from input
+  ## =======================================================
+  ##
+  if (!is.null(example)){
+    if (all(class(x) != 'power')){ # power objects already have example
+      ## how many examples given for each par:
       ns_example = sapply(example, function(x)length(x))[[1]]
       ## Prepare example for figure.
       y_ex_value = numeric(ns_example)
