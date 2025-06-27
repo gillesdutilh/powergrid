@@ -54,9 +54,10 @@ between \code{search_par} and \code{(qnorm(x) + qnorm(1 - 0.05)) ^ 2}. The
 setting "lm" is inspired on the implementation in the \code{sse} package
 by Thomas Fabbro.}
 
-\item{target}{The power (or any other value) for which the example, if
-requested, is drawn. Also defines which of the power lines is drawn with a
-thinker line width.}
+\item{target}{The power (or whatever the target is) for which the example,
+if requested, is drawn. Also defines which of the power lines is drawn
+with a thicker line width, among or in addition to the power lines defined
+by target_levels.}
 
 \item{minimal_target}{Logical. Should target be minimally achieved (e.g.,
 power), or maximially allowed (e.g., estimation uncertainty).}
@@ -64,7 +65,7 @@ power), or maximially allowed (e.g., estimation uncertainty).}
 \item{summary_function}{When x' attribute \code{summarized} is FALSE, x is
 summarized across sims using this function.}
 
-\item{target_levels}{For which levels of power (or any whichever variable is
+\item{target_levels}{For which levels of power (or whichever variable is
 contained in x) lines are drawn.}
 
 \item{shades_of_grey}{Logical indicating whether greylevels are painted in
