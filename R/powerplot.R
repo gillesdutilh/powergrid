@@ -45,16 +45,17 @@
 ##'   between \code{search_par} and \code{(qnorm(x) + qnorm(1 - 0.05)) ^ 2}. The
 ##'   setting "lm" is inspired on the implementation in the \code{sse} package
 ##'   by Thomas Fabbro.
-##' @param target The power (or any other value) for which the example, if
-##'   requested, is drawn. Also defines which of the power lines is drawn with a
-##'   thinker line width.
+##' @param target The power (or whatever the target is) for which the example,
+##'   if requested, is drawn. Also defines which of the power lines is drawn
+##'   with a thicker line width, among or in addition to the power lines defined
+##'   by target_levels.
 ##' @param minimal_target Logical. Should target be minimally achieved (e.g.,
 ##'   power), or maximially allowed (e.g., estimation uncertainty).
 ##' @param summary_function If \code{x} is an object of class \code{power_array}
 ##'   where attribute \code{summarized} is FALSE (and individual iterations are
 ##'   stored in dimension \code{sim}, the iterations dimension is aggregated by
 ##'   \code{summary_fun}. Otherwise ignored.
-##' @param target_levels For which levels of power (or any whichever variable is
+##' @param target_levels For which levels of power (or whichever variable is
 ##'   contained in x) lines are drawn.
 ##' @param shades_of_grey Logical indicating whether greylevels are painted in
 ##'   addition to isolines to show power levels.
@@ -347,6 +348,9 @@ PowerPlot =
     ## grid lines
     graphics::abline(h = margins_toplot[[1]], v = margins_toplot[[2]], col = 'white')
     ## power contour lines
+    if (!is.na(target) & !(target %in% target_levels)){
+      target_levels = sort(unique(c(target_levels, target)))
+      }
     power_lwds = ifelse(target_levels == target, 2, 1)
     ## Contour lines
     if (is.na(smooth)){ # no smoothing
