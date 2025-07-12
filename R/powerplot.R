@@ -104,7 +104,7 @@
 ##'                          delta = 'Effect Size',
 ##'                          sd = 'Standard Deviation'),
 ##'           target_levels = c(.8, .9), # draw fewer power isolines
-##'           target = NULL # no specific power target (no line thicker)
+##'           target = NA # no specific power target (no line thicker)
 ##'           )
 ##' AddExample(power_array,
 ##'            slicer = list(sd = .7),
