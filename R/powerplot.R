@@ -149,33 +149,10 @@ PowerPlot =
   ## process input
   ## =======================================================
   ##
-  ## Deal with output from package sse
-  ##
-  if(all(class(x) == 'power')) # This is output from sse::powEx
+  if (all(class(x) == 'power_array')) # made using powergrid functions
   {
-    power_array = drop(GetPowergrid(x))
-    ## create as-if input:
-    example = list(theta = sse::tex(x, type = 'theta'))
-    target = x@power.example
-    par_to_search = 'n'
-    slicer = list(xi = x@xi.example)
-    ## translate to Example object
-    example_list = Example(x)
-    ## Prepare example for figure
-    y_ex_value = example_list$required_value
-    x_ex_name = names(example)
-    x_ex_value = example[[x_ex_name]]
-  } else if(all(class(x) == 'powCalc')) # This is output from sse::powCalc
-  {
-    power_array = drop(GetPowergrid(x)) # take the power_array-like array
-    ## give it a class to handle in Example
-    class(power_array) = "pseudo_power_array_by_plotpower"
-    ## handle PowerGrid input
-  } else
-    ## Deal with power_array from powergrid (this) package
-    if (all(class(x) == 'power_array')) # made using powergrid functions
-  {
-    if(!attr(x, which = 'summarized')){ # iterations kept
+    if(!attr(x, which = 'summarized')){ # if object contains iterations, first
+                                        # summarize
       power_array = SummarizeSims(x, summary_function)
       warning(PrintWrap(paste0(
         "The object 'x' you supplied to PowerPlot contains individual ",
@@ -187,9 +164,8 @@ PowerPlot =
       power_array = x
     }
   } else {
-    stop("The object 'x' should be of class 'power_array', 'power' or 'powCalc' (from package 'sse'). ", call. = FALSE)
+    stop("The object 'x' should be of class 'power_array'. ", call. = FALSE)
     power_array = x} # if just any array, give it a try
-
   ## =======================================================
   ## Create Example from input
   ## =======================================================
