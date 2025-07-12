@@ -112,13 +112,21 @@
 ##'            method = 'lm',
 ##'            target = .9,
 ##'            col = 'Orange', lwd = 3)
+##' ## ============================================
+##' ## Less typical use case:
+##' ## minimal delta for power, given sd, as a function of n
+##' ## ============================================
 ##' ## note that you can easily change what you search for: At each n, what would be
 ##' ## the minimal delta?
 ##' PowerPlot(power_array,
 ##'           par_to_search = 'delta',
 ##'           slicer = list(sd = .7))
 ##'
-##' ## You're not limited to n at all, nor to searching a minimum: If n is 30, what
+##' ## ============================================
+##' ## Less typical use case:
+##' ## *maximum sd* for power, given n, as a function of delta
+##' ## ============================================
+##' ## You're not limited to study n at all, nor to searching a minimum: If n is 30, what
 ##' ## is the largest sd at which we still find enough power? (as a function of
 ##' ## delta on the y-axis)
 ##' PowerPlot(power_array,
