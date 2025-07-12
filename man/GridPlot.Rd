@@ -24,7 +24,8 @@ GridPlot(
 )
 }
 \arguments{
-\item{x}{An object of class "power_array" (from \code{powergrid}).}
+\item{x}{An object of class "power_array" (from \code{powergrid}), "power" (from
+sse::powEx) or "powCalc" (from sse::powCalc).}
 
 \item{slicer}{If the parameter grid of \code{x} has more than 3 dimensions, a
 3-dimensional slice must be cut out using \code{slicer}, a list whose
