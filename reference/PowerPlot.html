@@ -119,9 +119,10 @@ by Thomas Fabbro.</p></dd>
 
 
 <dt id="arg-target">target<a class="anchor" aria-label="anchor" href="#arg-target"></a></dt>
-<dd><p>The power (or any other value) for which the example, if
-requested, is drawn. Also defines which of the power lines is drawn with a
-thinker line width.</p></dd>
+<dd><p>The power (or whatever the target is) for which the example,
+if requested, is drawn. Also defines which of the power lines is drawn
+with a thicker line width, among or in addition to the power lines defined
+by target_levels.</p></dd>
 
 
 <dt id="arg-minimal-target">minimal_target<a class="anchor" aria-label="anchor" href="#arg-minimal-target"></a></dt>
@@ -135,7 +136,7 @@ summarized across sims using this function.</p></dd>
 
 
 <dt id="arg-target-levels">target_levels<a class="anchor" aria-label="anchor" href="#arg-target-levels"></a></dt>
-<dd><p>For which levels of power (or any whichever variable is
+<dd><p>For which levels of power (or whichever variable is
 contained in x) lines are drawn.</p></dd>
 
 
@@ -232,6 +233,7 @@ confidence interval. For this purpose, set <code>minimal_target</code> to
 <span class="r-in"><span>          target_levels <span class="op">=</span> <span class="fu"><a href="https://rdrr.io/r/base/c.html" class="external-link">c</a></span><span class="op">(</span><span class="fl">.8</span>, <span class="fl">.9</span><span class="op">)</span>, <span class="co"># draw fewer power isolines</span></span></span>
 <span class="r-in"><span>          target <span class="op">=</span> <span class="cn">NULL</span> <span class="co"># no specific power target (no line thicker)</span></span></span>
 <span class="r-in"><span>          <span class="op">)</span></span></span>
+<span class="r-err co"><span class="r-pr">#&gt;</span> <span class="error">Error in if (!is.na(target) &amp; !(target %in% target_levels)) {    target_levels = sort(unique(c(target_levels, target)))}:</span> argument is of length zero</span>
 <span class="r-in"><span><span class="fu"><a href="AddExample.html">AddExample</a></span><span class="op">(</span><span class="va">power_array</span>,</span></span>
 <span class="r-in"><span>           slicer <span class="op">=</span> <span class="fu"><a href="https://rdrr.io/r/base/list.html" class="external-link">list</a></span><span class="op">(</span>sd <span class="op">=</span> <span class="fl">.7</span><span class="op">)</span>,</span></span>
 <span class="r-in"><span>           example <span class="op">=</span> <span class="fu"><a href="https://rdrr.io/r/base/list.html" class="external-link">list</a></span><span class="op">(</span>delta <span class="op">=</span> <span class="fl">.9</span><span class="op">)</span>,</span></span>
@@ -265,7 +267,7 @@ confidence interval. For this purpose, set <code>minimal_target</code> to
 </div>
 
 <div class="pkgdown-footer-right">
-  <p>Site built with <a href="https://pkgdown.r-lib.org/" class="external-link">pkgdown</a> 2.1.2.</p>
+  <p>Site built with <a href="https://pkgdown.r-lib.org/" class="external-link">pkgdown</a> 2.1.3.</p>
 </div>
 
     </footer></div>
