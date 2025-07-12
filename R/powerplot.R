@@ -331,10 +331,15 @@ PowerPlot =
     ## grid lines
     graphics::abline(h = margins_toplot[[1]], v = margins_toplot[[2]], col = 'white')
     ## power contour lines
-    if (!is.na(target) & !(target %in% target_levels)){
-      target_levels = sort(unique(c(target_levels, target)))
+    if (!is.na(target)) # if a target is given
+    {
+      if (!(target %in% target_levels)){ # but not one of levels, attach.
+        target_levels = sort(unique(c(target_levels, target)))
       }
-    power_lwds = ifelse(target_levels == target, 2, 1)
+      power_lwds = ifelse(target_levels == target, 2, 1)
+    } else {
+      power_lwds = 1
+    }
     ## Contour lines
     if (is.na(smooth)){ # no smoothing
       graphics::contour(as.numeric(margins_toplot[[2]]),
