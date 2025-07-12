@@ -159,7 +159,9 @@ Refine = function(old, n_iter_add = 1, pars = NULL, ...){
   ## sort (in a rather complicated way, since we do not know the number
   ## of columns):
   old = old[do.call(order, as.data.frame(as.matrix(old[, -ncol(old)]))), ]
-                                        # to have the correct grid point names when using xtabs, change from num/fac to character
+                                        # to have the correct grid point names
+                                        # when using xtabs, change from num/fac
+                                        # to character
   old[, -ncol(old)] = apply(old[, -ncol(old)], 2, as.character)
   new = stats::xtabs(Freq ~ ., data = old)
   new[as.matrix(old[is.na(old$Freq), names(old) != 'Freq'])] = NA
