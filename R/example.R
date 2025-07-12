@@ -190,23 +190,8 @@ Example = function(x,
   ## =======================================================
   ## If the input is not rejected, adjust atypical input.
   ##
-  ## This function may get input with class `power` from sse package (typically
-  ## when applied inside the plot function). Confusingly, such object is the
-  ## result from powEx and thus already contains the example. 'power' input is
-  ## turned into class 'power_example'.
-  if(inherits(x, 'power')) {
-    example_list = list(
-      requested_example = list(theta = sse::tex(x, type = 'theta')),
-      objective = 'achieve target or higher',
-      target = sse::tex(x, type = 'power'),
-      required_name = 'n',
-      required_value = sse::tex(x, type = 'nRec'),
-      searched = 'min',
-      method = attr(x, which = "method"),
-      objective = 'achieve target or higher'
-    )
-  } else if (all(class(x) %in% c('power_array',
-                                 'pseudo_power_array_by_plotpower'))){
+  if (all(class(x) %in% c('power_array',
+                          'pseudo_power_array_by_plotpower'))){
     ## =========================================================================
     ## Standard situation: -----------------------------------------------------
     ## when it is a regular `power_array` object, find the min/max for target
