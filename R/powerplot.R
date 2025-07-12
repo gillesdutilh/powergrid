@@ -21,8 +21,7 @@
 ##'   confidence interval. For this purpose, set \code{minimal_target} to
 ##'   \code{FALSE}. See Example for more details about `find_min` and
 ##'   `minimal_target`.
-##' @param x An object of class "power_array" (from powergrid), "power" (from
-##'   sse::powEx) or "powCalc" (from sse::powCalc).
+##' @param x An object of class "power_array" (from powergrid).
 ##' @param slicer If the parameter grid for which `x' was constructed has more
 ##'   than 2 dimensions, a 2-dimensional slice may be cut out using
 ##'   \code{slicer}, which is a list whose elements define at which values (the
