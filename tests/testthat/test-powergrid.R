@@ -13,9 +13,22 @@ n_iter = 20
 power_array = PowerGrid(pars = sse_pars, fun = PowFun,
                         n_iter = n_iter, summarize = TRUE)
 test_that(
-  "trying to summarize an objects that is already summarized throws a warning",
+  "trying to summarize an object that is already summarized throws a warning",
   {expect_error(
     SummarizeSims(power_array, summary_function = mean)
   )}
 )
 
+
+## Test error on parallel use without parallel
+has_future_apply <- isNamespaceLoaded("future.apply")
+FA_ns <- asNamespace("future.apply")
+if(has_future_apply) try(unloadNamespace(FA_ns))
+stopifnot( ! isNamespaceLoaded("future.apply"))
+test_that(
+  "Running PowerGrid() without future.apply in namespace ,leads to appropriate error",
+  {expect_error(PowerGrid(pars = sse_pars, fun = PowFun,
+                       n_iter = n_iter, summarize = TRUE, parallel = TRUE))}
+)
+print("error handled")
+if (has_future_apply) loadNamespace("future.apply")

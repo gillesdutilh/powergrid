@@ -136,6 +136,9 @@ PowerGrid = function(pars, fun, more_args = NULL, n_iter = NA,
   ##'
   ## =================================
   ## Simulation ('n_iter' supplied)
+  #' allenr - TODO: Surely this should be if the parallel argument is TRUE
+  #'    currently you are only testing for parallel if the parallel argument is
+  #'    FALSE.
   if (!is.na(n_iter) && !parallel) {
     if (!requireNamespace("future.apply", quietly = TRUE)) {
       stop("Setting argument `parallel' to TRUE requires installation of future.apply", call. = FALSE)}
