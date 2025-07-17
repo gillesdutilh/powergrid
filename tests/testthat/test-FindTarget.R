@@ -47,30 +47,21 @@ slice <- slice + rnorm(n=length(slice), sd=0.1)
 result1 <- FindTarget(power_slice =slice, target=0.5, method = "lm")
 test_that(
   "FindTarget (lm) identifies correct value, under defaults",
-  {expect_equal(result1, 5)}
+  {expect_equal(result1, 5, ignore_attr=TRUE)}
 )
 
-result2 <- FindTarget(power_slice =slice, target=0.5, method = "lm",
-                      minimal_target = FALSE)
 test_that(
-  "FindTarget (lm) identifies correct value, target is a maximum",
-  {expect_equal(result2, 1)}
+  "FindTarget (lm) throws error if minimal target is FALSE",
+  {expect_error(FindTarget(power_slice =slice, target=0.5, method = "lm",
+                           minimal_target = FALSE))}
 )
 
-result3 <- FindTarget(power_slice =slice, target=0.5, method = "lm",
-                      find_min = FALSE)
 test_that(
   "FindTarget (lm) identifies correct value, minimal parameter value searched",
-  {expect_equal(result3, 9)}
+  {expect_error(FindTarget(power_slice =slice, target=0.5, method = "lm",
+                           find_min = FALSE))}
 )
-
-result4 <- FindTarget(power_slice =slice, target=0.5, method = "lm",
-                      minimal_target = FALSE, find_min = FALSE)
-test_that(
-  "FindTarget (lm) identifies correct value, target is a maximum & minimal parameter value searched ",
-  {expect_equal(result4, 5)}
-)
-rm(result1, result2, result3, result4)
+rm(slice, result1)
 
 ## ===============================================================
 

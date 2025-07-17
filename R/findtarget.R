@@ -99,6 +99,9 @@ FindTarget = function(power_slice,
   if (method == 'lm') {
     ## Implementation of fabbrot's interpolation through
     ## transformation trick.
+    if(!minimal_target | !find_min) {
+      stop("Currently the lm method only supports defaults for minimal_target and find_min")
+    }
     SSETrans <- function(x) {
       ## older versions: 0.5 * log((1 + x) / (1 - x)) # <== this line is
       ## a literal copy of the comment fabbrot in sse
