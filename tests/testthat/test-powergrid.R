@@ -1,3 +1,9 @@
+
+#' TODO: naming of test files should be consistent (either camelcaps or lowercase)
+
+## ===============================================================
+#' TODO: I think this should be in test-SummariseSims no?
+
 ## Test warning summarizing summarized object
 PowFun <- function(n, delta, sd){
   x1 = rnorm(n = n/2, sd = sd)
@@ -19,8 +25,11 @@ test_that(
   )}
 )
 
+## ===============================================================
 
-## Test error on parallel use without parallel
+#' Test error on parallel use without parallel in namespace.
+#' This is pretty involved, I don't know how unlading a package from the
+#' will work when in the testing environment.
 has_future_apply <- isNamespaceLoaded("future.apply")
 FA_ns <- asNamespace("future.apply")
 if(has_future_apply) try(unloadNamespace(FA_ns))
@@ -30,5 +39,4 @@ test_that(
   {expect_error(PowerGrid(pars = sse_pars, fun = PowFun,
                        n_iter = n_iter, summarize = TRUE, parallel = TRUE))}
 )
-print("error handled")
 if (has_future_apply) loadNamespace("future.apply")
