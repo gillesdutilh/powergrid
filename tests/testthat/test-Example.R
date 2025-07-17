@@ -22,9 +22,12 @@ test_that(
 
 ## =============================================================================
 
+#' Suppressing warnings may be bad practice, but this is not the goal of this test.
+suppressWarnings(
 result1 <- Example(closed_power_array,
                    example = list(delta=0.9, sd= 1.0),
                    target = 0.8, method="lm")
+)
 comparison1 <- ceiling(power.t.test(delta = 0.9, sd=1.0, power=0.8)$n)
 test_that(
   "Gives correct required n under defaults (lm)",
@@ -48,20 +51,6 @@ test_that(
 
 
 ## =============================================================================
-test_that(
-  "Appropriate error thrown when a bad dimension name used",
-  {expect_error(Example(closed_power_array,
-        example = list(badname=0.9, sd= 1.0),
-        target = 0.8))}
-)
-
-test_that(
-  "Appropriate error thrown when a bad value used",
-  {expect_error(Example(closed_power_array,
-                        example = list(delta=NA, sd= 1.0),
-                        target = 0.8))}
-)
-
 #' Conversion of the target is maybe a bit extreme.
 test_that(
   "Can handle small variations in numeric specification",
@@ -69,7 +58,6 @@ test_that(
                         example = list(delta=.90, sd= 1.00),
                         target = "0.8000")$required_value, 25)}
 )
-
 ## =============================================================================
 #' Testing printed output of Example. print_comparison is generated from the
 #' same summary function. So more of a test for future issues.

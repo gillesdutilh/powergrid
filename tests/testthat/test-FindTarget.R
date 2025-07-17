@@ -44,7 +44,9 @@ set.seed(123)
 slice <- setNames(seq(0.09,0.89, 0.1), nm=seq(0.1,0.9, 0.1)*10)
 slice <- slice + rnorm(n=length(slice), sd=0.1)
 
-result1 <- FindTarget(power_slice =slice, target=0.5, method = "lm")
+suppressWarnings(
+  result1 <- FindTarget(power_slice =slice, target=0.5, method = "lm")
+)
 test_that(
   "FindTarget (lm) identifies correct value, under defaults",
   {expect_equal(result1, 5, ignore_attr=TRUE)}
