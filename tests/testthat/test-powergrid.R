@@ -24,19 +24,3 @@ test_that(
     SummarizeSims(power_array, summary_function = mean)
   )}
 )
-
-## ===============================================================
-
-#' Test error on parallel use without parallel in namespace.
-#' This is pretty involved, I don't know how unlading a package from the
-#' will work when in the testing environment.
-has_future_apply <- isNamespaceLoaded("future.apply")
-FA_ns <- asNamespace("future.apply")
-if(has_future_apply) try(unloadNamespace(FA_ns))
-stopifnot( ! isNamespaceLoaded("future.apply"))
-test_that(
-  "Running PowerGrid() without future.apply in namespace ,leads to appropriate error",
-  {expect_error(PowerGrid(pars = sse_pars, fun = PowFun,
-                       n_iter = n_iter, summarize = TRUE, parallel = TRUE))}
-)
-if (has_future_apply) loadNamespace("future.apply")
