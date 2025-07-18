@@ -10,6 +10,11 @@ closed_fun <- function(n, delta, sd){
 }
 closed_power_array <- PowerGrid(pars = sse_pars, fun = closed_fun,
                                 summarize = FALSE)
+set.seed(123)
+nm_closed_pars <- lapply(sse_pars, sample)
+nm_power_array <- PowerGrid(pars = nm_closed_pars, fun = closed_fun,
+                             summarize = FALSE)
+
 
 ## ===============================================================
 
@@ -47,6 +52,18 @@ test_that(
   {expect_equal(Example(closed_power_array,
                         example = list(delta=0.9, sd= 1.0),
                         target = 0.8)$required_value, 25)}
+)
+
+## =============================================================================
+
+#' power arrays with non-monotonic pars attributed are handled correctly
+
+result1 <- Example(closed_power_array, example=list(delta=0.9, sd=1), target=0.8)
+comparison1 <- Example(nm_power_array, example=list(delta=0.9, sd=1), target=0.8)
+test_that(
+  "non-monotonic par attr in power_array still allows example calculation",
+  {expect_equal(closed_power_array, nm_power_array, ignore_attr=TRUE)
+    expect_equal(result1$required_value, comparison1$required_value)}
 )
 
 
