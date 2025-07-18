@@ -106,6 +106,10 @@ PowerGrid = function(pars, fun, more_args = NULL, n_iter = NA,
                     summarize = TRUE, summary_function = mean,
                     parallel = FALSE,
                     n_cores = future::availableCores()-1) {
+  #' allenr: I think the best approach would be to skip the early summarising
+  #' which removes some if statements. Powergrid can handle unsummarised
+  #' data anyway. Then summarize at the end.
+
   ##
   ## ============================================
   ## Process arguments
@@ -143,13 +147,8 @@ PowerGrid = function(pars, fun, more_args = NULL, n_iter = NA,
     e1d42fl5z7b6 =
       drop(replicate(
         n_iter, sapply( # reshape mapply result
-                  .mapply(fun, pars_grid, MoreArgs = more_args),
-                  function(x)unlist(x))))
-    if (summarize) {
-      e1d42fl5z7b6 = apply(e1d42fl5z7b6,
-                           1:(length(dim(e1d42fl5z7b6)) - 1), # per all but sim dim
-                           summary_function, simplify = TRUE)
-    }
+          .mapply(fun, pars_grid, MoreArgs = more_args),
+          function(x)unlist(x))))
   }
   ##'
   ## parallel using future_replicate
@@ -165,11 +164,6 @@ PowerGrid = function(pars, fun, more_args = NULL, n_iter = NA,
                                      .mapply(fun, pars_grid, MoreArgs = more_args),
                                      function(x)unlist(x))
                          ))
-    if (summarize){
-      e1d42fl5z7b6 = apply(e1d42fl5z7b6,
-                           1:(length(dim(e1d42fl5z7b6)) - 1), # per all but sim dim
-                           summary_function, simplify = TRUE)
-    }
   }
   ## =================================
   n_funouts = length(.mapply(fun, pars_grid[1, ], MoreArgs = more_args)[[1]])
@@ -179,38 +173,15 @@ PowerGrid = function(pars, fun, more_args = NULL, n_iter = NA,
     stats::xtabs(stats::as.formula(
                           paste('gg ~', paste(names(pars_grid), collapse = '+'))), data = pars_grid)
   }
-  ## Since the array resulting from .mapply may differ depending on
-  ## 1) all.equal(summary_function, I) vs other summary function, vs no iterations
-  ## 2) having one versus more than one result variable,
-  ## I transform into an output array in the IFs below.
-  ##'
-  ## Simplest situation, with no iterations or summarized iterations,
-  ## only one variable.
-  if (n_funouts == 1 && (summarize || is.na(n_iter))) {
-    out_array = ToArray(e1d42fl5z7b6)
-  } # simple xtabs with pars
-  ##'
-  ## With no iterations or summarized iterations,
-  ## but multiple variables
-  if (n_funouts > 1 && (summarize || is.na(n_iter))) {
-    ## first take care that pars names and funout names are not confused
-    if(any(rownames(e1d42fl5z7b6) %in% names(pars))){
-      rownames(e1d42fl5z7b6) =
-        paste0('funout_', rownames(e1d42fl5z7b6))}
-    ## transform to array
-    out_array = ToArray(t(e1d42fl5z7b6))
-    names(dimnames(out_array))[length(dim(out_array))] = 'fun_out'
-  } # simple xtabs on transposed array
-  ##'
   ## When simulations are not summarized (kept), one variable
-  if (n_funouts == 1 && !summarize && !is.na(n_iter)) {
+  if (n_funouts == 1) {
     out_array = ToArray(e1d42fl5z7b6) # so maybe merge with above
     dimnames(out_array)[length(dimnames(out_array))] = NULL
     names(dimnames(out_array))[length(dimnames(out_array))] = 'sim'
   }
   ##'
   ## When simulations are not summarized (kept), multiple variables
-  if (n_funouts > 1 && !summarize && !is.na(n_iter)) {
+  if (n_funouts > 1 ) {
     ## first take care that pars names and funout names are not confused
     if(any(dimnames(e1d42fl5z7b6)[[1]] %in% names(pars))){
       dimnames(e1d42fl5z7b6)[[1]] =
@@ -237,16 +208,14 @@ PowerGrid = function(pars, fun, more_args = NULL, n_iter = NA,
   attr(out_array, which = 'sim_function_nval') = n_funouts
   attr(out_array, which = 'pars') = pars
   attr(out_array, which = 'more_args') = more_args
-  attr(out_array, which = 'summarized') = summarize
+
+  attr(out_array, which = 'summarized') = FALSE
   attr(out_array, which = 'n_iter') = n_iter
-  attr(out_array, which = "summary_function") = summary_function
-  attr(out_array, which = "summary_function_name") =
-    ## if it has a name, take the name
-    ifelse (class(substitute(summary_function)) == 'name',
-            substitute(summary_function),
-            ## otherwise ananymous
-            "anonymous function"
-            )
+
+  if(!is.na(n_iter) && summarize) {
+    out_array = SummarizeSims(out_array, summary_function = summary_function)
+    }
+
   attr(out_array,
        which = 'n_iter') = ifelse(is.na(n_iter), NA, n_iter)
   return(out_array)
