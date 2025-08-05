@@ -1,70 +1,67 @@
-
-#' Note that FindTarget needs a vector, with names
-#' TODO: I still find both the descriptions and help unintuitive
-
+rm(list=ls())
 ## ===============================================================
+#' Tests are very simple, but still sufficient.
 
-#' Tests are very simple.
+slice <- setNames(seq(0.09,0.89, 0.1), nm = seq(1,9))
 
-slice <- setNames(seq(0.09,0.89, 0.1), nm=seq(0.1,0.9, 0.1)*10)
-
-result1 <- FindTarget(power_slice =slice, target=0.5)
+#' Minimum target above 0.5 (default) => 0.59
+result1 <- FindTarget(power_slice = slice, target = 0.5)
 test_that(
   "FindTarget (step) identifies correct value, under defaults",
   {expect_equal(result1, 6)}
 )
 
-result2 <- FindTarget(power_slice =slice, target=0.5,
+#' Minimum target below 0.5 => 0.09
+result2 <- FindTarget(power_slice = slice, target = 0.5,
                                     minimal_target = FALSE)
 test_that(
   "FindTarget (step) identifies correct value, target is a maximum",
   {expect_equal(result2, 1)}
 )
 
-result3 <- FindTarget(power_slice =slice, target=0.5,
+#' Maximal target above 0.5 => 0.89
+result3 <- FindTarget(power_slice = slice, target=0.5,
                                 find_min = FALSE)
 test_that(
   "FindTarget (step) identifies correct value, minimal parameter value searched",
   {expect_equal(result3, 9)}
 )
 
-result4 <- FindTarget(power_slice =slice, target=0.5,
+#' Maximal target below 0.5 => 0.49
+result4 <- FindTarget(power_slice = slice, target = 0.5,
                                         minimal_target = FALSE, find_min = FALSE)
 test_that(
   "FindTarget (step) identifies correct value, target is a maximum & minimal parameter value searched ",
   {expect_equal(result4, 5)}
 )
-rm(slice, result1, result2, result3, result4)
 ## ===============================================================
 
 #' The values of minimal_target and find_min are ignored if method
 #' equals "lm", thus tests are failed.
 
 set.seed(123)
-slice <- setNames(seq(0.09,0.89, 0.1), nm=seq(0.1,0.9, 0.1)*10)
-slice <- slice + rnorm(n=length(slice), sd=0.1)
+slice <- setNames(seq(0.09,0.89, 0.1), nm = seq(0.1,0.9, 0.1)*10)
+slice <- slice + rnorm(n = length(slice), sd = 0.1)
 
 suppressWarnings(
-  result1 <- FindTarget(power_slice =slice, target=0.5, method = "lm")
+  result1 <- FindTarget(power_slice = slice, target = 0.5, method = "lm")
 )
 test_that(
   "FindTarget (lm) identifies correct value, under defaults",
-  {expect_equal(result1, 5, ignore_attr=TRUE)}
+  {expect_equal(result1, 5, ignore_attr = TRUE)}
 )
 
 test_that(
   "FindTarget (lm) throws error if minimal target is FALSE",
-  {expect_error(FindTarget(power_slice =slice, target=0.5, method = "lm",
+  {expect_error(FindTarget(power_slice = slice, target = 0.5, method = "lm",
                            minimal_target = FALSE))}
 )
 
 test_that(
-  "FindTarget (lm) identifies correct value, minimal parameter value searched",
-  {expect_error(FindTarget(power_slice =slice, target=0.5, method = "lm",
+  "FindTarget (lm) throws error if find_min is FALSE",
+  {expect_error(FindTarget(power_slice = slice, target = 0.5, method = "lm",
                            find_min = FALSE))}
 )
-rm(slice, result1)
-
 ## ===============================================================
 
 #' Test for the artificial case where names are a string that
