@@ -1,3 +1,4 @@
+rm(list=ls())
 ## ===============================================================
 #' TODO: I think this should be in test-SummariseSims no?
 

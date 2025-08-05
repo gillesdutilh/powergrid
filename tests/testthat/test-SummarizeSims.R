@@ -1,3 +1,4 @@
+rm(list=ls())
 ## ===============================================================
 #' Test that the output of SummarizeSims are correctly assigned in the
 #' array.
