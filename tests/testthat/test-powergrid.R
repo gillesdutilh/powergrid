@@ -1,6 +1,3 @@
-
-#' TODO: naming of test files should be consistent (either camelcaps or lowercase)
-
 ## ===============================================================
 #' TODO: I think this should be in test-SummariseSims no?
 
@@ -8,7 +5,7 @@
 PowFun <- function(n, delta, sd){
   x1 = rnorm(n = n/2, sd = sd)
   x2 = rnorm(n = n/2, mean = delta, sd = sd)
-  t.test(x1, x2)$p.value < .05
+  t.test(x1, x2)$p.value < 0.05
 }
 sse_pars = list(
   n = seq(from = 20, to = 60, by = 10),
@@ -26,20 +23,21 @@ test_that(
 )
 
 ## =============================================================================
+#' Similar to the non-monotonic test in FindTarget()
 
 fwd_closed_pars <-
-  list(    n = seq(20,60, 10),
-           delta = seq(0.5, 1.5, 0.25),
-           sd = seq(0.5, 1.5, 0.25))
+  list(n = seq(20,60, 10),
+       delta = seq(0.5, 1.5, 0.25),
+       sd = seq(0.5, 1.5, 0.25))
 rev_closed_pars <- lapply(fwd_closed_pars, rev)
 
-closed_fun <-
+ClosedFun <-
   function(n, delta, sd){
-    power.t.test(n=n, delta = delta, sd=sd)$power
+    power.t.test(n = n, delta = delta, sd = sd)$power
   }
-fwd_power_array <- PowerGrid(pars = fwd_closed_pars, fun = closed_fun,
+fwd_power_array <- PowerGrid(pars = fwd_closed_pars, fun = ClosedFun,
                                 summarize = FALSE)
-rev_power_array <- PowerGrid(pars = rev_closed_pars, fun = closed_fun,
+rev_power_array <- PowerGrid(pars = rev_closed_pars, fun = ClosedFun,
                              summarize = FALSE)
 
 #' The main thing is that contents are the same. The pars attribute is different
@@ -47,5 +45,5 @@ rev_power_array <- PowerGrid(pars = rev_closed_pars, fun = closed_fun,
 #' but it should be intentional. Output with example also tested.
 test_that(
   "Reverse parameter specification leads to same array contents (attr not tested)",
-  {expect_equal(fwd_power_array, rev_power_array, ignore_attr=TRUE)}
+  {expect_equal(fwd_power_array, rev_power_array, ignore_attr = TRUE)}
 )
