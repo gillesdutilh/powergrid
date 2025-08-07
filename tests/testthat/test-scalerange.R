@@ -1,4 +1,5 @@
-
+rm(list=ls())
+## =============================================================================
 
 x <- runif(100)
 scaled <- ScaleRange(x, 10, 100)
@@ -14,4 +15,10 @@ test_that("ScaleRange length", {
 })
 test_that("ScaleRange same order", {
   expect_true(all(order(scaled) == order(x)))
+})
+
+## =============================================================================
+
+test_that("Error thrown if min greater than max", {
+  expect_error(ScaleRange(x, 101, 100))
 })
