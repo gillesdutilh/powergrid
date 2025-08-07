@@ -103,13 +103,9 @@
 ##' summary(power_array)
 ##' @export
 PowerGrid = function(pars, fun, more_args = NULL, n_iter = NA,
-                    summarize = TRUE, summary_function = mean,
-                    parallel = FALSE,
-                    n_cores = future::availableCores()-1) {
-  #' allenr: I think the best approach would be to skip the early summarising
-  #' which removes some if statements. Powergrid can handle unsummarised
-  #' data anyway. Then summarize at the end.
-
+                     summarize = TRUE, summary_function = mean,
+                     parallel = FALSE,
+                     n_cores = future::availableCores()-1) {
   ##
   ## ============================================
   ## Process arguments
@@ -130,8 +126,8 @@ PowerGrid = function(pars, fun, more_args = NULL, n_iter = NA,
   ## No simulation ('n_iter' not supplied)
   if(is.na(n_iter)) {
     e1d42fl5z7b6 = sapply( # the long name is to make it very unlikely
-                                        # to get the same name in the grid, which
-                                        # would break the xtab below.
+      # to get the same name in the grid, which
+      # would break the xtab below.
       .mapply(fun, pars_grid, MoreArgs = more_args), function(x)x,
       simplify = "array")
     ## out = cbind(pars_grid, e1d42fl5z7b6)
@@ -160,10 +156,10 @@ PowerGrid = function(pars, fun, more_args = NULL, n_iter = NA,
     future::plan("future::multisession", workers = n_cores)
     e1d42fl5z7b6 =
       drop(future.apply::future_replicate(
-                           n_iter, sapply( # reshape mapply result
-                                     .mapply(fun, pars_grid, MoreArgs = more_args),
-                                     function(x)unlist(x))
-                         ))
+        n_iter, sapply( # reshape mapply result
+          .mapply(fun, pars_grid, MoreArgs = more_args),
+          function(x)unlist(x))
+      ))
   }
   ## =================================
   n_funouts = length(.mapply(fun, pars_grid[1, ], MoreArgs = more_args)[[1]])
@@ -171,7 +167,7 @@ PowerGrid = function(pars, fun, more_args = NULL, n_iter = NA,
   ## Turn grid into array
   ToArray = function(gg){
     stats::xtabs(stats::as.formula(
-                          paste('gg ~', paste(names(pars_grid), collapse = '+'))), data = pars_grid)
+      paste('gg ~', paste(names(pars_grid), collapse = '+'))), data = pars_grid)
   }
   ## When simulations are not summarized (kept), one variable
   if (n_funouts == 1) {
@@ -181,7 +177,8 @@ PowerGrid = function(pars, fun, more_args = NULL, n_iter = NA,
   ## When simulations are not summarized (kept), multiple variables
   #' TODO: a lot of this is handling the simulations dimension which
   #' is sometimes empty but sometimes not (in my setup).
-  if (n_funouts > 1 & !is.na(n_iter)) {
+
+  if (n_funouts > 1) {
 
     ## first take care that pars names and funout names are not confused
     if(any(dimnames(e1d42fl5z7b6)[[1]] %in% names(pars))){
@@ -193,44 +190,26 @@ PowerGrid = function(pars, fun, more_args = NULL, n_iter = NA,
     #'   - column 2 is the output value
     #'   - column 3 is the iteration
     #'
+    if(!is.na(n_iter)) {
+      var_order <-  c(2, 1, 3)
+      nitt <- n_iter
+    } else {
+      var_order <- c(2, 1)
+      nitt <- 1
+    }
     flat = cbind(
-      as.data.frame(stats::ftable(e1d42fl5z7b6, row.vars = c(2, 1, 3))),
-      apply(pars_grid, 2, rep, n_funouts * n_iter))
+      as.data.frame(stats::ftable(e1d42fl5z7b6, row.vars = var_order)),
+      apply(pars_grid, 2, rep, n_funouts * nitt))
     ## easiest to set dimnames before xtabs
-    colnames(flat)[1:4] = c('parscom', 'fun_out', 'sim', 'value')
-    out_array = stats::xtabs(value ~ ., data = flat[, -1])
-    dimnames(out_array)[['sim']] = seq_along(dimnames(out_array)[['sim']])
-    ## Sort such that the first dimensions are the pars
-    dimnums = seq_along(dim(out_array))
-    pardimnums = dimnums[!(dimnums %in% 1:2)]
-    out_array = aperm(out_array, c(pardimnums, 1:2))
-    ##'
-    ##'
-  }
-
-  if (n_funouts > 1 & is.na(n_iter)) {
-
-    ## first take care that pars names and funout names are not confused
-    if(any(dimnames(e1d42fl5z7b6)[[1]] %in% names(pars))){
-      dimnames(e1d42fl5z7b6)[[1]] =
-        paste0('funout_', dimnames(e1d42fl5z7b6)[[1]])}
-    ## put in flat format to work with xtabs later
-    #' allenr: in the ftable,
-    #'   - column 1 is the parameter combination
-    #'   - column 2 is the output value
-    #'   - column 3 is the iteration
-    #'
-    flat = cbind(
-      as.data.frame(stats::ftable(e1d42fl5z7b6, row.vars = c(2, 1))),
-      apply(pars_grid, 2, rep, n_funouts))
-    ## easiest to set dimnames before xtabs
-    colnames(flat)[1:4] = c('parscom', 'fun_out', 'value')
+    colnames(flat)[seq_len(length(var_order)+1)] = c(c('fun_out', 'parscom', 'sim')[var_order], 'value')
     out_array = stats::xtabs(value ~ ., data = flat[, -1])
     ## Sort such that the first dimensions are the pars
-    #' STARTHERE, so close to done
-    dimnums = seq_along(dim(out_array))
-    pardimnums = dimnums[!(dimnums %in% 1:2)]
-    out_array = aperm(out_array, c(pardimnums, 1:2))
+    L <- dimnames(out_array) %in% c('fun_out', 'sim')
+    out_array = aperm(out_array, c(which(!L), which(L)))
+
+    if(!is.na(n_iter)) {
+      dimnames(out_array)[['sim']] = seq_along(dimnames(out_array)[['sim']])
+    }
     ##'
     ##'
   }
@@ -247,7 +226,7 @@ PowerGrid = function(pars, fun, more_args = NULL, n_iter = NA,
   attr(out_array, which = 'n_iter') = n_iter
 
   #' If the array has iterations, and needs summarising, summarise it
-  if((!is.na(n_iter) && summarize) || n_funouts >1) {
+  if((!is.na(n_iter) && summarize)) {
     out_array = SummarizeSims(out_array, summary_function = summary_function)
   }
 
