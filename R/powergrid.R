@@ -136,9 +136,6 @@ PowerGrid = function(pars, fun, more_args = NULL, n_iter = NA,
   ##'
   ## =================================
   ## Simulation ('n_iter' supplied)
-  #' allenr - TODO: Surely this should be if the parallel argument is TRUE
-  #'    currently you are only testing for parallel if the parallel argument is
-  #'    FALSE.
   if (!is.na(n_iter) && !parallel) {
     e1d42fl5z7b6 =
       drop(replicate(
@@ -169,27 +166,29 @@ PowerGrid = function(pars, fun, more_args = NULL, n_iter = NA,
     stats::xtabs(stats::as.formula(
       paste('gg ~', paste(names(pars_grid), collapse = '+'))), data = pars_grid)
   }
-  ## When simulations are not summarized (kept), one variable
+  ## One variable
   if (n_funouts == 1) {
+
+    ## Turn grid into array
+    ## TODO: This can probably just be an expression
+    ToArray = function(gg){
+      stats::xtabs(stats::as.formula(
+        paste('gg ~', paste(names(pars_grid), collapse = '+'))), data = pars_grid)
+    }
+
     out_array = ToArray(e1d42fl5z7b6) # so maybe merge with above
+
   }
   ##'
-  ## When simulations are not summarized (kept), multiple variables
-  #' TODO: a lot of this is handling the simulations dimension which
-  #' is sometimes empty but sometimes not (in my setup).
-
+  ## Multiple variables
   if (n_funouts > 1) {
 
     ## first take care that pars names and funout names are not confused
     if(any(dimnames(e1d42fl5z7b6)[[1]] %in% names(pars))){
       dimnames(e1d42fl5z7b6)[[1]] =
         paste0('funout_', dimnames(e1d42fl5z7b6)[[1]])}
-    ## put in flat format to work with xtabs later
-    #' allenr: in the ftable,
-    #'   - column 1 is the parameter combination
-    #'   - column 2 is the output value
-    #'   - column 3 is the iteration
-    #'
+    ## if, else to control the wrangling based on if multiple simulations present
+    ## nitt is a dummy version of n_iteration which is 1 if there is no interations.
     if(!is.na(n_iter)) {
       var_order <-  c(2, 1, 3)
       nitt <- n_iter
@@ -197,6 +196,7 @@ PowerGrid = function(pars, fun, more_args = NULL, n_iter = NA,
       var_order <- c(2, 1)
       nitt <- 1
     }
+    ## put in flat format to work with xtabs later
     flat = cbind(
       as.data.frame(stats::ftable(e1d42fl5z7b6, row.vars = var_order)),
       apply(pars_grid, 2, rep, n_funouts * nitt))
@@ -204,12 +204,9 @@ PowerGrid = function(pars, fun, more_args = NULL, n_iter = NA,
     colnames(flat)[seq_len(length(var_order)+1)] = c(c('fun_out', 'parscom', 'sim')[var_order], 'value')
     out_array = stats::xtabs(value ~ ., data = flat[, -1])
     ## Sort such that the first dimensions are the pars
-    L <- dimnames(out_array) %in% c('fun_out', 'sim')
+    L <- names(dimnames(out_array)) %in% c('fun_out', 'sim')
     out_array = aperm(out_array, c(which(!L), which(L)))
 
-    if(!is.na(n_iter)) {
-      dimnames(out_array)[['sim']] = seq_along(dimnames(out_array)[['sim']])
-    }
     ##'
     ##'
   }
@@ -225,19 +222,19 @@ PowerGrid = function(pars, fun, more_args = NULL, n_iter = NA,
   attr(out_array, which = 'summarized') = FALSE
   attr(out_array, which = 'n_iter') = n_iter
 
+
+  ## allenr: Ensure the simulation dimension is correctly labelled (regardless of
+  ## which path it took)
+  if(!is.na(n_iter)) {
+    names(dimnames(out_array))[length(dimnames(out_array))] <- "sim"
+    dimnames(out_array)[['sim']] = seq_along(dimnames(out_array)[['sim']])
+  }
+
   #' If the array has iterations, and needs summarising, summarise it
   if((!is.na(n_iter) && summarize)) {
     out_array = SummarizeSims(out_array, summary_function = summary_function)
   }
 
-  #' If it has iterations and does is not summarised, label simulation dimension
-  if(!is.na(n_iter) && !summarize) {
-    dimnames(out_array)[length(dimnames(out_array))] = NULL
-    names(dimnames(out_array))[length(dimnames(out_array))] = 'sim'
-  }
-
-  attr(out_array,
-       which = 'n_iter') = ifelse(is.na(n_iter), NA, n_iter)
   return(out_array)
 }
 
