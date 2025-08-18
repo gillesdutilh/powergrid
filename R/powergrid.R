@@ -50,7 +50,8 @@
 ##'
 ##' @examples
 ##' ## ============================================
-##' ## most basic case, power function available:
+##' ## most basic use case, calculate power when
+##' ## power function is available:
 ##' ## ============================================
 ##' sse_pars = list(
 ##'   n = seq(from = 10, to = 60, by = 2),
@@ -62,8 +63,41 @@
 ##'   return(ptt$power)
 ##' }
 ##' power_array = PowerGrid(pars = sse_pars, fun = PowFun, n_iter = NA)
-##' ##'
+##' 
 ##' summary(power_array)
+##'
+##' ## ============================================
+##' ## Simulations over iterations when no power
+##' ## function available
+##' ## ============================================
+##' PowFun <- function(n, delta, sd){
+##'   x1 = rnorm(n = n/2, sd = sd)
+##'   x2 = rnorm(n = n/2, mean = delta, sd = sd)
+##'   t.test(x1, x2)$p.value < .05
+##' }
+##' sse_pars = list(
+##'   n = seq(from = 10, to = 60, by = 5),
+##'   delta = seq(from = 0.5, to = 1.5, by = 0.2),
+##'   sd = seq(.5, 1.5, .2))
+##' ##
+##' n_iter = 20
+##' power_array = PowerGrid(pars = sse_pars, fun = PowFun,
+##'                         n_iter = n_iter)
+##' dimnames(power_array)
+##' summary(power_array)
+##' ## Note that by default, the simulations are summarized by their mean. To
+##' ## keep individual simulations, set summarize to FALSE.
+##'  power_array_no_summary = PowerGrid(pars = sse_pars, fun = PowFun,
+##'                                     n_iter = n_iter , summarize = FALSE)
+##' dimnames(power_array_no_summary) # additional dimention "sim"
+##' summary(power_array_no_summary)
+##' ## To summarize this object with iterations, use the SummarizeSims
+##' ## function. This assures that attributes relevant for further use in
+##' ## powergrid's functionality are kept intact
+##' power_array_summarized =
+##'   SummarizeSims(power_array_no_summary, summary_function = mean)
+##' dimnames(power_array_summarized)
+##' summary(power_array_summarized)
 ##'
 ##' ## ============================================
 ##' ## Multiple outputs are automatically handled
@@ -83,24 +117,6 @@
 ##' dimnames(array_two_returns)
 ##' summary(array_two_returns)
 ##'
-##' ## ============================================
-##' ## Simulations over iterations
-##' ## ============================================
-##' PowFun <- function(n, delta, sd){
-##'   x1 = rnorm(n = n/2, sd = sd)
-##'   x2 = rnorm(n = n/2, mean = delta, sd = sd)
-##'   t.test(x1, x2)$p.value < .05
-##' }
-##' sse_pars = list(
-##'   n = seq(from = 10, to = 60, by = 5),
-##'   delta = seq(from = 0.5, to = 1.5, by = 0.2),
-##'   sd = seq(.5, 1.5, .2))
-##' ##
-##' n_iter = 20
-##' power_array = PowerGrid(pars = sse_pars, fun = PowFun,
-##'                        n_iter = n_iter)
-##' dimnames(power_array)
-##' summary(power_array)
 ##' @export
 PowerGrid = function(pars, fun, more_args = NULL, n_iter = NA,
                     summarize = TRUE, summary_function = mean,
@@ -133,12 +149,12 @@ PowerGrid = function(pars, fun, more_args = NULL, n_iter = NA,
     ## out = cbind(pars_grid, e1d42fl5z7b6)
     ## result is a n_result_vars by nrow(pars_grid) matrix
   }
-  ##'
+  ##
   ## =================================
   ## Simulation ('n_iter' supplied)
-  #' allenr - TODO: Surely this should be if the parallel argument is TRUE
-  #'    currently you are only testing for parallel if the parallel argument is
-  #'    FALSE.
+  ## allenr - TODO: Surely this should be if the parallel argument is TRUE
+  ##    currently you are only testing for parallel if the parallel argument is
+  ##    FALSE.
   if (!is.na(n_iter) && !parallel) {
     e1d42fl5z7b6 =
       drop(replicate(
@@ -151,7 +167,7 @@ PowerGrid = function(pars, fun, more_args = NULL, n_iter = NA,
                            summary_function, simplify = TRUE)
     }
   }
-  ##'
+  ##
   ## parallel using future_replicate
   if (!is.na(n_iter) && parallel) {
     if (!requireNamespace("future.apply", quietly = TRUE)) {
@@ -173,7 +189,7 @@ PowerGrid = function(pars, fun, more_args = NULL, n_iter = NA,
   }
   ## =================================
   n_funouts = length(.mapply(fun, pars_grid[1, ], MoreArgs = more_args)[[1]])
-  ##'
+  ##
   ## Turn grid into array
   ToArray = function(gg){
     stats::xtabs(stats::as.formula(
@@ -183,13 +199,13 @@ PowerGrid = function(pars, fun, more_args = NULL, n_iter = NA,
   ## 1) all.equal(summary_function, I) vs other summary function, vs no iterations
   ## 2) having one versus more than one result variable,
   ## I transform into an output array in the IFs below.
-  ##'
+  ##
   ## Simplest situation, with no iterations or summarized iterations,
   ## only one variable.
   if (n_funouts == 1 && (summarize || is.na(n_iter))) {
     out_array = ToArray(e1d42fl5z7b6)
   } # simple xtabs with pars
-  ##'
+  ##
   ## With no iterations or summarized iterations,
   ## but multiple variables
   if (n_funouts > 1 && (summarize || is.na(n_iter))) {
@@ -201,14 +217,14 @@ PowerGrid = function(pars, fun, more_args = NULL, n_iter = NA,
     out_array = ToArray(t(e1d42fl5z7b6))
     names(dimnames(out_array))[length(dim(out_array))] = 'fun_out'
   } # simple xtabs on transposed array
-  ##'
+  ##
   ## When simulations are not summarized (kept), one variable
   if (n_funouts == 1 && !summarize && !is.na(n_iter)) {
     out_array = ToArray(e1d42fl5z7b6) # so maybe merge with above
     dimnames(out_array)[length(dimnames(out_array))] = NULL
     names(dimnames(out_array))[length(dimnames(out_array))] = 'sim'
   }
-  ##'
+  ##
   ## When simulations are not summarized (kept), multiple variables
   if (n_funouts > 1 && !summarize && !is.na(n_iter)) {
     ## first take care that pars names and funout names are not confused
@@ -227,10 +243,10 @@ PowerGrid = function(pars, fun, more_args = NULL, n_iter = NA,
     dimnums = seq_along(dim(out_array))
     pardimnums = dimnums[!(dimnums %in% 1:2)]
     out_array = aperm(out_array, c(pardimnums, 1:2))
-    ##'
-    ##'
+    ##
+    ##
   }
-  ##'
+  ##
   ## set attributes of output object
   class(out_array) = 'power_array'
   attr(out_array, which = 'sim_function') = fun
@@ -262,12 +278,12 @@ PowerGrid = function(pars, fun, more_args = NULL, n_iter = NA,
 ##' keeps and updates the object's attributes. These attributes are
 ##' needed for various functions in the powergrid package to work
 ##' well.
-##' ##'
+##' ##
 ##' The indexing functions as normal indexing, but note that drop is
 ##' FALSE by default, so that the resulting array has the same
 ##' dimensions as the original array. The number of levels at each
 ##' dimension may be reduced, however.
-##' ##'
+##' ##
 ##' @title indexing with [ ] for class \code{power_array}
 ##' @return An array of class \code{power_grid}
 ##' @author Gilles Dutilh
@@ -327,7 +343,7 @@ PowerGrid = function(pars, fun, more_args = NULL, n_iter = NA,
 ## ==================================================================
 
 ##' Method for printing objects of class power_array.
-##' ##'
+##' ##
 ##' Prints a power_array as a default array with a short summary about
 ##' its contents.
 ##' @title print
