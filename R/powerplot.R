@@ -215,9 +215,9 @@ PowerPlot =
     stop(PrintWrap(
       paste0(
         ifelse(is.null(slicer),
-               "Input 'x' should be a 2- or 1-dimensionsonal array, ",
-               "Slicing 'x' by 'slicer' did not yield the necessary 2- or 1-dimensional, "),
-        "but a ", left_dims, "-dimensional array instead.")))
+               "Input 'x' should be a 2- or 1-dimensional array, but is a ",
+               "Slicing 'x' by 'slicer' did not yield the necessary 2- or 1-dimensional, but a "),
+        left_dims, "-dimensional array instead.")))
   } ##
   dimnms = names(dimnames(array_toplot)) # dimension names to plot
   first_dim = dimnms[1]
