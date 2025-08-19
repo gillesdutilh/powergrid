@@ -53,15 +53,18 @@
 ##' ## most basic use case, calculate power when
 ##' ## power function is available:
 ##' ## ============================================
+##' ## Define grid of assumptions to study:
 ##' sse_pars = list(
-##'   n = seq(from = 10, to = 60, by = 2),
-##'   delta = seq(from = 0.5, to = 1.5, by = 0.2), ## effect size
-##'   sd = seq(.1, .9, .2)) ## Standard deviation
+##'   n = seq(from = 10, to = 60, by = 2),         # sample size
+##'   delta = seq(from = 0.5, to = 1.5, by = 0.2), # effect size
+##'   sd = seq(.1, .9, .2))                        # standard deviation
+##' ## Define function that calculates power based on these assumptions:
 ##' PowFun <- function(n, delta, sd){
 ##'   ptt = power.t.test(n = n/2, delta = delta, sd = sd,
 ##'                      sig.level = 0.05)
 ##'   return(ptt$power)
 ##' }
+##' ## Evaluate at each combination of assumptions: 
 ##' power_array = PowerGrid(pars = sse_pars, fun = PowFun, n_iter = NA)
 ##' 
 ##' summary(power_array)
@@ -70,30 +73,41 @@
 ##' ## Simulations over iterations when no power
 ##' ## function available
 ##' ## ============================================
+##' ## The same assumptions
+##' sse_pars = list(
+##'   n = seq(from = 10, to = 60, by = 5),
+##'   delta = seq(from = 0.5, to = 1.5, by = 0.2),
+##'   sd = seq(.5, 1.5, .2))
+##' ## Define a function that results in TRUE or FALSE for a successful or
+##' ## non-successful result:
 ##' PowFun <- function(n, delta, sd){
 ##'   x1 = rnorm(n = n/2, sd = sd)
 ##'   x2 = rnorm(n = n/2, mean = delta, sd = sd)
 ##'   t.test(x1, x2)$p.value < .05
 ##' }
-##' sse_pars = list(
-##'   n = seq(from = 10, to = 60, by = 5),
-##'   delta = seq(from = 0.5, to = 1.5, by = 0.2),
-##'   sd = seq(.5, 1.5, .2))
-##' ##
+##' ## In call to PowerGrid, set n_iter, prompting the function to evaluate
+##' ## function iteratively at each combination of assumptions:
 ##' n_iter = 20
 ##' power_array = PowerGrid(pars = sse_pars, fun = PowFun,
 ##'                         n_iter = n_iter)
 ##' dimnames(power_array)
 ##' summary(power_array)
-##' ## Note that by default, the simulations are summarized by their mean. To
-##' ## keep individual simulations, set summarize to FALSE.
-##'  power_array_no_summary = PowerGrid(pars = sse_pars, fun = PowFun,
+##'
+##' ## =================================
+##' ## keeping individual simulations
+##' ## =================================
+##' ## Note that by default, the iterations are summarized by their mean. To
+##' ## keep individual iterations, set summarize to FALSE:
+##'
+##' power_array_no_summary = PowerGrid(pars = sse_pars, fun = PowFun,
 ##'                                     n_iter = n_iter , summarize = FALSE)
-##' dimnames(power_array_no_summary) # additional dimention "sim"
+##' dimnames(power_array_no_summary) # additional dimension "sim"
 ##' summary(power_array_no_summary)
+##' 
 ##' ## To summarize this object with iterations, use the SummarizeSims
 ##' ## function. This assures that attributes relevant for further use in
 ##' ## powergrid's functionality are kept intact
+##'
 ##' power_array_summarized =
 ##'   SummarizeSims(power_array_no_summary, summary_function = mean)
 ##' dimnames(power_array_summarized)
@@ -119,9 +133,9 @@
 ##'
 ##' @export
 PowerGrid = function(pars, fun, more_args = NULL, n_iter = NA,
-                    summarize = TRUE, summary_function = mean,
-                    parallel = FALSE,
-                    n_cores = future::availableCores()-1) {
+                     summarize = TRUE, summary_function = mean,
+                     parallel = FALSE,
+                     n_cores = future::availableCores()-1) {
   ##
   ## ============================================
   ## Process arguments
@@ -273,13 +287,12 @@ PowerGrid = function(pars, fun, more_args = NULL, n_iter = NA,
 ## ==================================================================
 ## in order to keep class and other attributes
 
-##' Method for indexing [] of objects of class power_array. The method
-##' makes sure that the resulting array is of class power_array and
-##' keeps and updates the object's attributes. These attributes are
-##' needed for various functions in the powergrid package to work
-##' well.
+Method for indexing [] of objects of class power_array. The method
+makes sure that the resulting array is of class power_array, retaining and
+updating the object's attributes. These attributes areneeded for various functions in the powergrid package to work
+well.
 ##' ##
-##' The indexing functions as normal indexing, but note that drop is
+##' The indexing functions as normal indexing, but note that drop =
 ##' FALSE by default, so that the resulting array has the same
 ##' dimensions as the original array. The number of levels at each
 ##' dimension may be reduced, however.
