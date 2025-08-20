@@ -27,9 +27,9 @@ values available at these dimensions. See example for an illustration.}
 example.}
 
 \item{minimal_target}{Logical. Set to TRUE if you aim to achieve a minimum
-value (e.g., a power must be \emph{at least} 90\%), or FALSE if you want to allow a
-maximum value (e.g., the width of the expected CI may be \emph{at most} a
-certain value).}
+value (e.g., a power must be \emph{at least} 90\%), or FALSE if you want to
+allow a maximum value (e.g., the width of the expected CI may be \emph{at most}
+a certain value).}
 
 \item{find_min}{Logical, indicating whether the example should be found that
 minimizes a parameter (typically: minimal required n) to achieve the
@@ -37,10 +37,12 @@ minimizes a parameter (typically: minimal required n) to achieve the
 
 \item{method}{Character string, indicating how the location of the example
 is found, passed on internally to \code{FindTarget}. Either "step": walking in
-steps along \code{search_par} or "lm": Interpolating assuming a linear relation
-between \code{search_par} and (qnorm(x) + qnorm(1 - 0.05)) ^ 2. This method
-"lm" is inspired on the implementation in the sse package by Thomas
-Fabbro.}
+steps along the parameter of interest or "lm": Interpolating assuming a
+linear relation between the parameter of interest and (qnorm(x) + qnorm(1
+\itemize{
+\item 0.05)) ^ 2. This method "lm" is inspired on the implementation in the
+sse package by Thomas Fabbro.
+}}
 
 \item{summary_function}{When x' attribute \code{summarized} is FALSE, x is
 summarized across sims using this function before searching the example.}

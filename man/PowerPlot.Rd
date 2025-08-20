@@ -47,10 +47,10 @@ maximally allowed SD).}
 drawn for a power of \code{target}. You may supply a vector longer than 1
 for multiple examples.}
 
-\item{method}{Method used for finding the required \code{search_par} needed
+\item{method}{Method used for finding the required \code{par_to_search} needed
 to achieve \code{target}. Either "step": walking in steps along
-\code{search_par} or "lm": Interpolating assuming a linear relation
-between \code{search_par} and \code{(qnorm(x) + qnorm(1 - 0.05)) ^ 2}. The
+\code{par_to_search} or "lm": Interpolating assuming a linear relation
+between \code{par_to_search} and \code{(qnorm(x) + qnorm(1 - 0.05)) ^ 2}. The
 setting "lm" is inspired on the implementation in the \code{sse} package
 by Thomas Fabbro.}
 
