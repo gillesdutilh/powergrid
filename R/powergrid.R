@@ -53,31 +53,50 @@
 ##' ## most basic use case, calculate power when
 ##' ## power function is available:
 ##' ## ============================================
+##' 
 ##' ## Define grid of assumptions to study:
 ##' sse_pars = list(
 ##'   n = seq(from = 10, to = 60, by = 2),         # sample size
 ##'   delta = seq(from = 0.5, to = 1.5, by = 0.2), # effect size
 ##'   sd = seq(.1, .9, .2))                        # standard deviation
+##'
 ##' ## Define function that calculates power based on these assumptions:
 ##' PowFun <- function(n, delta, sd){
 ##'   ptt = power.t.test(n = n/2, delta = delta, sd = sd,
 ##'                      sig.level = 0.05)
 ##'   return(ptt$power)
 ##' }
+##'
 ##' ## Evaluate at each combination of assumptions: 
 ##' power_array = PowerGrid(pars = sse_pars, fun = PowFun, n_iter = NA)
-##' 
 ##' summary(power_array)
+##'
+##' ## =================================
+##' ## Use powergrid utilities on result
+##' ## =================================
+##'
+##' ## get minimum n, when delta is .7, sd = .5, for achieving a power of 90%:
+##' Example(power_array, example = list(delta = .7, sd = .5), target = .9)
+##'
+##' ## Draw a figure illustrating how the required n depends on delta (given an
+##' ## sd of .7):
+##' PowerPlot(power_array,
+##'           slicer = list(sd = .7), # slice out the plane with sd = .7
+##'           target = .9, # set target power to 90%
+##'           example = list(delta = .7) # Highlight the example with arrow
+##'           )
 ##'
 ##' ## ============================================
 ##' ## Simulations over iterations when no power
 ##' ## function available
 ##' ## ============================================
-##' ## The same assumptions
+##'
+##' ## Using the same assumptions as above
 ##' sse_pars = list(
 ##'   n = seq(from = 10, to = 60, by = 5),
 ##'   delta = seq(from = 0.5, to = 1.5, by = 0.2),
 ##'   sd = seq(.5, 1.5, .2))
+##' 
 ##' ## Define a function that results in TRUE or FALSE for a successful or
 ##' ## non-successful result:
 ##' PowFun <- function(n, delta, sd){
@@ -85,8 +104,9 @@
 ##'   x2 = rnorm(n = n/2, mean = delta, sd = sd)
 ##'   t.test(x1, x2)$p.value < .05
 ##' }
-##' ## In call to PowerGrid, set n_iter, prompting the function to evaluate
-##' ## function iteratively at each combination of assumptions:
+##' 
+##' ## In call to PowerGrid, setting n_iter prompts PowerGrid to evaluate
+##' ## the function iteratively at each combination of assumptions:
 ##' n_iter = 20
 ##' power_array = PowerGrid(pars = sse_pars, fun = PowFun,
 ##'                         n_iter = n_iter)
@@ -96,7 +116,8 @@
 ##' ## =================================
 ##' ## keeping individual simulations
 ##' ## =================================
-##' ## Note that by default, the iterations are summarized by their mean. To
+##' 
+##' ## By default, the iterations are summarized (by their mean). To
 ##' ## keep individual iterations, set summarize to FALSE:
 ##'
 ##' power_array_no_summary = PowerGrid(pars = sse_pars, fun = PowFun,
@@ -105,8 +126,8 @@
 ##' summary(power_array_no_summary)
 ##' 
 ##' ## To summarize this object with iterations, use the SummarizeSims
-##' ## function. This assures that attributes relevant for further use in
-##' ## powergrid's functionality are kept intact
+##' ## function. Among other things, this assures that attributes relevant for
+##' ## further use in powergrid's functionality are kept intact.
 ##'
 ##' power_array_summarized =
 ##'   SummarizeSims(power_array_no_summary, summary_function = mean)
@@ -116,21 +137,53 @@
 ##' ## ============================================
 ##' ## Multiple outputs are automatically handled
 ##' ## ============================================
+##'
+##' ## Parameter assumptions
+##' sse_pars = list(
+##'   n = seq(from = 10, to = 60, by = 2),
+##'   delta = seq(from = 0.5, to = 1.5, by = 0.2),
+##'   sd = seq(.5, 1.5, .2))
+##' 
+##' ## A function with two outputs (the power at two significance levels)
 ##' TwoValuesFun <- function(n, delta, sd){
 ##'   p5 = power.t.test(n = n, delta = delta, sd = sd, sig.level = .05)$power
 ##'   p1 = power.t.test(n = n, delta = delta, sd = sd, sig.level = .01)$power
 ##'   return(c('p5' = p5, 'p1' = p1))
 ##' }
-##' ##
-##' sse_pars = list(
-##'   n = seq(from = 10, to = 60, by = 2),
-##'   delta = seq(from = 0.5, to = 1.5, by = 0.2),
-##'   sd = seq(.5, 1.5, .2))
+##' 
 ##' array_two_returns = PowerGrid(sse_pars, TwoValuesFun)
+##' 
 ##' ## multiple outputs result in an additional dimension:
 ##' dimnames(array_two_returns)
 ##' summary(array_two_returns)
 ##'
+##'
+##' ## ============================================
+##' ## Example using more_args and parallel
+##' ## ============================================
+##'
+##' ## Just an example of using these (unrelated) arguments.
+##' PowFun <- function(n, delta, sd, alternative){ # not there is one argument
+##'                                                # 'alternative' we do not want to
+##'                                                # study in the grid
+##'   x1 = rnorm(n = n/2, sd = sd)
+##'   x2 = rnorm(n = n/2, mean = delta, sd = sd)
+##'   t.test(x1, x2, alternative = alternative)$p.value < .05
+##' }
+##' sse_pars = list(
+##'   n = seq(from = 10, to = 60, by = 2),
+##'   delta = seq(from = 0.5, to = 1.5, by = 0.2),
+##'   sd = seq(.5, 1.5, .2)) # 'alternative' is not one of the grid pars
+##' power_array = PowerGrid(
+##'   pars = sse_pars,
+##'   fun = PowFun,
+##'   n_iter = 20,
+##'   more_args = list(alternative = 'greater'), # argument 'alternative' is given
+##'                                              # in 'more_args' list.
+##'   parallel = TRUE, # use parallel computing
+##'   n_cores = 4) # choosing the number of cores.
+##' 
+##' 
 ##' @export
 PowerGrid = function(pars, fun, more_args = NULL, n_iter = NA,
                      summarize = TRUE, summary_function = mean,
@@ -147,7 +200,7 @@ PowerGrid = function(pars, fun, more_args = NULL, n_iter = NA,
     stop('You chose one of few parameter names that are not allowed (e1d42fl5z7b6 or funout_...)')}
   ## All pars arguments of fun?
   if (!all(names(pars) %in% methods::formalArgs(fun))){
-    stop("`pars` contains parameters that do not match the arguments of `fun`")
+    stop("`pars` contains parameters that do not match the arguments of `fun`.")
   }
   ## ============================================
   ## fill grid
@@ -285,17 +338,19 @@ PowerGrid = function(pars, fun, more_args = NULL, n_iter = NA,
 ## ==================================================================
 ## Method for [INDEXING]
 ## ==================================================================
-## in order to keep class and other attributes
+## Retaining attributes
 
-Method for indexing [] of objects of class power_array. The method
-makes sure that the resulting array is of class power_array, retaining and
-updating the object's attributes. These attributes areneeded for various functions in the powergrid package to work
-well.
+##' ## Method for indexing [] of objects of class power_array. The method makes
+##' ## sure that the resulting array is of class power_array, retaining and
+##' ## updating the objects attributes. These attributes are used in various
+##' ## functions in the powergrid package to work well.
+##'
 ##' ##
 ##' The indexing functions as normal indexing, but note that drop =
 ##' FALSE by default, so that the resulting array has the same
 ##' dimensions as the original array. The number of levels at each
 ##' dimension may be reduced, however.
+##' 
 ##' ##
 ##' @title indexing with [ ] for class \code{power_array}
 ##' @return An array of class \code{power_grid}
