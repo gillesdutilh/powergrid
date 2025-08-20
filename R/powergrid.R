@@ -468,8 +468,9 @@ print.power_array = function(x, ...){
 ## Method for summary power_array
 ## ==================================================================
 
-##' Offers a short summary of the power_array object, summarizing the
-##' range of observed values and the grid evaluated across.
+##' Offers a short summary of the power_array object, summarizing the range of
+##' observed values and the grid evaluated across, and the number of iterations,
+##' if relevant.
 ##' ##'
 ##' See PowerGrid for details
 ##' @title Summary of power_grid object.
@@ -538,7 +539,18 @@ summary.power_array = function(object, ...){
 
 ##' @title Summary of object that has simulations saved.
 ##' @description Summarizes objects of class `power_array` that have individual
-##'   simulations saved across simulations.
+##'   simulations saved across iterations.
+##'
+##' Array x (of class 'power_array') is reduced along the dimension "sim" using
+##' summary_function. Note that when the 'power_array' object stores multiple
+##' function outputs, the same summary function is applied to each of those
+##' outputs.
+##'
+##' The function makes sure that the attributes of x are retained and where
+##' needed updated, so that the resulting power_array is treated correctly by
+##' further functions in the powergrid package, including \code{\link{Example}},
+##' \code{\link{PowerPlot}}, \code{\link{Update}}, \code{\link{PowerPlot}}, and
+##' \code{\link{GridPlot}}.
 ##' @param x Object of class `power_array`
 ##' @param summary_function function to apply across simulations
 ##' @param ... Further arguments passed to 'summary_function'
@@ -578,8 +590,10 @@ SummarizeSims = function(x, summary_function, ...){
 ##'   columns. Some may find this "more tidy" to work with.
 ##'
 ##' The class of the data.frame becomes `c("power_df", "data.frame"), enabling
-##'   generics for data.frame. Note that the class "power_df" has currently no
-##'   use but is included for future compatibility.
+##'   generics for data.frame. The further relevant attributes from the
+##'   power_array are passed on to the power_df. Note that the class "power_df"
+##'   has currently no use in the powergrid package, but is included for future
+##'   compatibility.
 ##' @param x Object of class `power_array`
 ##' @return An object of with classes c("power_df", "data.frame"), with the same
 ##'   attributes as `x`, aside from array-native attributes (dimnames, dim),
