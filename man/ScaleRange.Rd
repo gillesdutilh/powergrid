@@ -11,7 +11,7 @@ ScaleRange(x, a, b)
 
 \item{a}{The desired minimum}
 
-\item{b}{The desired maxmum}
+\item{b}{The desired maximum}
 }
 \value{
 a vector with the desired minimum and maximum

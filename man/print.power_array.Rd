@@ -13,9 +13,11 @@
 }
 \description{
 Method for printing objects of class power_array.
-##'
+\subsection{}{
+
 Prints a power_array as a default array with a short summary about
 its contents.
+}
 }
 \author{
 Gilles Dutilh

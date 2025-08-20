@@ -72,57 +72,139 @@ as a list with names reflecting the arguments of \code{fun} to be set.
 }
 \examples{
 ## ============================================
-## most basic case, power function available:
+## most basic use case, calculate power when
+## power function is available:
 ## ============================================
+
+## Define grid of assumptions to study:
 sse_pars = list(
-  n = seq(from = 10, to = 60, by = 2),
-  delta = seq(from = 0.5, to = 1.5, by = 0.2), ## effect size
-  sd = seq(.1, .9, .2)) ## Standard deviation
+  n = seq(from = 10, to = 60, by = 2),         # sample size
+  delta = seq(from = 0.5, to = 1.5, by = 0.2), # effect size
+  sd = seq(.1, .9, .2))                        # standard deviation
+
+## Define function that calculates power based on these assumptions:
 PowFun <- function(n, delta, sd){
   ptt = power.t.test(n = n/2, delta = delta, sd = sd,
                      sig.level = 0.05)
   return(ptt$power)
 }
+
+## Evaluate at each combination of assumptions: 
 power_array = PowerGrid(pars = sse_pars, fun = PowFun, n_iter = NA)
-##'
 summary(power_array)
 
-## ============================================
-## Multiple outputs are automatically handled
-## ============================================
-TwoValuesFun <- function(n, delta, sd){
-  p5 = power.t.test(n = n, delta = delta, sd = sd, sig.level = .05)$power
-  p1 = power.t.test(n = n, delta = delta, sd = sd, sig.level = .01)$power
-  return(c('p5' = p5, 'p1' = p1))
-}
-##
-sse_pars = list(
-  n = seq(from = 10, to = 60, by = 2),
-  delta = seq(from = 0.5, to = 1.5, by = 0.2),
-  sd = seq(.5, 1.5, .2))
-array_two_returns = PowerGrid(sse_pars, TwoValuesFun)
-## multiple outputs result in an additional dimension:
-dimnames(array_two_returns)
-summary(array_two_returns)
+## =================================
+## Use powergrid utilities on result
+## =================================
+
+## get minimum n, when delta is .7, sd = .5, for achieving a power of 90\%:
+Example(power_array, example = list(delta = .7, sd = .5), target = .9)
+
+## Draw a figure illustrating how the required n depends on delta (given an
+## sd of .7):
+PowerPlot(power_array,
+          slicer = list(sd = .7), # slice out the plane with sd = .7
+          target = .9, # set target power to 90\%
+          example = list(delta = .7) # Highlight the example with arrow
+          )
 
 ## ============================================
-## Simulations over iterations
+## Simulations over iterations when no power
+## function available
 ## ============================================
+
+## Using the same assumptions as above
+sse_pars = list(
+  n = seq(from = 10, to = 60, by = 5),
+  delta = seq(from = 0.5, to = 1.5, by = 0.2),
+  sd = seq(.5, 1.5, .2))
+
+## Define a function that results in TRUE or FALSE for a successful or
+## non-successful result:
 PowFun <- function(n, delta, sd){
   x1 = rnorm(n = n/2, sd = sd)
   x2 = rnorm(n = n/2, mean = delta, sd = sd)
   t.test(x1, x2)$p.value < .05
 }
-sse_pars = list(
-  n = seq(from = 10, to = 60, by = 5),
-  delta = seq(from = 0.5, to = 1.5, by = 0.2),
-  sd = seq(.5, 1.5, .2))
-##
+
+## In call to PowerGrid, setting n_iter prompts PowerGrid to evaluate
+## the function iteratively at each combination of assumptions:
 n_iter = 20
 power_array = PowerGrid(pars = sse_pars, fun = PowFun,
-                       n_iter = n_iter)
+                        n_iter = n_iter)
 dimnames(power_array)
 summary(power_array)
+
+## =================================
+## keeping individual simulations
+## =================================
+
+## By default, the iterations are summarized (by their mean). To
+## keep individual iterations, set summarize to FALSE:
+
+power_array_no_summary = PowerGrid(pars = sse_pars, fun = PowFun,
+                                    n_iter = n_iter , summarize = FALSE)
+dimnames(power_array_no_summary) # additional dimension "sim"
+summary(power_array_no_summary)
+
+## To summarize this object with iterations, use the SummarizeSims
+## function. Among other things, this assures that attributes relevant for
+## further use in powergrid's functionality are kept intact.
+
+power_array_summarized =
+  SummarizeSims(power_array_no_summary, summary_function = mean)
+dimnames(power_array_summarized)
+summary(power_array_summarized)
+
+## ============================================
+## Multiple outputs are automatically handled
+## ============================================
+
+## Parameter assumptions
+sse_pars = list(
+  n = seq(from = 10, to = 60, by = 2),
+  delta = seq(from = 0.5, to = 1.5, by = 0.2),
+  sd = seq(.5, 1.5, .2))
+
+## A function with two outputs (the power at two significance levels)
+TwoValuesFun <- function(n, delta, sd){
+  p5 = power.t.test(n = n, delta = delta, sd = sd, sig.level = .05)$power
+  p1 = power.t.test(n = n, delta = delta, sd = sd, sig.level = .01)$power
+  return(c('p5' = p5, 'p1' = p1))
+}
+
+array_two_returns = PowerGrid(sse_pars, TwoValuesFun)
+
+## multiple outputs result in an additional dimension:
+dimnames(array_two_returns)
+summary(array_two_returns)
+
+
+## ============================================
+## Example using more_args and parallel
+## ============================================
+
+## Just an example of using these (unrelated) arguments.
+PowFun <- function(n, delta, sd, alternative){ # not there is one argument
+                                               # 'alternative' we do not want to
+                                               # study in the grid
+  x1 = rnorm(n = n/2, sd = sd)
+  x2 = rnorm(n = n/2, mean = delta, sd = sd)
+  t.test(x1, x2, alternative = alternative)$p.value < .05
+}
+sse_pars = list(
+  n = seq(from = 10, to = 60, by = 2),
+  delta = seq(from = 0.5, to = 1.5, by = 0.2),
+  sd = seq(.5, 1.5, .2)) # 'alternative' is not one of the grid pars
+power_array = PowerGrid(
+  pars = sse_pars,
+  fun = PowFun,
+  n_iter = 20,
+  more_args = list(alternative = 'greater'), # argument 'alternative' is given
+                                             # in 'more_args' list.
+  parallel = TRUE) # use parallel computing
+
+
 }
 \author{
 Gilles Dutilh

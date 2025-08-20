@@ -15,6 +15,7 @@ PowerPlot(
   minimal_target = TRUE,
   summary_function = mean,
   target_levels = c(0.8, 0.9, 0.95),
+  col = grDevices::grey.colors(1, 0.2, 0.2),
   shades_of_grey = TRUE,
   shades_legend = FALSE,
   title = NULL,
@@ -66,6 +67,9 @@ summarized across sims using this function.}
 
 \item{target_levels}{For which levels of power (or whichever variable is
 contained in x) lines are drawn.}
+
+\item{col}{Color for the contour lines. Does not effect eventual example
+arrows. Therefore, use AddExample.}
 
 \item{shades_of_grey}{Logical indicating whether greylevels are painted in
 addition to isolines to show power levels.}
