@@ -76,9 +76,9 @@ example.</p></dd>
 
 <dt id="arg-minimal-target">minimal_target<a class="anchor" aria-label="anchor" href="#arg-minimal-target"></a></dt>
 <dd><p>Logical. Set to TRUE if you aim to achieve a minimum
-value (e.g., a power must be <em>at least</em> 90%), or FALSE if you want to allow a
-maximum value (e.g., the width of the expected CI may be <em>at most</em> a
-certain value).</p></dd>
+value (e.g., a power must be <em>at least</em> 90%), or FALSE if you want to
+allow a maximum value (e.g., the width of the expected CI may be <em>at most</em>
+a certain value).</p></dd>
 
 
 <dt id="arg-find-min">find_min<a class="anchor" aria-label="anchor" href="#arg-find-min"></a></dt>
@@ -90,10 +90,10 @@ minimizes a parameter (typically: minimal required n) to achieve the
 <dt id="arg-method">method<a class="anchor" aria-label="anchor" href="#arg-method"></a></dt>
 <dd><p>Character string, indicating how the location of the example
 is found, passed on internally to <code>FindTarget</code>. Either "step": walking in
-steps along <code>search_par</code> or "lm": Interpolating assuming a linear relation
-between <code>search_par</code> and (qnorm(x) + qnorm(1 - 0.05)) ^ 2. This method
-"lm" is inspired on the implementation in the sse package by Thomas
-Fabbro.</p></dd>
+steps along the parameter of interest or "lm": Interpolating assuming a
+linear relation between the parameter of interest and (qnorm(x) + qnorm(1</p><ul><li><p>0.05)) ^ 2. This method "lm" is inspired on the implementation in the
+sse package by Thomas Fabbro.</p></li>
+</ul></dd>
 
 
 <dt id="arg-summary-function">summary_function<a class="anchor" aria-label="anchor" href="#arg-summary-function"></a></dt>
