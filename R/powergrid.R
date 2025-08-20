@@ -348,6 +348,7 @@ PowerGrid = function(pars, fun, more_args = NULL, n_iter = NA,
 ##' FALSE by default, so that the resulting array has the same
 ##' dimensions as the original array. The number of levels at each
 ##' dimension may be reduced, however.
+##' ##
 ##' @title indexing with [ ] for class \code{power_array}
 ##' @return An array of class \code{power_grid}
 ##' @author Gilles Dutilh
