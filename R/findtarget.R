@@ -1,13 +1,17 @@
-##' Function developed for internal use in powergrid::Example. Search
-##' 2-dimensional slice of a power_array object, for a value of at least (or at
-##' most) a chosen value, searching along one dimension of the slice in a chosen
-##' direction, per level of the other dimension. Typically, one searches for a
-##' power of at least x% along increasing sample size, thus finding the minimal
-##' n for achieving a power of x, per level of another parameter, e.g., effect
-##' size.
+## Function developed mainly for internal use in the powergrid packagen. For
+## most use cases, you will not need this function, but rather use any of
+## \code{\link{Example}}, \code{\link{AddExample}}, \code{\link{PowerPlot}}, or
+## \code{\link{GridPlot}}. Only if you need to work with, say, the required n
+## for a number of assumptions over and above the standard build in figures,
+## there is a need to use FindTarget.
+##'
+##' FindTarget takes as input a 2-dimensional slice of a power_array object,
+##' say, n by effect size, and searches along one dimension (say n) for a value
+##' of at least (or at most) a chosen target value (say, a power of 90%), for
+##' each level of the other dimension (say, effect size).
 ##'
 ##' By default, the power_slice is searched along the dimension n
-##' (\code{search_par}), searching for the lowest value (\code{find_min} = TRUE)
+##' (\code{par_to_search}), searching for the lowest value (\code{find_min} = TRUE)
 ##' where the array contains a value of at least (\code{minimal_target} = TRUE)
 ##' .9 (the \code{target}), thus finding the minimal sample size required to
 ##' achieve a power of 90%. These arguments may seem a bit confusing at first,
@@ -36,20 +40,20 @@
 ##' @param target The required size of the value in the power_slice
 ##' @param minimal_target Is the target a minimum (e.g., for power) or a maximum
 ##'   (e.g., the size of a confidence interval)
-##' @param search_par Which parameter should be searched to achieve the required
+##' @param par_to_search Which parameter should be searched to achieve the required
 ##'   target. In the standard SSE case, this is n.
-##' @param find_min Should the lowest value of search_par be found that yields a
+##' @param find_min Should the lowest value of par_to_search be found that yields a
 ##'   value that meets the target. For n, one searches the lowest, but for,
 ##'   e.g. the variance, one would search for the maximum where the target can
 ##'   still be achieved.
-##' @param method How is the required \code{search_par} to achieve \code{target}
-##'   found. Either \code{'step'}: walking in steps along \code{search_par} or
+##' @param method How is the required \code{par_to_search} to achieve \code{target}
+##'   found. Either \code{'step'}: walking in steps along \code{par_to_search} or
 ##'   \code{'lm'}: Interpolating assuming a linear relation between
-##'   \code{search_par} and \code{(qnorm(x) + qnorm(1 - 0.05)) ^ 2}. Setting
+##'   \code{par_to_search} and \code{(qnorm(x) + qnorm(1 - 0.05)) ^ 2}. Setting
 ##'   'lm' is inspired on the implementation in the sse package by Thomas
 ##'   Fabbro.
 ##' @return Returns the lowest (or highest if \code{find_min} == FALSE) value of
-##'   \code{search_par} for which the value in \code{power_slice} is at minimum
+##'   \code{par_to_search} for which the value in \code{power_slice} is at minimum
 ##'   (or maximum if \code{minimal_target} == FALSE) of value \code{target}. If
 ##'   \code{method} == 'lm', interpolation through transformation is used.
 ##' @author Gilles Dutilh
@@ -75,7 +79,7 @@
 FindTarget = function(power_slice,
                       target = .9,
                       minimal_target = TRUE,
-                      search_par = 'n',
+                      par_to_search = 'n',
                       find_min = TRUE,
                       method = 'step'
                       ) {
@@ -113,8 +117,8 @@ FindTarget = function(power_slice,
       lm_out = stats::lm(pred_n[!is.infinite(trans_pow)] ~
                            trans_pow[!is.infinite(trans_pow)])
       lm_pred = stats::predict(lm_out,
-                                       newdata = data.frame(
-                                         trans_pow = SSETrans(target)))
+                               newdata = data.frame(
+                                 trans_pow = SSETrans(target)))
       if(lm_pred %% 1 != 1) warning(paste("The output with method = 'lm' is rounded up, this makes sense for n but may not for parameters"))
       lm_pred = ceiling(lm_pred)
       return(lm_pred)
@@ -125,10 +129,10 @@ FindTarget = function(power_slice,
   if(length(dim(power_slice)) %in% c(1, 0) ){ # if a one-dim array, or a vector
     Find(power_slice)
   } else { # is multidim array, you must say which parameter you want to search
-           # across
+                                        # across
     apply(power_slice,
           names(dimnames(power_slice))[
-            names(dimnames(power_slice)) != search_par],
+            names(dimnames(power_slice)) != par_to_search],
           Find)
   }
 }
