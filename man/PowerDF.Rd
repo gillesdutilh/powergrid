@@ -20,8 +20,10 @@ where values are stored in column x, and all other dimensions are
 columns. Some may find this "more tidy" to work with.
 
 The class of the data.frame becomes `c("power_df", "data.frame"), enabling
-generics for data.frame. Note that the class "power_df" has currently no
-use but is included for future compatibility.
+generics for data.frame. The further relevant attributes from the
+power_array are passed on to the power_df. Note that the class "power_df"
+has currently no use in the powergrid package, but is included for future
+compatibility.
 }
 \author{
 Gilles Dutilh

@@ -94,12 +94,14 @@ the minimal sample size where the expected confidence interval is smaller
 than a certain desired width.
 }
 
-Example searches for \emph{one single constellation} of parameters. Often,
-you may want to study how the power (or any other value) depends on the value
-parameters. The functions PowerPlot and GridPlot offer plotting
-functionalities to graphically illustrate such dependencies. If you want to
-find "Examples" as a function of parameter settings and work with these, you
-can use the workhorse of 'Example', \link[powergrid]{FindTarget}.
+Example searches for the minimum or maximum on one parameters (say, the
+minimum n) given \emph{one single constellation} of further parameters. However,
+you may want to study how, say, the required n (or any other value) depends
+on the value of further parameters. The functions PowerPlot and GridPlot
+offer plotting functionalities to graphically illustrate such
+dependencies. If you want to find "Examples" as a function of parameter
+settings and work with these, you can use the workhorse behind 'Example',
+PowerPlot and Gridplot, \code{\link{FindTarget}}
 }
 \examples{
 ## ============================================

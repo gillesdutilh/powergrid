@@ -348,7 +348,6 @@ PowerGrid = function(pars, fun, more_args = NULL, n_iter = NA,
 ##' FALSE by default, so that the resulting array has the same
 ##' dimensions as the original array. The number of levels at each
 ##' dimension may be reduced, however.
-##' ##
 ##' @title indexing with [ ] for class \code{power_array}
 ##' @return An array of class \code{power_grid}
 ##' @author Gilles Dutilh
@@ -549,7 +548,7 @@ summary.power_array = function(object, ...){
 ##' The function makes sure that the attributes of x are retained and where
 ##' needed updated, so that the resulting power_array is treated correctly by
 ##' further functions in the powergrid package, including \code{\link{Example}},
-##' \code{\link{PowerPlot}}, \code{\link{Update}}, \code{\link{PowerPlot}}, and
+##' \code{\link{PowerPlot}}, \code{\link{Refine}}, \code{\link{PowerPlot}}, and
 ##' \code{\link{GridPlot}}.
 ##' @param x Object of class `power_array`
 ##' @param summary_function function to apply across simulations

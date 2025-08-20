@@ -12,8 +12,9 @@
 \item{...}{passed on to \code{cat}}
 }
 \description{
-Offers a short summary of the power_array object, summarizing the
-range of observed values and the grid evaluated across.
+Offers a short summary of the power_array object, summarizing the range of
+observed values and the grid evaluated across, and the number of iterations,
+if relevant.
 ##'
 See PowerGrid for details
 }

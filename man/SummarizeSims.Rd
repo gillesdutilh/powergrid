@@ -19,7 +19,18 @@ An object of class \code{power_array}, with attributes \code{summarized =
 }
 \description{
 Summarizes objects of class \code{power_array} that have individual
-simulations saved across simulations.
+simulations saved across iterations.
+
+Array x (of class 'power_array') is reduced along the dimension "sim" using
+summary_function. Note that when the 'power_array' object stores multiple
+function outputs, the same summary function is applied to each of those
+outputs.
+
+The function makes sure that the attributes of x are retained and where
+needed updated, so that the resulting power_array is treated correctly by
+further functions in the powergrid package, including \code{\link{Example}},
+\code{\link{PowerPlot}}, \code{\link{Refine}}, \code{\link{PowerPlot}}, and
+\code{\link{GridPlot}}.
 }
 \author{
 Gilles Dutilh
