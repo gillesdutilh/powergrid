@@ -152,7 +152,7 @@ GridPlot = function(x,
   ## find min or max to plot
   y_rec = FindTarget(x, target = target,# min or max required of
                                         # y_par
-                     search_par = y_par,
+                     par_to_search = y_par,
                      find_min = find_min,
                      minimal_target = minimal_target,
                      method = method)
