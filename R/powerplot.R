@@ -38,10 +38,10 @@
 ##'   (list element value) of which parameter (list element name) the example is
 ##'   drawn for a power of \code{target}. You may supply a vector longer than 1
 ##'   for multiple examples.
-##' @param method Method used for finding the required \code{search_par} needed
+##' @param method Method used for finding the required \code{par_to_search} needed
 ##'   to achieve \code{target}. Either "step": walking in steps along
-##'   \code{search_par} or "lm": Interpolating assuming a linear relation
-##'   between \code{search_par} and \code{(qnorm(x) + qnorm(1 - 0.05)) ^ 2}. The
+##'   \code{par_to_search} or "lm": Interpolating assuming a linear relation
+##'   between \code{par_to_search} and \code{(qnorm(x) + qnorm(1 - 0.05)) ^ 2}. The
 ##'   setting "lm" is inspired on the implementation in the \code{sse} package
 ##'   by Thomas Fabbro.
 ##' @param target The power (or whatever the target is) for which the example,
@@ -300,7 +300,7 @@ PowerPlot =
     x_ex_value = FindTarget(array_toplot,
                             target = target,
                             minimal_target = minimal_target,
-                            search_par = names(dimnames(array_toplot)),
+                            par_to_search = names(dimnames(array_toplot)),
                             find_min = find_min,
                             method = method)
     y_ex_value = round(array_toplot[as.character(x_ex_value)], 3)
