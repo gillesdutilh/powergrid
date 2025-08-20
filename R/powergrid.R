@@ -180,8 +180,7 @@
 ##'   n_iter = 20,
 ##'   more_args = list(alternative = 'greater'), # argument 'alternative' is given
 ##'                                              # in 'more_args' list.
-##'   parallel = TRUE, # use parallel computing
-##'   n_cores = 4) # choosing the number of cores.
+##'   parallel = TRUE) # use parallel computing
 ##' 
 ##' 
 ##' @export
@@ -340,18 +339,15 @@ PowerGrid = function(pars, fun, more_args = NULL, n_iter = NA,
 ## ==================================================================
 ## Retaining attributes
 
-##' ## Method for indexing [] of objects of class power_array. The method makes
-##' ## sure that the resulting array is of class power_array, retaining and
-##' ## updating the objects attributes. These attributes are used in various
-##' ## functions in the powergrid package to work well.
+##' Method for indexing [] of objects of class power_array. The method makes
+##' sure that the resulting array is of class power_array, retaining and
+##' updating the objects attributes. These attributes are used in various
+##' functions in the powergrid package to work well.
 ##'
-##' ##
 ##' The indexing functions as normal indexing, but note that drop =
 ##' FALSE by default, so that the resulting array has the same
 ##' dimensions as the original array. The number of levels at each
 ##' dimension may be reduced, however.
-##' 
-##' ##
 ##' @title indexing with [ ] for class \code{power_array}
 ##' @return An array of class \code{power_grid}
 ##' @author Gilles Dutilh
