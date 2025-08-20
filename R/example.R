@@ -45,18 +45,18 @@
 ##' @param target Which value (of typically power) should be achieved at the
 ##'   example.
 ##' @param minimal_target Logical. Set to TRUE if you aim to achieve a minimum
-##'   value (e.g., a power must be *at least* 90%), or FALSE if you want to allow a
-##'   maximum value (e.g., the width of the expected CI may be *at most* a
-##'   certain value).
+##'   value (e.g., a power must be *at least* 90%), or FALSE if you want to
+##'   allow a maximum value (e.g., the width of the expected CI may be *at most*
+##'   a certain value).
 ##' @param find_min Logical, indicating whether the example should be found that
 ##'   minimizes a parameter (typically: minimal required n) to achieve the
 ##'   `target` or maximizes this assumption (e.g., maximal allowed SD).
 ##' @param method Character string, indicating how the location of the example
 ##'   is found, passed on internally to `FindTarget`. Either "step": walking in
-##'   steps along `search_par` or "lm": Interpolating assuming a linear relation
-##'   between `search_par` and (qnorm(x) + qnorm(1 - 0.05)) ^ 2. This method
-##'   "lm" is inspired on the implementation in the sse package by Thomas
-##'   Fabbro.
+##'   steps along the parameter of interest or "lm": Interpolating assuming a
+##'   linear relation between the parameter of interest and (qnorm(x) + qnorm(1
+##'   - 0.05)) ^ 2. This method "lm" is inspired on the implementation in the
+##'   sse package by Thomas Fabbro.
 ##' @param summary_function When x' attribute `summarized` is FALSE, x is
 ##'   summarized across sims using this function before searching the example.
 ##' @return Example returns a list containing:
@@ -208,14 +208,10 @@ Example = function(x,
     required_value = FindTarget(slice_to_search,
                                 target = target,
                                 minimal_target = minimal_target,
-                                search_par = 'this is ignored for vector',
+                                par_to_search = 'this is ignored for vector',
                                 find_min = find_min,
                                 method = method)
     required_name = attr(slice_to_search, which = 'dims_left')
-    ## required_name = names(dimnames(slice_to_search))
-    ## x_ex_name = names(margins_toplot)[names(margins_toplot) != par_to_search]
-    ## x_ex_value = example[[x_ex_name]]
-    ## note that "y_ex_name" is not defined, this is par_to_search
     example_list = list(
       requested_example = example,
       objective = ifelse(minimal_target,
