@@ -56,6 +56,8 @@
 ##'   \code{summary_fun}. Otherwise ignored.
 ##' @param target_levels For which levels of power (or whichever variable is
 ##'   contained in x) lines are drawn.
+##' @param col Color for the contour lines. Does not effect eventual example
+##'   arrows. Therefore, use AddExample.
 ##' @param shades_of_grey Logical indicating whether greylevels are painted in
 ##'   addition to isolines to show power levels.
 ##' @param shades_legend Logical indicating whether a legend for the shading is
@@ -145,6 +147,7 @@ PowerPlot =
            minimal_target = TRUE,
            summary_function = mean,
            target_levels = c(.8, .9, .95), # which power iso lines to draw
+           col = grDevices::grey.colors(1, .2, .2),
            shades_of_grey = TRUE, # do you want shades of grey on background
            shades_legend = FALSE, # do you want a legend for the shades
            title = NULL,
@@ -285,7 +288,7 @@ PowerPlot =
     plot(as.numeric(names(array_toplot)), array_toplot, type = 'n', axes = FALSE,
          xlab = names(dimnames(array_toplot)), ylab = 'Power')
     graphics::abline(v = as.numeric(names(array_toplot)), col = 'lightgrey')
-    graphics::lines(as.numeric(names(array_toplot)), array_toplot)
+    graphics::lines(as.numeric(names(array_toplot)), array_toplot, col = col)
     graphics::axis(1, at = as.numeric(names(array_toplot)))
     graphics::axis(2, las = 1)
     graphics::box(bty = 'l')
@@ -346,7 +349,7 @@ PowerPlot =
                         as.numeric(margins_toplot[[1]]),
                         t(array_toplot), add = TRUE, labcex = 1.2,
                         levels = target_levels, lwd = power_lwds,
-                        col = grDevices::grey.colors(1, .2, .2))
+                        col = col)
 
     } else { # smoothing
       smooth_pred_grid = as.matrix(expand.grid(as.numeric(margins_toplot[[2]]),
@@ -403,10 +406,21 @@ AddExample = function(x, slicer = NULL, example, target = .9,
                       minimal_target = TRUE, find_min = TRUE,
                       method = 'step', col = 1, ...)
 {
+  ## =======================================================
+  ## process input
+  ## =======================================================
+  ## further args
   args = list(...)
   if('lwd' %in% names(args)){lwd = args$lwd}else{lwd = 1}
+  ## check that example defined only a single parameter, otherwise throw error.
+  if(!is.null(example) && length(example) > 1){
+    stop(
+      PrintWrap(
+        "The list in argument 'example' should not contain more than one parameter. You may want to use argument 'slicer' to cut out the same slice that you cut out and plotted in 'PowerPlot'."),
+      call. = FALSE)
+  }
   ns_example = sapply(example, function(x)length(x))[[1]]
-      ## Prepare example for figure.
+  ## Prepare example for figure.
   y_ex_value = numeric(ns_example)
   x_ex_name = numeric(ns_example)
   x_ex_value = numeric(ns_example)
