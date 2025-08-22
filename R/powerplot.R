@@ -164,11 +164,11 @@ PowerPlot =
     if(!attr(x, which = 'summarized')){ # if object contains iterations, first
                                         # summarize
       power_array = SummarizeSims(x, summary_function)
-      warning(PrintWrap(paste0(
+      warning(paste0(
         "The object 'x' you supplied to PowerPlot contains individual ",
         "iterations. For sensible plotting, these were automatically ",
         "summarized across simulations using the function given in ",
-        "argument `summary_function`.")), call. = FALSE)
+        "argument `summary_function`."), call. = FALSE)
     } else # power_array that is ready to use
     {
       power_array = x
@@ -202,12 +202,22 @@ PowerPlot =
     }
   }
 
-  ## ============================================
+  ## =======================================================
   ## take slice that should be plotted
+  ## =======================================================
   if(!is.null(slicer)){
     array_toplot = ArraySlicer(x = power_array, slicer = slicer)
   } else {array_toplot = power_array}
-
+  ##
+  ## if there are multiple function returns saved in power_array, give a warning
+  ## and take only the first, by setting slicing accordingly.
+  if (attr(array_toplot, 'sim_function_nval') > 1) # still multiple outputs
+  {
+    ## assume the user want the first
+    chosen_fun_out = attr(array_toplot, 'dimnames')$fun_out[1]
+    array_toplot = ArraySlicer(array_toplot, slicer = list(fun_out = chosen_fun_out))
+    warning(paste0("Argument 'x' contains multiple function outputs at each parameter combination (even after possible slicing with argument 'slicer'). PowerPlot automatically selected\n*** function output ", chosen_fun_out, " to be plotted! ***\nTo explicitly choose a function output, do so using argument 'slicer', including 'fun_out = <output name> in that list."))
+  }
   ## feedback if the number of dimension are not correct
   left_dims = length(dim(array_toplot))
   if (left_dims == 0){
@@ -215,22 +225,19 @@ PowerPlot =
                        1, 0)
   }
   if(!(left_dims %in% c(2, 1))){
-    stop(PrintWrap(
-      paste0(
+    stop(paste0(
         ifelse(is.null(slicer),
                "Input 'x' should be a 2- or 1-dimensional array, but is a ",
                "Slicing 'x' by 'slicer' did not yield the necessary 2- or 1-dimensional, but a "),
-        left_dims, "-dimensional array instead.")))
-  } ##
+        left_dims, "-dimensional array instead."))
+  }
+  ##
   dimnms = names(dimnames(array_toplot)) # dimension names to plot
   first_dim = dimnms[1]
   if(par_to_search == 'n' & !(par_to_search %in% dimnms)){
-    warning(
-      PrintWrap(
-        paste0("Argument `par_to_search` was automatically changed from 'n' (the default) to '",
-               first_dim,
-               "'. If you want to search along another dimension, please set `par_to_search` accordingly.")
-      ), call. = FALSE)
+    warning(paste0("Argument `par_to_search` was automatically changed from 'n' (the default) to '",
+                   first_dim,
+                   "'. If you want to search along another dimension, please set `par_to_search` accordingly."), call. = FALSE)
     par_to_search = first_dim
   }
   dimorder = c(par_to_search, dimnms[dimnms != par_to_search])
@@ -414,10 +421,7 @@ AddExample = function(x, slicer = NULL, example, target = .9,
   if('lwd' %in% names(args)){lwd = args$lwd}else{lwd = 1}
   ## check that example defined only a single parameter, otherwise throw error.
   if(!is.null(example) && length(example) > 1){
-    stop(
-      PrintWrap(
-        "The list in argument 'example' should not contain more than one parameter. You may want to use argument 'slicer' to cut out the same slice that you cut out and plotted in 'PowerPlot'."),
-      call. = FALSE)
+    stop("The list in argument 'example' should not contain more than one parameter. You may want to use argument 'slicer' to cut out the same slice that you cut out and plotted in 'PowerPlot'.", call. = FALSE)
   }
   ns_example = sapply(example, function(x)length(x))[[1]]
   ## Prepare example for figure.
