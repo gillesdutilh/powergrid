@@ -122,8 +122,10 @@ PowerGrid = function(pars, fun, more_args = NULL, n_iter = NA,
   ## ============================================
   ## fill grid
   pars_grid = expand.grid(pars)
+  ## The next block of code goes through 3 routes (A1-A3) depending on whether iterations
+  ## are needed, and whether parallel computation is requested.
   ## =================================
-  ## No simulation ('n_iter' not supplied)
+  ## Route A1) No simulation ('n_iter' not supplied)
   if(is.na(n_iter)) {
     e1d42fl5z7b6 = sapply( # the long name is to make it very unlikely
       # to get the same name in the grid, which
@@ -133,9 +135,8 @@ PowerGrid = function(pars, fun, more_args = NULL, n_iter = NA,
     ## out = cbind(pars_grid, e1d42fl5z7b6)
     ## result is a n_result_vars by nrow(pars_grid) matrix
   }
-  ##'
   ## =================================
-  ## Simulation ('n_iter' supplied)
+  ## Route A2) Series simulation ('n_iter' supplied)
   if (!is.na(n_iter) && !parallel) {
     e1d42fl5z7b6 =
       drop(replicate(
@@ -143,8 +144,7 @@ PowerGrid = function(pars, fun, more_args = NULL, n_iter = NA,
           .mapply(fun, pars_grid, MoreArgs = more_args),
           function(x)unlist(x))))
   }
-  ##'
-  ## parallel using future_replicate
+  ## Route A3 Parallel simulation using future_replicate
   if (!is.na(n_iter) && parallel) {
     if (!requireNamespace("future.apply", quietly = TRUE)) {
       stop("Setting argument `parallel' to TRUE requires installation of future.apply", call. = FALSE)}
@@ -159,28 +159,24 @@ PowerGrid = function(pars, fun, more_args = NULL, n_iter = NA,
       ))
   }
   ## =================================
+  ## A1-A3 briefly converge and then diverge into B1-B2 depending on whether
+  ## multiple outputs are returned.
+  ## Check length of the returned output (per parameter set & simulation)
   n_funouts = length(.mapply(fun, pars_grid[1, ], MoreArgs = more_args)[[1]])
-  ##'
-  ## Turn grid into array
-  ToArray = function(gg){
-    stats::xtabs(stats::as.formula(
-      paste('gg ~', paste(names(pars_grid), collapse = '+'))), data = pars_grid)
-  }
-  ## One variable
+  ##
+
+  ## Route B1) One variable
   if (n_funouts == 1) {
 
     ## Turn grid into array
-    ## TODO: This can probably just be an expression
-    ToArray = function(gg){
-      stats::xtabs(stats::as.formula(
-        paste('gg ~', paste(names(pars_grid), collapse = '+'))), data = pars_grid)
-    }
-
-    out_array = ToArray(e1d42fl5z7b6) # so maybe merge with above
-
+    out_array = stats::xtabs(
+      stats::as.formula(
+        paste('e1d42fl5z7b6 ~', paste(names(pars_grid), collapse = '+'))),
+      data = pars_grid)
   }
-  ##'
-  ## Multiple variables
+  ##
+  ## Route B2) Multiple variables, with slightly different behaviours based
+  ## on where iterations present.
   if (n_funouts > 1) {
 
     ## first take care that pars names and funout names are not confused
@@ -211,8 +207,14 @@ PowerGrid = function(pars, fun, more_args = NULL, n_iter = NA,
     ##'
   }
 
-  ##'
-  ## set attributes of output object
+  ## allenr: Ensure the simulation dimension is correctly labelled (regardless of
+  ## which route it took)
+  if(!is.na(n_iter)) {
+    names(dimnames(out_array))[length(dimnames(out_array))] <- "sim"
+    dimnames(out_array)[['sim']] = seq_along(dimnames(out_array)[['sim']])
+  }
+
+  ## set attributes of output object. Summarised is FALSE as not summarised yet
   class(out_array) = 'power_array'
   attr(out_array, which = 'sim_function') = fun
   attr(out_array, which = 'sim_function_nval') = n_funouts
@@ -221,14 +223,6 @@ PowerGrid = function(pars, fun, more_args = NULL, n_iter = NA,
 
   attr(out_array, which = 'summarized') = FALSE
   attr(out_array, which = 'n_iter') = n_iter
-
-
-  ## allenr: Ensure the simulation dimension is correctly labelled (regardless of
-  ## which path it took)
-  if(!is.na(n_iter)) {
-    names(dimnames(out_array))[length(dimnames(out_array))] <- "sim"
-    dimnames(out_array)[['sim']] = seq_along(dimnames(out_array)[['sim']])
-  }
 
   #' If the array has iterations, and needs summarising, summarise it
   if((!is.na(n_iter) && summarize)) {
