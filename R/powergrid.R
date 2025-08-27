@@ -186,11 +186,11 @@ PowerGrid = function(pars, fun, more_args = NULL, n_iter = NA,
     ## if, else to control the wrangling based on if multiple simulations present
     ## nitt is a dummy version of n_iteration which is 1 if there is no interations.
     if(!is.na(n_iter)) {
-      var_order <-  c(2, 1, 3)
-      nitt <- n_iter
+      var_order =  c(2, 1, 3)
+      nitt = n_iter
     } else {
-      var_order <- c(2, 1)
-      nitt <- 1
+      var_order = c(2, 1)
+      nitt = 1
     }
     ## put in flat format to work with xtabs later
     flat = cbind(
@@ -200,9 +200,8 @@ PowerGrid = function(pars, fun, more_args = NULL, n_iter = NA,
     colnames(flat)[seq_len(length(var_order)+1)] = c(c('fun_out', 'parscom', 'sim')[var_order], 'value')
     out_array = stats::xtabs(value ~ ., data = flat[, -1])
     ## Sort such that the first dimensions are the pars
-    L <- names(dimnames(out_array)) %in% c('fun_out', 'sim')
+    L = names(dimnames(out_array)) %in% c('fun_out', 'sim')
     out_array = aperm(out_array, c(which(!L), which(L)))
-
     ##'
     ##'
   }
@@ -210,7 +209,7 @@ PowerGrid = function(pars, fun, more_args = NULL, n_iter = NA,
   ## allenr: Ensure the simulation dimension is correctly labelled (regardless of
   ## which route it took)
   if(!is.na(n_iter)) {
-    names(dimnames(out_array))[length(dimnames(out_array))] <- "sim"
+    names(dimnames(out_array))[length(dimnames(out_array))] = "sim"
     dimnames(out_array)[['sim']] = seq_along(dimnames(out_array)[['sim']])
   }
 
