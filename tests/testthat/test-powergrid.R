@@ -48,3 +48,16 @@ test_that(
   "Reverse parameter specification leads to same array contents (attr not tested)",
   {expect_equal(fwd_power_array, rev_power_array, ignore_attr = TRUE)}
 )
+
+
+## =============================================================================
+#' Test PowerGrid() with multiple outputs
+
+ClosedFunTwoReturn <-
+  function(n, delta, sd){
+    out <- power.t.test(n = n, delta = delta, sd = sd)$power
+    return(c(out, out*0.5))
+  }
+
+fwd_power_array <- PowerGrid(pars = fwd_closed_pars, fun = ClosedFunTwoReturn,
+                             summarize = FALSE)

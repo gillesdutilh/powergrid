@@ -103,9 +103,9 @@
 ##' summary(power_array)
 ##' @export
 PowerGrid = function(pars, fun, more_args = NULL, n_iter = NA,
-                    summarize = TRUE, summary_function = mean,
-                    parallel = FALSE,
-                    n_cores = future::availableCores()-1) {
+                     summarize = TRUE, summary_function = mean,
+                     parallel = FALSE,
+                     n_cores = future::availableCores()-1) {
   ##
   ## ============================================
   ## Process arguments
@@ -122,37 +122,29 @@ PowerGrid = function(pars, fun, more_args = NULL, n_iter = NA,
   ## ============================================
   ## fill grid
   pars_grid = expand.grid(pars)
+  ## The next block of code goes through 3 routes (A1-A3) depending on whether iterations
+  ## are needed, and whether parallel computation is requested.
   ## =================================
-  ## No simulation ('n_iter' not supplied)
+  ## Route A1) No simulation ('n_iter' not supplied)
   if(is.na(n_iter)) {
     e1d42fl5z7b6 = sapply( # the long name is to make it very unlikely
-                                        # to get the same name in the grid, which
-                                        # would break the xtab below.
+      # to get the same name in the grid, which
+      # would break the xtab below.
       .mapply(fun, pars_grid, MoreArgs = more_args), function(x)x,
       simplify = "array")
     ## out = cbind(pars_grid, e1d42fl5z7b6)
     ## result is a n_result_vars by nrow(pars_grid) matrix
   }
-  ##'
   ## =================================
-  ## Simulation ('n_iter' supplied)
-  #' allenr - TODO: Surely this should be if the parallel argument is TRUE
-  #'    currently you are only testing for parallel if the parallel argument is
-  #'    FALSE.
+  ## Route A2) Series simulation ('n_iter' supplied)
   if (!is.na(n_iter) && !parallel) {
     e1d42fl5z7b6 =
       drop(replicate(
         n_iter, sapply( # reshape mapply result
-                  .mapply(fun, pars_grid, MoreArgs = more_args),
-                  function(x)unlist(x))))
-    if (summarize) {
-      e1d42fl5z7b6 = apply(e1d42fl5z7b6,
-                           1:(length(dim(e1d42fl5z7b6)) - 1), # per all but sim dim
-                           summary_function, simplify = TRUE)
-    }
+          .mapply(fun, pars_grid, MoreArgs = more_args),
+          function(x)unlist(x))))
   }
-  ##'
-  ## parallel using future_replicate
+  ## Route A3 Parallel simulation using future_replicate
   if (!is.na(n_iter) && parallel) {
     if (!requireNamespace("future.apply", quietly = TRUE)) {
       stop("Setting argument `parallel' to TRUE requires installation of future.apply", call. = FALSE)}
@@ -161,94 +153,81 @@ PowerGrid = function(pars, fun, more_args = NULL, n_iter = NA,
     future::plan("future::multisession", workers = n_cores)
     e1d42fl5z7b6 =
       drop(future.apply::future_replicate(
-                           n_iter, sapply( # reshape mapply result
-                                     .mapply(fun, pars_grid, MoreArgs = more_args),
-                                     function(x)unlist(x))
-                         ))
-    if (summarize){
-      e1d42fl5z7b6 = apply(e1d42fl5z7b6,
-                           1:(length(dim(e1d42fl5z7b6)) - 1), # per all but sim dim
-                           summary_function, simplify = TRUE)
-    }
+        n_iter, sapply( # reshape mapply result
+          .mapply(fun, pars_grid, MoreArgs = more_args),
+          function(x)unlist(x))
+      ))
   }
   ## =================================
+  ## A1-A3 briefly converge and then diverge into B1-B2 depending on whether
+  ## multiple outputs are returned.
+  ## Check length of the returned output (per parameter set & simulation)
   n_funouts = length(.mapply(fun, pars_grid[1, ], MoreArgs = more_args)[[1]])
-  ##'
-  ## Turn grid into array
-  ToArray = function(gg){
-    stats::xtabs(stats::as.formula(
-                          paste('gg ~', paste(names(pars_grid), collapse = '+'))), data = pars_grid)
+  ##
+
+  ## Route B1) One variable
+  if (n_funouts == 1) {
+
+    ## Turn grid into array
+    out_array = stats::xtabs(
+      stats::as.formula(
+        paste('e1d42fl5z7b6 ~', paste(names(pars_grid), collapse = '+'))),
+      data = pars_grid)
   }
-  ## Since the array resulting from .mapply may differ depending on
-  ## 1) all.equal(summary_function, I) vs other summary function, vs no iterations
-  ## 2) having one versus more than one result variable,
-  ## I transform into an output array in the IFs below.
-  ##'
-  ## Simplest situation, with no iterations or summarized iterations,
-  ## only one variable.
-  if (n_funouts == 1 && (summarize || is.na(n_iter))) {
-    out_array = ToArray(e1d42fl5z7b6)
-  } # simple xtabs with pars
-  ##'
-  ## With no iterations or summarized iterations,
-  ## but multiple variables
-  if (n_funouts > 1 && (summarize || is.na(n_iter))) {
-    ## first take care that pars names and funout names are not confused
-    if(any(rownames(e1d42fl5z7b6) %in% names(pars))){
-      rownames(e1d42fl5z7b6) =
-        paste0('funout_', rownames(e1d42fl5z7b6))}
-    ## transform to array
-    out_array = ToArray(t(e1d42fl5z7b6))
-    names(dimnames(out_array))[length(dim(out_array))] = 'fun_out'
-  } # simple xtabs on transposed array
-  ##'
-  ## When simulations are not summarized (kept), one variable
-  if (n_funouts == 1 && !summarize && !is.na(n_iter)) {
-    out_array = ToArray(e1d42fl5z7b6) # so maybe merge with above
-    dimnames(out_array)[length(dimnames(out_array))] = NULL
-    names(dimnames(out_array))[length(dimnames(out_array))] = 'sim'
-  }
-  ##'
-  ## When simulations are not summarized (kept), multiple variables
-  if (n_funouts > 1 && !summarize && !is.na(n_iter)) {
+  ##
+  ## Route B2) Multiple variables, with slightly different behaviours based
+  ## on where iterations present.
+  if (n_funouts > 1) {
+
     ## first take care that pars names and funout names are not confused
     if(any(dimnames(e1d42fl5z7b6)[[1]] %in% names(pars))){
       dimnames(e1d42fl5z7b6)[[1]] =
         paste0('funout_', dimnames(e1d42fl5z7b6)[[1]])}
+    ## if, else to control the wrangling based on if multiple simulations present
+    ## nitt is a dummy version of n_iteration which is 1 if there is no interations.
+    if(!is.na(n_iter)) {
+      var_order =  c(2, 1, 3)
+      nitt = n_iter
+    } else {
+      var_order = c(2, 1)
+      nitt = 1
+    }
     ## put in flat format to work with xtabs later
     flat = cbind(
-      as.data.frame(stats::ftable(e1d42fl5z7b6, row.vars = c(2, 1, 3))),
-      apply(pars_grid, 2, rep, n_funouts * n_iter))
+      as.data.frame(stats::ftable(e1d42fl5z7b6, row.vars = var_order)),
+      apply(pars_grid, 2, rep, n_funouts * nitt))
     ## easiest to set dimnames before xtabs
-    colnames(flat)[1:4] = c('parscom', 'fun_out', 'sim', 'value')
+    colnames(flat)[seq_len(length(var_order)+1)] = c(c('fun_out', 'parscom', 'sim')[var_order], 'value')
     out_array = stats::xtabs(value ~ ., data = flat[, -1])
-    dimnames(out_array)[['sim']] = seq_along(dimnames(out_array)[['sim']])
     ## Sort such that the first dimensions are the pars
-    dimnums = seq_along(dim(out_array))
-    pardimnums = dimnums[!(dimnums %in% 1:2)]
-    out_array = aperm(out_array, c(pardimnums, 1:2))
+    L = names(dimnames(out_array)) %in% c('fun_out', 'sim')
+    out_array = aperm(out_array, c(which(!L), which(L)))
     ##'
     ##'
   }
-  ##'
-  ## set attributes of output object
+
+  ## allenr: Ensure the simulation dimension is correctly labelled (regardless of
+  ## which route it took)
+  if(!is.na(n_iter)) {
+    names(dimnames(out_array))[length(dimnames(out_array))] = "sim"
+    dimnames(out_array)[['sim']] = seq_along(dimnames(out_array)[['sim']])
+  }
+
+  ## set attributes of output object. Summarised is FALSE as not summarised yet
   class(out_array) = 'power_array'
   attr(out_array, which = 'sim_function') = fun
   attr(out_array, which = 'sim_function_nval') = n_funouts
   attr(out_array, which = 'pars') = pars
   attr(out_array, which = 'more_args') = more_args
-  attr(out_array, which = 'summarized') = summarize
+
+  attr(out_array, which = 'summarized') = FALSE
   attr(out_array, which = 'n_iter') = n_iter
-  attr(out_array, which = "summary_function") = summary_function
-  attr(out_array, which = "summary_function_name") =
-    ## if it has a name, take the name
-    ifelse (class(substitute(summary_function)) == 'name',
-            substitute(summary_function),
-            ## otherwise ananymous
-            "anonymous function"
-            )
-  attr(out_array,
-       which = 'n_iter') = ifelse(is.na(n_iter), NA, n_iter)
+
+  #' If the array has iterations, and needs summarising, summarise it
+  if((!is.na(n_iter) && summarize)) {
+    out_array = SummarizeSims(out_array, summary_function = summary_function)
+  }
+
   return(out_array)
 }
 
