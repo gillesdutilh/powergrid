@@ -112,7 +112,7 @@
 ##'
 ##' ## Draw a figure illustrating how the required n depends on delta (given an
 ##' ## sd of .7):
-##' PowerPlot(out,
+##' PowerPlot(powarr,
 ##'           slicer = list(sd = .7), # slice out the plane with sd = .7
 ##'           target = .9, # set target power to 90%, defining the thick line
 ##'           example = list(delta = .7) # Highlight the example with arrow
