@@ -45,7 +45,11 @@ applied. If TRUE, future::future_replicate is used internally.}
 \item{n_cores}{Passed on to future_replicate}
 }
 \value{
-An array of class "power_array"
+An array of class "power_array", with attributes containing
+informations about input arguments, summary status, the presence of
+multiple function outputs and more. This object class is handled sensibly
+by functions in package powergrid, including \code{\link{Example}},
+\code{\link{PowerPlot}}, and \code{\link{GridPlot}}.
 }
 \description{
 PowerGrid is an apply-like function, allowing to evaluate a function at the
@@ -57,72 +61,186 @@ is for evaluating statistical power at a grid of assumed parameters.
 }
 \details{
 Function \code{fun} is evaluated at each combination of the argument values
-listed in \code{pars} and its results are stored in an array whose
-dimensions (and \code{dimnames()}) are defined by \code{pars}. If function
-\code{fun} returns more than one value (always as a single vector), the
-array will have an additional dimension, with levels named after the names
-of the returned vector (if given). If n_iter is not NA, function \code{fun}
-is evaluated n_iter times. This will add to the resulting array an
-additional dimension 'sim'.
+listed in \code{pars} and its results are stored in an array of class
+\code{power_array}, whose dimensions (and \code{dimnames()}) are defined by
+\code{pars}. For this to work, the element names of \code{pars} must match
+the argument names of \code{fun}.
+\subsection{Further arguments to \code{fun}}{
 
-The elements of \code{pars} must match the argument names of fun. If input
-parameters are not to be part of the grid, but rather further settings,
-these can be passed on to \code{fun} through the argument \code{more_args}
-as a list with names reflecting the arguments of \code{fun} to be set.
+If input parameters to \code{fun} are not
+to be part of the grid, but rather further settings, these can be passed on
+to \code{fun} through the argument \code{more_args} as a list with names
+reflecting the arguments of \code{fun} to be set.
+}
+
+\subsection{Storing multiple outputs from \code{fun}}{
+
+You may have a function \code{fun} that returns a vector with length larger
+than one, as long as it is a single vector. When \code{fun} returns a vector
+with length larger than one, the power_array will have an additional
+dimension \code{fun_out}, with levels named after the names of \code{fun}'s
+return vector (if given).
+}
+
+\subsection{Evaluating a function over iterations}{
+
+If \code{n_iter} is not NA (the default) but an integer, function \code{fun}
+is evaluated n_iter times. This will add an additional dimension 'sim' to
+the resulting array of class \code{power_array}. If your simulation is heavy, you
+may wanna set \code{parallel = TRUE} and choose the \code{n_cores}, invoking
+parallel computing using t\code{future::future_replicate}.
+
+You may summarize the object with individual iterations across these
+iterations using function \code{\link{SummarizeSims}}. Note that both
+summarized and non-summarized output of \code{PowerGrid} have class
+\code{power_array}. The summary status is saved in the attributes. This allows
+the \code{powergrid} utilities \code{\link{Example}}, \code{\link{PowerPlot}},
+and \code{\link{GridPlot}} to do something sensible also with non-summarized
+objects.
+}
 }
 \examples{
-## ============================================
-## most basic case, power function available:
-## ============================================
+## =======================================================
+## most basic use case, calculating power when
+## power function is available:
+## =======================================================
+
+## Define grid of assumptions to study:
 sse_pars = list(
-  n = seq(from = 10, to = 60, by = 2),
-  delta = seq(from = 0.5, to = 1.5, by = 0.2), ## effect size
-  sd = seq(.1, .9, .2)) ## Standard deviation
+  n = seq(from = 10, to = 60, by = 2),         # sample size
+  delta = seq(from = 0.5, to = 1.5, by = 0.2), # effect size
+  sd = seq(.1, .9, .2))                        # standard deviation
+
+## Define function that calculates power based on these assumptions:
 PowFun <- function(n, delta, sd){
   ptt = power.t.test(n = n/2, delta = delta, sd = sd,
                      sig.level = 0.05)
   return(ptt$power)
 }
-power_array = PowerGrid(pars = sse_pars, fun = PowFun, n_iter = NA)
-##'
-summary(power_array)
 
-## ============================================
-## Multiple outputs are automatically handled
-## ============================================
-TwoValuesFun <- function(n, delta, sd){
-  p5 = power.t.test(n = n, delta = delta, sd = sd, sig.level = .05)$power
-  p1 = power.t.test(n = n, delta = delta, sd = sd, sig.level = .01)$power
-  return(c('p5' = p5, 'p1' = p1))
-}
-##
+## Evaluate at each combination of assumptions: 
+powarr = PowerGrid(pars = sse_pars, fun = PowFun, n_iter = NA)
+summary(powarr)
+
+## =================================
+## Use powergrid utilities on result
+## =================================
+
+## get required sample size n, when delta is .7, sd = .5, for achieving a
+## power of 90\%:
+Example(powarr, example = list(delta = .7, sd = .5), target = .9)
+
+## Draw a figure illustrating how the required n depends on delta (given an
+## sd of .7):
+PowerPlot(powarr,
+          slicer = list(sd = .7), # slice out the plane with sd = .7
+          target = .9, # set target power to 90\%, defining the thick line
+          example = list(delta = .7) # Highlight the example with arrow
+          )
+
+## =======================================================
+## Simulation over iterations when no power
+## function is available
+## =======================================================
+
+## Using the same assumptions as above
 sse_pars = list(
-  n = seq(from = 10, to = 60, by = 2),
+  n = seq(from = 10, to = 60, by = 5),
   delta = seq(from = 0.5, to = 1.5, by = 0.2),
   sd = seq(.5, 1.5, .2))
-array_two_returns = PowerGrid(sse_pars, TwoValuesFun)
-## multiple outputs result in an additional dimension:
-dimnames(array_two_returns)
-summary(array_two_returns)
 
-## ============================================
-## Simulations over iterations
-## ============================================
+## Define a function that results in TRUE or FALSE for a successful or
+## non-successful (5\% significant) simulated trial:
 PowFun <- function(n, delta, sd){
   x1 = rnorm(n = n/2, sd = sd)
   x2 = rnorm(n = n/2, mean = delta, sd = sd)
   t.test(x1, x2)$p.value < .05
 }
+
+## In call to PowerGrid, setting n_iter prompts PowerGrid to evaluate
+## the function iteratively at each combination of assumptions:
+n_iter = 20
+powarr = PowerGrid(pars = sse_pars, fun = PowFun,
+                        n_iter = n_iter)
+
+## By default, the iterations are summarized (by their mean), so:
+dimnames(powarr)
+summary(powarr) # indicates that iterations were summarized (not stored)
+
+## =================================
+## keeping individual iterations
+## =================================
+
+## To keep individual iterations, set summarize to FALSE:
+
+powarr_no_summary = PowerGrid(pars = sse_pars, fun = PowFun,
+                                    n_iter = n_iter , summarize = FALSE)
+dimnames(powarr_no_summary) # additional dimension "sim"
+summary(powarr_no_summary)
+
+## To summarize this object containing iterations, use the SummarizeSims
+## function. Among other things, this assures that attributes relevant for
+## further use in powergrid's functionality are kept intact.
+
+powarr_summarized =
+  SummarizeSims(powarr_no_summary, summary_function = mean)
+dimnames(powarr_summarized)
+summary(powarr_summarized)
+
+## This summarized `power_array` is no different from a version that was
+## directly summarized.
+
+## Note that Example and Powerplot detect when a `power_array` object is not
+#summarized, and behave sensibly with a warning:
+Example(powarr_no_summary, example = list(delta = .7, sd = .5), target = .9)
+
+PowerPlot(powarr_no_summary,
+          slicer = list(sd = .7), # slice out the plane with sd = .7
+          target = .9, # set target power to 90\%, defining the thick line
+          example = list(delta = .7) # Highlight the example with arrow
+          )
+
+#=======================================================
+# Multiple outputs are automatically handled #
+#=======================================================
+
+## Parameter assumptions
 sse_pars = list(
-  n = seq(from = 10, to = 60, by = 5),
+  n = seq(from = 10, to = 60, by = 2),
   delta = seq(from = 0.5, to = 1.5, by = 0.2),
   sd = seq(.5, 1.5, .2))
-##
-n_iter = 20
-power_array = PowerGrid(pars = sse_pars, fun = PowFun,
-                       n_iter = n_iter)
-dimnames(power_array)
-summary(power_array)
+
+## A function with two outputs (the power at two significance levels)
+TwoValuesFun <- function(n, delta, sd){
+  p5 = power.t.test(n = n, delta = delta, sd = sd, sig.level = .05)$power
+  p1 = power.t.test(n = n, delta = delta, sd = sd, sig.level = .01)$power
+  return(c('p5' = p5, 'p1' = p1))
+}
+
+powarr_two_returns = PowerGrid(sse_pars, TwoValuesFun)
+
+## multiple outputs result in an additional dimension:
+dimnames(powarr_two_returns)
+summary(powarr_two_returns)
+
+## note that you need to tell Example and other powergrid functions, which
+## of the outputs you are interested in:
+Example(powarr_two_returns, example = list(delta = .7, sd = .5, fun_out = 'p1'),
+        target = .9)
+
+PowerPlot(powarr_two_returns,
+          slicer = list(sd = .7, fun_out = 'p1'), # slice out the plane with the
+                                                  # output of interest
+          target = .9, # set target power to 90\%, defining the thick line
+          example = list(delta = .7) # Highlight the example with arrow
+          )
+}
+\seealso{
+\code{\link[=Refine]{Refine()}} for adding iterations or parameter combinations to
+exsiting \code{power_array} object, \code{\link[=SummarizeSims]{SummarizeSims()}} for summarizing a
+\code{power_array} object containing individual iterations, \code{\link[=ArraySlicer]{ArraySlicer()}} and
+\code{\link[power_array]{[}} for reducing the dimenstiona of a
+\code{power_array} object, correctly updating its attributes.
 }
 \author{
 Gilles Dutilh
