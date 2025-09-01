@@ -51,6 +51,9 @@
 ##' @param xlim,ylim See \code{?graphics::plot}.
 ##' @param smooth Logical. If TRUE, a 5th order polynomial is fitted though the
 ##'   points constituting each line for smoothing.
+##' @seealso \code{\link{PowerGrid}}, \code{\link{AddExample}},
+##'   \code{\link{Example}}, \code{\link{PowerPlot}} for more basic plotting
+##'   of 2 parameters.
 ##' @return A list with graphical information to use in further plotting.
 ##' @author Gilles Dutilh
 ##' @examples
