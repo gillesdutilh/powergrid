@@ -257,7 +257,8 @@ PowerGrid = function(pars, fun, more_args = NULL, n_iter = NA,
           .mapply(fun, pars_grid, MoreArgs = more_args),
           function(x)unlist(x))))
   }
-  ## Route A3 Parallel simulation using future_replicate
+  ## =================================
+  ## Route A3) Parallel simulation using future_replicate
   if (!is.na(n_iter) && parallel) {
     if (!requireNamespace("future.apply", quietly = TRUE)) {
       stop("Setting argument `parallel' to TRUE requires installation of future.apply", call. = FALSE)}
@@ -339,6 +340,10 @@ PowerGrid = function(pars, fun, more_args = NULL, n_iter = NA,
   ## If the array has iterations, and needs summarising, summarize it
   if((!is.na(n_iter) && summarize)) {
     out_array = SummarizeSims(out_array, summary_function = summary_function)
+  }
+  ## If the object never needed summarizing, it is already summarized:
+  if(is.na(n_iter)) {
+    attr(out_array, which = 'summarized') = TRUE
   }
   return(out_array)
 }
