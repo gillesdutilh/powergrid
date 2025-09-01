@@ -340,7 +340,6 @@ PowerGrid = function(pars, fun, more_args = NULL, n_iter = NA,
   if((!is.na(n_iter) && summarize)) {
     out_array = SummarizeSims(out_array, summary_function = summary_function)
   }
-
   return(out_array)
 }
 
@@ -349,11 +348,10 @@ PowerGrid = function(pars, fun, more_args = NULL, n_iter = NA,
 ## ==================================================================
 ## in order to keep class and other attributes
 
-##' Method for indexing [] of objects of class power_array. The method
-##' makes sure that the resulting array is of class power_array and
-##' keeps and updates the object's attributes. These attributes are
-##' needed for various functions in the powergrid package to work
-##' well.
+##' Method for indexing [] of objects of class power_array. The method makes
+##' sure that the resulting array is of class power_array and keeps and updates
+##' the object's attributes. These attributes are needed for various functions
+##' in the powergrid package to work well.
 ##' ##'
 ##' The indexing functions as normal indexing, but note that drop is
 ##' FALSE by default, so that the resulting array has the same
@@ -366,6 +364,10 @@ PowerGrid = function(pars, fun, more_args = NULL, n_iter = NA,
 ##' @param x object
 ##' @param ... index
 ##' @param drop drop
+##' @seealso
+##' \code{\link{PowerGrid}}
+##' \code{\link{ArraySlicer}} for a different method of reducing the
+##'   dimensions of an array of class power_array.
 ##' @export
 `[.power_array` = function(x, ..., drop = TRUE) {
   the_attributes = attributes(x)
@@ -425,6 +427,8 @@ PowerGrid = function(pars, fun, more_args = NULL, n_iter = NA,
 ##' @title print
 ##' @param x object of class power_array
 ##' @param ... passed on to `cat`
+##' @seealso
+##' \code{\link{PowerGrid}}
 ##' @export
 ##' @author Gilles Dutilh
 print.power_array = function(x, ...){
@@ -486,6 +490,8 @@ print.power_array = function(x, ...){
 ##' @title Summary of power_grid object.
 ##' @param object array of class power_grid
 ##' @param ... passed on to `cat`
+##' @seealso
+##' \code{\link{PowerGrid}}
 ##' @export
 ##' @author Gilles Dutilh
 summary.power_array = function(object, ...){
@@ -556,6 +562,8 @@ summary.power_array = function(object, ...){
 ##' @return An object of class `power_array`, with attributes \code{summarized =
 ##'   TRUE}.
 ##' @author Gilles Dutilh
+##' @seealso
+##' \code{\link{PowerGrid}}
 ##' @export
 SummarizeSims = function(x, summary_function, ...){
   if(attr(x, which = 'summarized') | !inherits(x, 'power_array')){
@@ -595,6 +603,8 @@ SummarizeSims = function(x, summary_function, ...){
 ##' @return An object of with classes c("power_df", "data.frame"), with the same
 ##'   attributes as `x`, aside from array-native attributes (dimnames, dim),
 ##'   plus the data.frame attributes `names` and `row_names`.
+##' @seealso
+##' \code{\link{PowerGrid}}
 ##' @author Gilles Dutilh
 ##' @export
 PowerDF = function(x){
