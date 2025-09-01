@@ -82,6 +82,9 @@
 ##'   summarized across sims using this function.
 ##' @param ... Further arguments are passed on to function `image`
 ##'   internally. Most useful for zooming with xlim and ylim.
+##' @seealso \code{\link{PowerGrid}}, \code{\link{AddExample}},
+##'   \code{\link{Example}}, \code{\link{GridPlot}} for plotting
+##'   interdependencies of 3 parameters.
 ##' @return Nothing
 ##' @author Gilles Dutilh
 ##' @examples
@@ -433,6 +436,7 @@ PowerPlot =
 ##' @param col Color or arrow drawn.
 ##' @param ... Further arguments are passed to the two calls of function
 ##'   \code{graphics::arrows} drawing the nicked arrow.
+##' @seealso \code{\link{PowerPlot}}, \code{\link{GridPlot}}
 ##' @return Nothing
 ##' @author Gilles Dutilh
 ##' @export
