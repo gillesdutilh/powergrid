@@ -94,13 +94,13 @@
 ##' ## What's the minimal sample size n, given the combination of sd and delta.
 ##'
 ##' ## Set up a grid of n, delta and sd:
-##' ##' sse_pars = list(
+##' sse_pars = list(
 ##'   n = seq(from = 10, to = 60, by = 4),
 ##'   delta = seq(from = 0.5, to = 1.5, by = 0.1), # effect size
 ##'   sd = seq(.1, 1.1, .2)) # Standard deviation
 ##'
 ##' ## Define a power function using these parameters:
-##' ##' PowFun <- function(n, delta, sd){ # power for a t-test at alpha = .05
+##' PowFun <- function(n, delta, sd){ # power for a t-test at alpha = .05
 ##'   ptt = power.t.test(n = n/2, delta = delta, sd = sd,
 ##'                      sig.level = 0.05)
 ##'   return(ptt$power)
@@ -111,7 +111,7 @@
 ##'
 ##' ## explore power graphically in the situation where sd = .7, including an
 ##' ## example situation where delta is .9:
-##'##' PowerPlot(power_array,
+##' PowerPlot(power_array,
 ##'           slicer = list(sd = .7),
 ##'           example = list(delta = .9)
 ##'           )
@@ -293,10 +293,10 @@ PowerPlot =
   ##
   ## ============================================
   ## translator for labels; translates if label is available
-  Trans = function(x){
+  Trans = function(x){# Vectorize for mul
     if(!is.null(par_labels)){
-      for(i in seq_along(length(x))){
-        if(x[i] %in% names(par_labels)){x[i] = par_labels[x[i]]}
+      for(i in seq_along(x)){
+        if(x[i] %in% names(par_labels)){x[i] = par_labels[[x[i]]]}
       }
     }
     return(x)
