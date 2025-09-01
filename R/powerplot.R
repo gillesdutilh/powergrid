@@ -9,19 +9,24 @@
 ##'   x-axis) for achieving a certain level of statistical power. The default
 ##'   argument settings reflect this use case.
 ##'
-##'   The plotting is, however, more flexible. For example, one may flip the
-##'   axes by setting a different \code{par_to_search} (which defines the
-##'   y-axis). One may also search not the minimum, as in the case of sample
+##'   ## Flexible plotting
+##'   The plotting is, however, more flexible. 
+##'   ### Any variable on the axes
+##'   You can flip the axes by setting a different \code{par_to_search} (which
+##'   defines the y-axis). The other parameter is automatically chosen to be
+##'   drawn on the x-axis.
+##'   ### Maximizing a parameter
+##'   One may also search not the minimum, as in the case of sample
 ##'   size, but the maximum, e.g., the highest sd at which a certain power may
 ##'   still be achieved. In this case, the \code{par_to_search} is sd, and
 ##'   \code{find_min = FALSE}.
-##'
-##'   Further, in the classic use case, one aims at a *minimal* level of
-##'   power. One may however also aim at, e.g., a *maximal* width of a
-##'   confidence interval. For this purpose, set \code{minimal_target} to
-##'   \code{FALSE}. See Example for more details about `find_min` and
+##'   ### When smaller is better
+##'   In the standard case of power, higher is better, so you search for a
+##'   *minimal* level of power. One may however also aim at, e.g., a *maximal*
+##'   width of a confidence interval. For this purpose, set \code{minimal_target}
+##'   to \code{FALSE}. See Example for more details about `find_min` and
 ##'   `minimal_target`.
-##' @param x An object of class "power_array" (from powergrid).
+##' @param x An object of class `power_array` (from powergrid).
 ##' @param slicer If the parameter grid for which `x' was constructed has more
 ##'   than 2 dimensions, a 2-dimensional slice may be cut out using
 ##'   \code{slicer}, which is a list whose elements define at which values (the
@@ -38,12 +43,12 @@
 ##'   (list element value) of which parameter (list element name) the example is
 ##'   drawn for a power of \code{target}. You may supply a vector longer than 1
 ##'   for multiple examples.
-##' @param method Method used for finding the required \code{par_to_search} needed
-##'   to achieve \code{target}. Either "step": walking in steps along
-##'   \code{par_to_search} or "lm": Interpolating assuming a linear relation
-##'   between \code{par_to_search} and \code{(qnorm(x) + qnorm(1 - 0.05)) ^ 2}. The
-##'   setting "lm" is inspired on the implementation in the \code{sse} package
-##'   by Thomas Fabbro.
+##' @param method Method used for finding the required \code{par_to_search}
+##'   needed to achieve \code{target}. Either \code{step}: walking in steps
+##'   along \code{par_to_search} or \code{lm}: Interpolating assuming a linear
+##'   relation between \code{par_to_search} and \code{(qnorm(x) + qnorm(1 -
+##'   0.05)) ^ 2}. The setting \code{lm} is inspired on the implementation in
+##'   the \code{sse} package by Thomas Fabbro.
 ##' @param target The power (or whatever the target is) for which the example,
 ##'   if requested, is drawn. Also defines which of the power lines is drawn
 ##'   with a thicker line width, among or in addition to the power lines defined
@@ -111,15 +116,16 @@
 ##' AddExample(power_array,
 ##'            slicer = list(sd = .7),
 ##'            example = list(delta = .9),
-##'            method = 'lm',
 ##'            target = .9,
 ##'            col = 'Orange', lwd = 3)
 ##' ## ============================================
 ##' ## Less typical use case:
 ##' ## minimal delta for power, given sd, as a function of n
 ##' ## ============================================
-##' ## note that you can easily change what you search for: At each n, what would be
-##' ## the minimal delta?
+##' ## You can easily change what you search for. For example: At each sample size n,
+##' ## what would be the minimal effect size delta there must be for the target
+##' ## power to be achieved?
+##'
 ##' PowerPlot(power_array,
 ##'           par_to_search = 'delta',
 ##'           slicer = list(sd = .7))
@@ -128,13 +134,22 @@
 ##' ## Less typical use case:
 ##' ## *maximum sd* for power, given n, as a function of delta
 ##' ## ============================================
-##' ## You're not limited to study n at all, nor to searching a minimum: If n is 30, what
-##' ## is the largest sd at which we still find enough power? (as a function of
-##' ## delta on the y-axis)
+##'
+##' ## You're not limited to study n at all, nor to searching a minimum: When
+##' ## your n is given to be 30, what is the largest sd at which we still find
+##' ## enough power? (as a function of delta on the x-axis)
+##' 
 ##' PowerPlot(power_array,
 ##'           par_to_search = 'sd',
 ##'           find_min = FALSE,
 ##'           slicer = list(n = 30))
+##' ## Adding an example works the same: If we expect a delta of 1, and the n =
+##' ## 30, what is the maximal SD we can have still yielding 90% power?
+##' AddExample(power_array,
+##'            find_min = FALSE,
+##'            slicer = list(n = 30),
+##'            example = list(delta = 1),
+##'            target = .9)
 ##' @export
 PowerPlot =
   function(x, # object of class `power_array` or powEx output (class `power`)
