@@ -23,13 +23,16 @@
 ##'   in arrays where some crossings of parameters include more iterations than
 ##'   others. This is a feature, not a bug. May result in less aesthetic
 ##'   plotting, however.
+##'
+##'   For details about handling the random seed, see \code{\link{PowerGrid}}.
 ##' @param old the object of class `power_array` to extend
 ##' @param n_iter_add the number of iterations to *add* to old
 ##' @param pars the new parameter grid to evaluate across
 ##' @param ... further arguments passed on to PowerGrid internally.
 ##' @return object of class `power_array`, containing old, extended by
 ##'   \code{pars} and/or \code{n_iter_add}.
-##' @author Gilles Dutilh
+##' @seealso \code{\link{PowerGrid}}
+@author Gilles Dutilh
 ##' @examples
 ##' ## ============================================
 ##' ## very simple example with one parameter
