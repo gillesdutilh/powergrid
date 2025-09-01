@@ -56,6 +56,7 @@
 ##'   relation between \code{par_to_search} and \code{(qnorm(x) + qnorm(1 -
 ##'   0.05)) ^ 2}. Setting 'lm' is inspired on the implementation in the sse
 ##'   package by Thomas Fabbro.
+##' @seealso \code{\link{PowerGrid}}, \code{\link{Example}}, \code{\link{PowerPlot}}
 ##' @return Returns an array or vector: containing the value that is found for the
 ##'   par_to_search (say, n) meeting the target following above criteria (say,
 ##'   the lowest n for which the power is larger than .9), for each crossing of
