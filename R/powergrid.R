@@ -260,7 +260,7 @@ PowerGrid = function(pars, fun, more_args = NULL, n_iter = NA,
   }
   ## ============================================
   ## save seed
-  if !exists(.Random.seed){set.seed(1)} # need to have one so save
+  if (!exists(.Random.seed)){set.seed(1)} # need to have one so save
   random_seed = .Random.seed
   ## ============================================
   ## fill grid
