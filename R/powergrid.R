@@ -336,7 +336,7 @@ PowerGrid = function(pars, fun, more_args = NULL, n_iter = NA,
   attr(out_array, which = 'summarized') = FALSE
   attr(out_array, which = 'n_iter') = n_iter
 
-  #' If the array has iterations, and needs summarising, summarise it
+  ## If the array has iterations, and needs summarising, summarize it
   if((!is.na(n_iter) && summarize)) {
     out_array = SummarizeSims(out_array, summary_function = summary_function)
   }
