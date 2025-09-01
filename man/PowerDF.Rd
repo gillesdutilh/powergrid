@@ -23,6 +23,9 @@ The class of the data.frame becomes `c("power_df", "data.frame"), enabling
 generics for data.frame. Note that the class "power_df" has currently no
 use but is included for future compatibility.
 }
+\seealso{
+\code{\link{PowerGrid}}
+}
 \author{
 Gilles Dutilh
 }

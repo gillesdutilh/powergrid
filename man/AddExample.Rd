@@ -32,6 +32,9 @@ Nothing
 Add an example arrow to an existing power plot created by
 PowerPlot.
 }
+\seealso{
+\code{\link{PowerPlot}}, \code{\link{GridPlot}}
+}
 \author{
 Gilles Dutilh
 }

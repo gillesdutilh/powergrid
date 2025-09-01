@@ -98,6 +98,19 @@ the \code{powergrid} utilities \code{\link{Example}}, \code{\link{PowerPlot}},
 and \code{\link{GridPlot}} to do something sensible also with non-summarized
 objects.
 }
+
+\subsection{Reproducibility}{
+
+The current status of .Random.seed is stored in the attribute \code{random_seed}
+(which is a list). To reproduce a call of PowerGrid involving randomness,
+precede new call to PowerGrid by .Random.seed = attr(<your_power_array>,
+which = 'random.seed')[\link{1}]. Note that if you Refine() your power_array, the
+.Random.seed at the moment of updating is appended to the random.seed
+attribute. So, to reconstruct a refined power_array, run the original call
+to \code{PowerGrid} after .Random.seed = attr(<your_power_array>, which =
+'random.seed')[\link{1}], and the the call to Refine after .Random.seed =
+attr(<your_power_array>, which = 'random.seed')[\link{2}], etc.
+}
 }
 \examples{
 ## =======================================================
@@ -137,6 +150,20 @@ PowerPlot(powarr,
           target = .9, # set target power to 90\%, defining the thick line
           example = list(delta = .7) # Highlight the example with arrow
           )
+## Slice out a sub-array (making sure attributes stay intact for further use in
+## powergrid):
+
+only_n20_delta1.1 =
+  ArraySlicer(powarr, slicer = list(
+                        n = 20,
+                        delta = 1.1))
+summary(only_n20_delta1.1)
+
+## Indexing may also be used, but note that the name of the remaining dimension
+## is lost. Therefore, use ArraySlicer when you want to keep working with the
+## object in powergrid.
+only_n20_delta1.1 = powarr[n = 20, delta = 1.1, ]
+summary(only_n20_delta1.1)
 
 ## =======================================================
 ## Simulation over iterations when no power

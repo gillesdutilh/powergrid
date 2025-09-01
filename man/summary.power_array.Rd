@@ -17,6 +17,9 @@ range of observed values and the grid evaluated across.
 ##'
 See PowerGrid for details
 }
+\seealso{
+\code{\link{PowerGrid}}
+}
 \author{
 Gilles Dutilh
 }

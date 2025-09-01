@@ -143,6 +143,11 @@ GridPlot(power_array, target = .8,
          x_par = 'sd',
          l_par = 'n', method = 'step')
 }
+\seealso{
+\code{\link{PowerGrid}}, \code{\link{AddExample}},
+\code{\link{Example}}, \code{\link{PowerPlot}} for more basic plotting
+of 2 parameters.
+}
 \author{
 Gilles Dutilh
 }

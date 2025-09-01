@@ -68,7 +68,8 @@ ArraySlicer(power_array,
             slicer = list(alpha = .1, sd = c(.9, .7)))
 }
 \seealso{
-\code{\link{PowerGrid}}
+\code{\link{PowerGrid}}, \verb{[.power_array} for reducing the dimensions of
+an array of class \code{power_array} using [-indexing.
 }
 \author{
 Gilles Dutilh

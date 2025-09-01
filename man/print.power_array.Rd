@@ -17,6 +17,9 @@ Method for printing objects of class power_array.
 Prints a power_array as a default array with a short summary about
 its contents.
 }
+\seealso{
+\code{\link{PowerGrid}}
+}
 \author{
 Gilles Dutilh
 }

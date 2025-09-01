@@ -21,6 +21,9 @@ An object of class \code{power_array}, with attributes \code{summarized =
 Summarizes objects of class \code{power_array} that have individual
 simulations saved across simulations.
 }
+\seealso{
+\code{\link{PowerGrid}}
+}
 \author{
 Gilles Dutilh
 }

@@ -183,6 +183,10 @@ ex_out # note how the printed result indicates that the *maximal permissible SD*
        # was found for a CI of *at most .88*.
 
 }
+\seealso{
+\code{\link{PowerGrid}}, \code{\link{FindTarget}},
+\code{\link{PowerPlot}}, \code{\link{GridPlot}}
+}
 \author{
 Gilles Dutilh
 }

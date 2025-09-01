@@ -124,6 +124,9 @@ n_by_delta_sd = FindTarget(power_array,
 ## what is the minimum n to achieve .85 for different values of delta, sd, and sig_level:
 print(n_by_delta_sd)
 }
+\seealso{
+\code{\link{PowerGrid}}, \code{\link{Example}}, \code{\link{PowerPlot}}
+}
 \author{
 Gilles Dutilh
 }
