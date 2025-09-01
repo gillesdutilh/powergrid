@@ -27,9 +27,17 @@
 ##' the minimal sample size where the expected confidence interval is smaller
 ##' than a certain desired width.
 ##'
+##' Example searches for the minimum or maximum on one parameters (say, the
+##' minimum n) given *one single constellation* of further parameters. However,
+##' you may want to study how, say, the required n (or any other value) depends
+##' on the value of further parameters. The functions PowerPlot and GridPlot
+##' offer plotting functionalities to graphically illustrate such
+##' dependencies. If you want to find "Examples" as a function of parameter
+##' settings and work with these, you can use the workhorse behind 'Example',
+##' PowerPlot and Gridplot, \code{\link{FindTarget}}
 ##' @title Find Combination of Parameters Yielding Desired Value (typically
 ##'   power).
-##' @param x Object of class `power_array` or `power`
+##' @param x Object of class `power_array`
 ##' @param example List with named elements representing the constellation of
 ##'   parameter values for which the example should be found. The names of this
 ##'   list should match the dimension names of `x`, their values should be exact
@@ -37,31 +45,31 @@
 ##' @param target Which value (of typically power) should be achieved at the
 ##'   example.
 ##' @param minimal_target Logical. Set to TRUE if you aim to achieve a minimum
-##'   value (e.g., a power of *at least* 90%), or FALSE if you want to allow a
-##'   maximum value (e.g., the width of the expected CI may be *at most* a
-##'   certain value).
+##'   value (e.g., a power must be *at least* 90%), or FALSE if you want to
+##'   allow a maximum value (e.g., the width of the expected CI may be *at most*
+##'   a certain value).
 ##' @param find_min Logical, indicating whether the example should be found that
 ##'   minimizes a parameter (typically: minimal required n) to achieve the
 ##'   `target` or maximizes this assumption (e.g., maximal allowed SD).
 ##' @param method Character string, indicating how the location of the example
 ##'   is found, passed on internally to `FindTarget`. Either "step": walking in
-##'   steps along `search_par` or "lm": Interpolating assuming a linear relation
-##'   between `search_par` and (qnorm(x) + qnorm(1 - 0.05)) ^ 2. This method
-##'   "lm" is inspired on the implementation in the sse package by Thomas
-##'   Fabbro.
+##'   steps along the parameter of interest or "lm": Interpolating assuming a
+##'   linear relation between the parameter of interest and (qnorm(x) + qnorm(1
+##'   - 0.05)) ^ 2. This method "lm" is inspired on the implementation in the
+##'   sse package by Thomas Fabbro.
 ##' @param summary_function When x' attribute `summarized` is FALSE, x is
 ##'   summarized across sims using this function before searching the example.
-##' @return Returns a list containing:
+##' @return Example returns a list containing:
 ##'
-##' - "requested_example": the parameters at which the power (or whatever the
-##'   values represent) was searched to achieve level `target` (typically
-##'   the minimal power, e.g., .9), searching along parameter `required
+##' - "requested_example": the parameter combination at which the power (or
+##'   whatever the values represent) was searched to achieve level `target`
+##'   (typically the minimal power, e.g., .9), searching along parameter `required
 ##'   name` (typically n).
 ##'
 ##' - "objective": was `required_name` searched to find the "min" or "max" of
-##'   x.
+##'   x?
 ##'
-##' - "target": which value should the power (or any other value) have.
+##' - "target": which value should the power (or any other value) have?
 ##'
 ##' - "required_name": the parameter searched along to find the minimum (or
 ##'   maximized if slot `searched` = 'max') to achieve objective. (typically n)
@@ -72,12 +80,12 @@
 ##' - "searched": was the "min" or "max" for `required_name` searched?
 ##'
 ##' - "minimal_target": Is the target a minimum (TRUE, as typical for power) or a
-##'   maximum (FALSE, e.g., an expected uncertainty level)
+##'   maximum (FALSE, e.g., an expected uncertainty level)?
 ##' @author Gilles Dutilh
 ##' @export
 ##' @examples
 ##' ## ============================================
-##' ## Typical use case: find lowest n for power
+##' ## Typical use case: find lowest n for a certain target power
 ##' ## ============================================
 ##' sse_pars = list(
 ##'   n = seq(from = 10, to = 60, by = 2),
@@ -200,14 +208,10 @@ Example = function(x,
     required_value = FindTarget(slice_to_search,
                                 target = target,
                                 minimal_target = minimal_target,
-                                search_par = 'this is ignored for vector',
+                                par_to_search = 'this is ignored for vector',
                                 find_min = find_min,
                                 method = method)
     required_name = attr(slice_to_search, which = 'dims_left')
-    ## required_name = names(dimnames(slice_to_search))
-    ## x_ex_name = names(margins_toplot)[names(margins_toplot) != par_to_search]
-    ## x_ex_value = example[[x_ex_name]]
-    ## note that "y_ex_name" is not defined, this is par_to_search
     example_list = list(
       requested_example = example,
       objective = ifelse(minimal_target,
