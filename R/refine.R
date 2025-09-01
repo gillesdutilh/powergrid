@@ -32,7 +32,7 @@
 ##' @return object of class `power_array`, containing old, extended by
 ##'   \code{pars} and/or \code{n_iter_add}.
 ##' @seealso \code{\link{PowerGrid}}
-@author Gilles Dutilh
+##' @author Gilles Dutilh
 ##' @examples
 ##' ## ============================================
 ##' ## very simple example with one parameter
