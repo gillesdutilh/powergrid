@@ -150,7 +150,7 @@ FindTarget = function(power_slice,
       lm_pred = stats::predict(lm_out,
                                newdata = data.frame(
                                  trans_pow = SSETrans(target)))
-      if(lm_pred %% 1 != 1) warning(paste("The output with method = 'lm' is rounded up, this makes sense for n but may not for parameters"))
+      if(lm_pred %% 1 != 1) warning(paste("The output with method = 'lm' is rounded up, this si sensible for n but may not be for the current situation.", call. = FALSE))
       lm_pred = ceiling(lm_pred)
       return(lm_pred)
     }
