@@ -177,8 +177,9 @@ Refine = function(old, n_iter_add = 1, pars = NULL, ...){
   copy_attr$dim = dim(new)
   copy_attr$dimnames = dimnames(new)
   copy_attr$n_iter = copy_attr$n_iter + n_iter_add
-  copy_attr$random_seed = c(copy_attr$random_seed, random_seed)
+  copy_attr$random_seed[[length(copy_attr$random_seed) + 1]] = random_seed
   ## set attributes
   attributes(new) = copy_attr
   return(new)
 }
+
