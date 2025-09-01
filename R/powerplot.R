@@ -88,23 +88,37 @@
 ##' ## ============================================
 ##' ## Typical use case: minimal n for power
 ##' ## ============================================
+##' ## What's the minimal sample size n, given the combination of sd and delta.
+##'
+##' ## Set up a grid of n, delta and sd:
+##' 
 ##' sse_pars = list(
 ##'   n = seq(from = 10, to = 60, by = 4),
-##'   delta = seq(from = 0.5, to = 1.5, by = 0.1), ## effect size
-##'   sd = seq(.1, 1.1, .2)) ## Standard deviation
+##'   delta = seq(from = 0.5, to = 1.5, by = 0.1), # effect size
+##'   sd = seq(.1, 1.1, .2)) # Standard deviation
+##'
+##' ## Define a power function using these parameters:
+##' 
 ##' PowFun <- function(n, delta, sd){ # power for a t-test at alpha = .05
 ##'   ptt = power.t.test(n = n/2, delta = delta, sd = sd,
 ##'                      sig.level = 0.05)
 ##'   return(ptt$power)
 ##' }
+##'
+##' ## Evaluat PowFun across the grid defined by sse_pars:
 ##' power_array = PowerGrid(pars = sse_pars, fun = PowFun, n_iter = NA)
-##' ## explore power graphically in teh situation where sd = .7, including example
+##'
+##' ## explore power graphically in the situation where sd = .7, including an
+##' ## example situation where delta is .9:
+##'
 ##' PowerPlot(power_array,
 ##'           slicer = list(sd = .7),
 ##'           example = list(delta = .9)
 ##'           )
+##'
 ##' ## Some graphical adjustments. Note that example is drawn on top of
 ##' ## PowerPlot now.
+##'
 ##' PowerPlot(power_array,
 ##'           slicer = list(sd = .7),
 ##'           par_labels = c(n = 'Total Sample Size',
@@ -118,6 +132,7 @@
 ##'            example = list(delta = .9),
 ##'            target = .9,
 ##'            col = 'Orange', lwd = 3)
+##' 
 ##' ## ============================================
 ##' ## Less typical use case:
 ##' ## minimal delta for power, given sd, as a function of n
@@ -134,7 +149,6 @@
 ##' ## Less typical use case:
 ##' ## *maximum sd* for power, given n, as a function of delta
 ##' ## ============================================
-##'
 ##' ## You're not limited to study n at all, nor to searching a minimum: When
 ##' ## your n is given to be 30, what is the largest sd at which we still find
 ##' ## enough power? (as a function of delta on the x-axis)
@@ -143,8 +157,10 @@
 ##'           par_to_search = 'sd',
 ##'           find_min = FALSE,
 ##'           slicer = list(n = 30))
+##'
 ##' ## Adding an example works the same: If we expect a delta of 1, and the n =
 ##' ## 30, what is the maximal SD we can have still yielding 90% power?
+##' 
 ##' AddExample(power_array,
 ##'            find_min = FALSE,
 ##'            slicer = list(n = 30),
