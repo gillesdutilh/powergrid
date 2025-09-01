@@ -1,8 +1,10 @@
 ##' @title Cut Slice From Array
 ##' @description Cut out a slice from an array. The resulting slice may be
 ##'   single- or multidimensional. The function is intended for arrays of class
-##'   "power_array". Slicing an object will result in an object with added
-##'   attributes that may be used in functionality of the powergrid package.
+##'   "power_array", and makes sure that the resulting array is of class
+##'   power_array and keeps and, where needed, updates the object's
+##'   attributes. These attributes are needed for various functions in the
+##'   powergrid package to work well.
 ##' @details Internally, indexing ([) is used, but the implementation in
 ##'   ArraySlicer is very flexible allowing for any number of dimensions in any
 ##'   order in the \code{slicer} argument. The resulting slice is always an
@@ -17,6 +19,8 @@
 ##'   that, relative to a standard array, some additional attributes are passed
 ##'   to be used in the functions in package \code{powergrid}
 ##' @author Gilles Dutilh
+##' @seealso \code{\link{PowerGrid}}, `[.power_array` for reducing the dimensions of
+##'   an array of class `power_array` using [-indexing.
 ##' @examples
 ##' sse_pars = list(
 ##'   n = seq(from = 20, to = 60, by = 5),
