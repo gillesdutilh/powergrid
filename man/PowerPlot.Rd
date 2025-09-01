@@ -15,6 +15,7 @@ PowerPlot(
   minimal_target = TRUE,
   summary_function = mean,
   target_levels = c(0.8, 0.9, 0.95),
+  col = grDevices::grey.colors(1, 0.2, 0.2),
   shades_of_grey = TRUE,
   shades_legend = FALSE,
   title = NULL,
@@ -46,10 +47,10 @@ maximally allowed SD).}
 drawn for a power of \code{target}. You may supply a vector longer than 1
 for multiple examples.}
 
-\item{method}{Method used for finding the required \code{search_par} needed
+\item{method}{Method used for finding the required \code{par_to_search} needed
 to achieve \code{target}. Either "step": walking in steps along
-\code{search_par} or "lm": Interpolating assuming a linear relation
-between \code{search_par} and \code{(qnorm(x) + qnorm(1 - 0.05)) ^ 2}. The
+\code{par_to_search} or "lm": Interpolating assuming a linear relation
+between \code{par_to_search} and \code{(qnorm(x) + qnorm(1 - 0.05)) ^ 2}. The
 setting "lm" is inspired on the implementation in the \code{sse} package
 by Thomas Fabbro.}
 
@@ -66,6 +67,9 @@ summarized across sims using this function.}
 
 \item{target_levels}{For which levels of power (or whichever variable is
 contained in x) lines are drawn.}
+
+\item{col}{Color for the contour lines. Does not effect eventual example
+arrows. Therefore, use AddExample.}
 
 \item{shades_of_grey}{Logical indicating whether greylevels are painted in
 addition to isolines to show power levels.}

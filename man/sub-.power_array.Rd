@@ -19,17 +19,21 @@
 An array of class \code{power_grid}
 }
 \description{
-Method for indexing [] of objects of class power_array. The method
-makes sure that the resulting array is of class power_array and
-keeps and updates the object's attributes. These attributes are
-needed for various functions in the powergrid package to work
-well.
+Method for indexing [] of objects of class power_array. The method makes
+sure that the resulting array is of class power_array and keeps and updates
+the object's attributes. These attributes are needed for various functions
+in the powergrid package to work well.
 ##'
 The indexing functions as normal indexing, but note that drop is
 FALSE by default, so that the resulting array has the same
 dimensions as the original array. The number of levels at each
 dimension may be reduced, however.
 ##'
+}
+\seealso{
+\code{\link{PowerGrid}}
+\code{\link{ArraySlicer}} for a different method of reducing the
+dimensions of an array of class power_array.
 }
 \author{
 Gilles Dutilh

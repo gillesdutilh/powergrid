@@ -38,7 +38,7 @@
 ##' @title Find Target Power or Other Value
 ##' @param power_slice An array, most commonly of class `power_array`, possibly
 ##'   the result of taking a slice of an object of class \code{power_array}
-##'   using \code{\link{array_slicer}} or the power_array []-indexing method.
+##'   using \code{\link{ArraySlicer}} or the power_array []-indexing method.
 ##' @param target The required value in the power_slice (e.g., .9, if the values
 ##'   represent power)
 ##' @param minimal_target Is the target a minimum (e.g., the power) or a maximum

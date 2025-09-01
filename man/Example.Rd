@@ -16,7 +16,7 @@ Example(
 )
 }
 \arguments{
-\item{x}{Object of class \code{power_array} or \code{power}}
+\item{x}{Object of class \code{power_array}}
 
 \item{example}{List with named elements representing the constellation of
 parameter values for which the example should be found. The names of this
@@ -27,9 +27,9 @@ values available at these dimensions. See example for an illustration.}
 example.}
 
 \item{minimal_target}{Logical. Set to TRUE if you aim to achieve a minimum
-value (e.g., a power of \emph{at least} 90\%), or FALSE if you want to allow a
-maximum value (e.g., the width of the expected CI may be \emph{at most} a
-certain value).}
+value (e.g., a power must be \emph{at least} 90\%), or FALSE if you want to
+allow a maximum value (e.g., the width of the expected CI may be \emph{at most}
+a certain value).}
 
 \item{find_min}{Logical, indicating whether the example should be found that
 minimizes a parameter (typically: minimal required n) to achieve the
@@ -37,30 +37,32 @@ minimizes a parameter (typically: minimal required n) to achieve the
 
 \item{method}{Character string, indicating how the location of the example
 is found, passed on internally to \code{FindTarget}. Either "step": walking in
-steps along \code{search_par} or "lm": Interpolating assuming a linear relation
-between \code{search_par} and (qnorm(x) + qnorm(1 - 0.05)) ^ 2. This method
-"lm" is inspired on the implementation in the sse package by Thomas
-Fabbro.}
+steps along the parameter of interest or "lm": Interpolating assuming a
+linear relation between the parameter of interest and (qnorm(x) + qnorm(1
+\itemize{
+\item 0.05)) ^ 2. This method "lm" is inspired on the implementation in the
+sse package by Thomas Fabbro.
+}}
 
 \item{summary_function}{When x' attribute \code{summarized} is FALSE, x is
 summarized across sims using this function before searching the example.}
 }
 \value{
-Returns a list containing:
+Example returns a list containing:
 \itemize{
-\item "requested_example": the parameters at which the power (or whatever the
-values represent) was searched to achieve level \code{target} (typically
-the minimal power, e.g., .9), searching along parameter \verb{required name} (typically n).
+\item "requested_example": the parameter combination at which the power (or
+whatever the values represent) was searched to achieve level \code{target}
+(typically the minimal power, e.g., .9), searching along parameter \verb{required name} (typically n).
 \item "objective": was \code{required_name} searched to find the "min" or "max" of
-x.
-\item "target": which value should the power (or any other value) have.
+x?
+\item "target": which value should the power (or any other value) have?
 \item "required_name": the parameter searched along to find the minimum (or
 maximized if slot \code{searched} = 'max') to achieve objective. (typically n)
 \item "required_value": the minimum (or maximum if \code{searched} = "max") for
 parameter \code{required_name} (which is typically n)
 \item "searched": was the "min" or "max" for \code{required_name} searched?
 \item "minimal_target": Is the target a minimum (TRUE, as typical for power) or a
-maximum (FALSE, e.g., an expected uncertainty level)
+maximum (FALSE, e.g., an expected uncertainty level)?
 }
 }
 \description{
@@ -93,10 +95,19 @@ setting \code{minimal_target} to FALSE. This allows to search, for example, for
 the minimal sample size where the expected confidence interval is smaller
 than a certain desired width.
 }
+
+Example searches for the minimum or maximum on one parameters (say, the
+minimum n) given \emph{one single constellation} of further parameters. However,
+you may want to study how, say, the required n (or any other value) depends
+on the value of further parameters. The functions PowerPlot and GridPlot
+offer plotting functionalities to graphically illustrate such
+dependencies. If you want to find "Examples" as a function of parameter
+settings and work with these, you can use the workhorse behind 'Example',
+PowerPlot and Gridplot, \code{\link{FindTarget}}
 }
 \examples{
 ## ============================================
-## Typical use case: find lowest n for power
+## Typical use case: find lowest n for a certain target power
 ## ============================================
 sse_pars = list(
   n = seq(from = 10, to = 60, by = 2),

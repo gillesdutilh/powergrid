@@ -22,8 +22,10 @@ to be used in the functions in package \code{powergrid}
 \description{
 Cut out a slice from an array. The resulting slice may be
 single- or multidimensional. The function is intended for arrays of class
-"power_array". Slicing an object will result in an object with added
-attributes that may be used in functionality of the powergrid package.
+"power_array", and makes sure that the resulting array is of class
+power_array and keeps and, where needed, updates the object's
+attributes. These attributes are needed for various functions in the
+powergrid package to work well.
 }
 \details{
 Internally, indexing ([) is used, but the implementation in
@@ -64,6 +66,9 @@ ArraySlicer(power_array,
 ## Cut out multiple levels from one dimension
 ArraySlicer(power_array,
             slicer = list(alpha = .1, sd = c(.9, .7)))
+}
+\seealso{
+\code{\link{PowerGrid}}
 }
 \author{
 Gilles Dutilh
