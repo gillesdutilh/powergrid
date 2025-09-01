@@ -59,6 +59,8 @@
 ##'   sse package by Thomas Fabbro.
 ##' @param summary_function When x' attribute `summarized` is FALSE, x is
 ##'   summarized across sims using this function before searching the example.
+##' @seealso \code{\link{PowerGrid}}, \code{\link{FindTarget}},
+##'   \code{\link{PowerPlot}}, \code{\link{GridPlot}}
 ##' @return Example returns a list containing:
 ##'
 ##' - "requested_example": the parameter combination at which the power (or
@@ -189,7 +191,6 @@ Example = function(x,
   if (method == 'lm' && any(target %in% 0:1)){
     stop(PrintWrap("Method is set to 'lm', which only makes sense for power as a function of n. Searching for a power of 1 or 0 is not supported by this package. For help achieving a power of 1 or 0, see a priest or a shrink, respectively."))}
   if (all(class(x) != 'power_array' &
-          class(x) != 'pseudo_power_array_by_plotpower' &
           !inherits(x, 'power'))){
     ## just throw an error (may be implemented later)
     stop("The object 'x' should be of class 'power_array' or 'powCalc' (from package 'sse'). ")
@@ -198,8 +199,7 @@ Example = function(x,
   ## =======================================================
   ## If the input is not rejected, adjust atypical input.
   ##
-  if (all(class(x) %in% c('power_array',
-                          'pseudo_power_array_by_plotpower'))){
+  if (all(class(x) =='power_array')){
     ## =========================================================================
     ## Standard situation: -----------------------------------------------------
     ## when it is a regular `power_array` object, find the min/max for target
