@@ -365,7 +365,7 @@ PowerGrid = function(pars, fun, more_args = NULL, n_iter = NA,
 
   attr(out_array, which = 'summarized') = FALSE
   attr(out_array, which = 'n_iter') = n_iter
-  attr(out_array, random.seed = random.seed)
+  attr(out_array, which = 'random_seed') = list("original" = random_seed)
   
   ## If the array has iterations, and needs summarising, summarize it
   if((!is.na(n_iter) && summarize)) {
