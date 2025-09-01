@@ -117,6 +117,13 @@
 ##'           target = .9, # set target power to 90%, defining the thick line
 ##'           example = list(delta = .7) # Highlight the example with arrow
 ##'           )
+##' ## Slice out a sub-array (making sure attributes stay intact for further use in
+##' ## powergrid):
+##' only_n20_delta1.1 =
+##'   ArraySlicer(powarr, slicer = list(
+##'                         n = 20,
+##'                         delta = 1.1))
+##' summary(only_n20_delta1.1)
 ##'
 ##' ## =======================================================
 ##' ## Simulation over iterations when no power
@@ -345,6 +352,7 @@ PowerGrid = function(pars, fun, more_args = NULL, n_iter = NA,
   if(is.na(n_iter)) {
     attr(out_array, which = 'summarized') = TRUE
   }
+
   return(out_array)
 }
 
