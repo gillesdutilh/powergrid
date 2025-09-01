@@ -105,6 +105,8 @@
 ##' @export
 Refine = function(old, n_iter_add = 1, pars = NULL, ...){
   if (is.null(pars)) {pars = attr(old, 'pars')}
+  ## save seed
+  random_seed = .Random.seed
   ## copy the original attributes to add later
   copy_attr = attributes(old)
   ## number of zeros later needed for iter-dimension
@@ -175,6 +177,7 @@ Refine = function(old, n_iter_add = 1, pars = NULL, ...){
   copy_attr$dim = dim(new)
   copy_attr$dimnames = dimnames(new)
   copy_attr$n_iter = copy_attr$n_iter + n_iter_add
+  copy_attr$random_seed = c(copy_attr$random_seed, random_seed)
   ## set attributes
   attributes(new) = copy_attr
   return(new)
