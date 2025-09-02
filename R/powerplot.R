@@ -1,4 +1,5 @@
-##' @title Create Power Plot
+##' @title Plot the relation between assumed parameters and
+##'   requirements for achieving a target power (or other objective)
 ##' @description Plot (a slice of) an object of class \code{power_array}. Main
 ##'   purpose is to illustrate the relation between two parameters (e.g., effect
 ##'   size on the x-axis and n on the y-axis) for a given target power. An
@@ -425,7 +426,7 @@ PowerPlot =
 
 ## ======================================================= lower level function
 ## for plotting example =======================================================
-##' @title Add an example to an existing power plot
+##' @title Add an example to an existing PowerPlot or GridPlot
 ##' @description Add an example arrow to an existing power plot created by
 ##'   PowerPlot.
 ##'
