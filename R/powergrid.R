@@ -466,8 +466,8 @@ PowerGrid = function(pars, fun, more_args = NULL, n_iter = NA,
 ##' @param ... passed on to `cat`
 ##' @seealso
 ##' \code{\link{PowerGrid}}
-##' @export
 ##' @author Gilles Dutilh
+##' @export
 print.power_array = function(x, ...){
   print.table(x)
   note_type_created_by = paste0(
@@ -529,8 +529,8 @@ print.power_array = function(x, ...){
 ##' @param ... passed on to `cat`
 ##' @seealso
 ##' \code{\link{PowerGrid}}
-##' @export
 ##' @author Gilles Dutilh
+##' @export
 summary.power_array = function(object, ...){
   aa = attributes(object)
   parnames = names(aa$dimnames[!(names(aa$dimnames) %in% c('sim', 'fun_out'))])
