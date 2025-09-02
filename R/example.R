@@ -237,12 +237,11 @@ Example = function(x,
 ##'
 ##' Print short informative output for object of class `power_example`.
 ##'
-##' @title Print Example
+##' @title Print example
 ##' @param x object of class `power_example`
 ##' @param ... passed on to `cat`
 ##' @return nothing
 ##' @author Gilles Dutilh
-##' @export
 print.power_example = function(x, ...){
   description =
     ifelse(x$method == 'lm',
@@ -291,12 +290,11 @@ print.power_example = function(x, ...){
 ##'
 ##' Print longer informative output for object of class `power_example`.
 ##'
-##' @title Print Example
+##' @title Print contents of an example
 ##' @param object object of class `power_example`
 ##' @param ... passed on to `data.frame` (which is the thing that is printed)
 ##' @return nothing
 ##' @author Gilles Dutilh
-##' @export
 summary.power_example = function(object, ...){
   data.frame('example' = unlist(object), ...)
 }
