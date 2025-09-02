@@ -26,6 +26,7 @@ ScaleRange = function(x, a, b){
 ##' @return a character string with returns placed such to achieve the desired
 ##'   width
 ##' @author Gilles Dutilh
+##' @export
 PrintWrap = function(x,
                      ## width = 0.5 * (getOption("width") - 3), ...){
                      width = 48, ...){
@@ -44,6 +45,7 @@ PrintWrap = function(x,
 ##' @param ... Further arguments passed to 'strwrap()'
 ##' @return a character string of nchar `width`
 ##' @author Gilles Dutilh
+##' @export
 PrintDashes = function(symbol = '=', width = 48, ...)
 {
   paste(rep(symbol, width), collapse = '')
