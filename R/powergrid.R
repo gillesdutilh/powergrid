@@ -59,7 +59,7 @@
 ##' 'random.seed')[[1]]}, and the the call to Refine after \code{.Random.seed =
 ##' attr(<your_power_array>, which = 'random.seed')[[2]]}, etc.
 ##'
-##' @title Evaluate Function (iteratively) at Grid of Input Arguments
+##' @title Evaluate function (iteratively) at a grid of input arguments
 ##' @param pars A list where each element is a vector of values named as one of
 ##'   the arguments of \code{fun}. `fun` is applied to the full grid crossing
 ##'   the values of each of these parameters.
