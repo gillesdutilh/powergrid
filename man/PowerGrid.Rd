@@ -103,13 +103,13 @@ objects.
 
 The current status of .Random.seed is stored in the attribute \code{random_seed}
 (which is a list). To reproduce a call of PowerGrid involving randomness,
-precede new call to PowerGrid by .Random.seed = attr(<your_power_array>,
-which = 'random.seed')[\link{1}]. Note that if you Refine() your power_array, the
+precede new call to PowerGrid by \code{.Random.seed = attr(<your_power_array>,
+which = 'random.seed')[[1]]}. Note that if you Refine() your power_array, the
 .Random.seed at the moment of updating is appended to the random.seed
 attribute. So, to reconstruct a refined power_array, run the original call
-to \code{PowerGrid} after .Random.seed = attr(<your_power_array>, which =
-'random.seed')[\link{1}], and the the call to Refine after .Random.seed =
-attr(<your_power_array>, which = 'random.seed')[\link{2}], etc.
+to \code{PowerGrid} after \code{.Random.seed = attr(<your_power_array>, which =
+'random.seed')[[1]]}, and the the call to Refine after \code{.Random.seed =
+attr(<your_power_array>, which = 'random.seed')[[2]]}, etc.
 }
 }
 \examples{

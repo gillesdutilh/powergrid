@@ -51,13 +51,13 @@
 ##'
 ##' The current status of .Random.seed is stored in the attribute `random_seed`
 ##' (which is a list). To reproduce a call of PowerGrid involving randomness,
-##' precede new call to PowerGrid by .Random.seed = attr(<your_power_array>,
-##' which = 'random.seed')[[1]]. Note that if you Refine() your power_array, the
+##' precede new call to PowerGrid by \code{.Random.seed = attr(<your_power_array>,
+##' which = 'random.seed')[[1]]}. Note that if you Refine() your power_array, the
 ##' .Random.seed at the moment of updating is appended to the random.seed
 ##' attribute. So, to reconstruct a refined power_array, run the original call
-##' to `PowerGrid` after .Random.seed = attr(<your_power_array>, which =
-##' 'random.seed')[[1]], and the the call to Refine after .Random.seed =
-##' attr(<your_power_array>, which = 'random.seed')[[2]], etc.
+##' to `PowerGrid` after \code{.Random.seed = attr(<your_power_array>, which =
+##' 'random.seed')[[1]]}, and the the call to Refine after \code{.Random.seed =
+##' attr(<your_power_array>, which = 'random.seed')[[2]]}, etc.
 ##'
 ##' @title Evaluate Function (iteratively) at Grid of Input Arguments
 ##' @param pars A list where each element is a vector of values named as one of

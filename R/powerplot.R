@@ -428,6 +428,29 @@ PowerPlot =
 ##' @title Add an example to an existing power plot
 ##' @description Add an example arrow to an existing power plot created by
 ##'   PowerPlot.
+##'
+##' ## arguments \code{slicer} and \code{example}
+##'
+##' `AddExample` is a higher level plotting function, so it does not know
+##' anything about the figure it draws on top off. Therefore, you need to supply
+##' the same arguments \code{x} and \code{slicer} that you supplied to the
+##' \code{\link{PowerPlot}} you are drawing on top off: With \code{slicer} you
+##' define the plotted plain, with \code{example} the value on the x-axis where
+##' the arrow starts.
+##'
+##' When drawing arrows on top of a \code{\link{GridPlot}}, AddExample cannot
+##' guess which dimensions defined lines, and which defined the axes. Therefore,
+##' you need to make an even more explicit \code{slicer}, which defines the line
+##' that you want the example on. See examples for an illustration.
+##'
+##' ## multiple examples
+##'
+##' Argument \code{example} may contain a vector with length longer than one to
+##' draw multiple examples. Note that these examples should always be on one
+##' line, in one plain. In particular when drawing on top of a \code{GridPlot},
+##' be aware that you can't draw examples on two different lines in one call of
+##' \code{AddExample}.
+##' 
 ##' @param x,slicer,example,target,minimal_target,find_min,method See help for
 ##'   \code{PowerPlot}.
 ##' @param col Color or arrow drawn.

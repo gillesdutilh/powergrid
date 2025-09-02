@@ -16,7 +16,7 @@ GridPlot(
   method = "step",
   minimal_target = TRUE,
   find_min = TRUE,
-  col = grDevices::grey.colors(length(dimnames(x)[[l_par]])),
+  col = NULL,
   title = NULL,
   xlim = NULL,
   ylim = NULL,
