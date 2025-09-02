@@ -242,6 +242,7 @@ Example = function(x,
 ##' @param ... passed on to `cat`
 ##' @return nothing
 ##' @author Gilles Dutilh
+##' @export
 print.power_example = function(x, ...){
   description =
     ifelse(x$method == 'lm',
