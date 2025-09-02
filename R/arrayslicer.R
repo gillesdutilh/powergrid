@@ -1,4 +1,4 @@
-##' @title Cut Slice From Array
+##' @title Cut slice from array (typically of class `power_array`)
 ##' @description Cut out a slice from an array. The resulting slice may be
 ##'   single- or multidimensional. The function is intended for arrays of class
 ##'   "power_array", and makes sure that the resulting array is of class
