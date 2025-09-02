@@ -295,6 +295,7 @@ print.power_example = function(x, ...){
 ##' @param ... passed on to `data.frame` (which is the thing that is printed)
 ##' @return nothing
 ##' @author Gilles Dutilh
+##' @export
 summary.power_example = function(object, ...){
   data.frame('example' = unlist(object), ...)
 }
