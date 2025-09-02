@@ -2,7 +2,7 @@
 % Please edit documentation in R/example.R
 \name{summary.power_example}
 \alias{summary.power_example}
-\title{Print Example}
+\title{Print contents of an example}
 \usage{
 \method{summary}{power_example}(object, ...)
 }

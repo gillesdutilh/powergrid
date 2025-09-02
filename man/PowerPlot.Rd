@@ -2,7 +2,8 @@
 % Please edit documentation in R/powerplot.R
 \name{PowerPlot}
 \alias{PowerPlot}
-\title{Create Power Plot}
+\title{Plot the relation between assumed parameters and
+requirements for achieving a target power (or other objective)}
 \usage{
 PowerPlot(
   x,

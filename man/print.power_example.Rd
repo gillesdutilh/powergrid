@@ -2,7 +2,7 @@
 % Please edit documentation in R/example.R
 \name{print.power_example}
 \alias{print.power_example}
-\title{Print Example}
+\title{Print example}
 \usage{
 \method{print}{power_example}(x, ...)
 }

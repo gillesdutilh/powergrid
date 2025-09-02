@@ -2,7 +2,7 @@
 % Please edit documentation in R/powerplot.R
 \name{AddExample}
 \alias{AddExample}
-\title{Add an example to an existing power plot}
+\title{Add an example to an existing PowerPlot or GridPlot}
 \usage{
 AddExample(
   x,

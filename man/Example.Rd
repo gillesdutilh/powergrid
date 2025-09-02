@@ -2,8 +2,8 @@
 % Please edit documentation in R/example.R
 \name{Example}
 \alias{Example}
-\title{Find Combination of Parameters Yielding Desired Value (typically
-power).}
+\title{Find combination of parameters required for achieving a desired power
+(or other objective).}
 \usage{
 Example(
   x,

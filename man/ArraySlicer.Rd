@@ -2,7 +2,7 @@
 % Please edit documentation in R/arrayslicer.R
 \name{ArraySlicer}
 \alias{ArraySlicer}
-\title{Cut Slice From Array}
+\title{Cut slice from array (typically of class \code{power_array})}
 \usage{
 ArraySlicer(x, slicer = NULL)
 }

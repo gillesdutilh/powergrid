@@ -23,3 +23,4 @@ width. Is used in package in combination with PrintWrap.
 \author{
 Gilles Dutilh
 }
+\keyword{internal}

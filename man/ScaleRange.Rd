@@ -2,7 +2,7 @@
 % Please edit documentation in R/misc.R
 \name{ScaleRange}
 \alias{ScaleRange}
-\title{Scale to desired range}
+\title{Scale a vector to have a desired range}
 \usage{
 ScaleRange(x, a, b)
 }
@@ -22,3 +22,4 @@ Linear scaling of a vector to a vector with a required range.
 \author{
 Gilles Dutilh
 }
+\keyword{internal}

@@ -2,7 +2,7 @@
 % Please edit documentation in R/findtarget.R
 \name{FindTarget}
 \alias{FindTarget}
-\title{Find Target Power or Other Value}
+\title{Find requirements for target power (or other objective)}
 \usage{
 FindTarget(
   power_slice,

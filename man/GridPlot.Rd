@@ -2,7 +2,8 @@
 % Please edit documentation in R/gridplot.R
 \name{GridPlot}
 \alias{GridPlot}
-\title{Plot Combinations of Parameters for Achieving Target}
+\title{Plot requirements for achieving a target power as a function of
+assumptions about two parameters}
 \usage{
 GridPlot(
   x,

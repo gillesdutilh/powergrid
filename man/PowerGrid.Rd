@@ -2,7 +2,7 @@
 % Please edit documentation in R/powergrid.R
 \name{PowerGrid}
 \alias{PowerGrid}
-\title{Evaluate Function (iteratively) at Grid of Input Arguments}
+\title{Evaluate function (iteratively) at a grid of input arguments}
 \usage{
 PowerGrid(
   pars,

@@ -2,7 +2,7 @@
 % Please edit documentation in R/refine.R
 \name{Refine}
 \alias{Refine}
-\title{Refine or Extend Power Array}
+\title{Refine or extend the result of PowerGrid}
 \usage{
 Refine(old, n_iter_add = 1, pars = NULL, ...)
 }
