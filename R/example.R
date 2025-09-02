@@ -84,7 +84,6 @@
 ##' - "minimal_target": Is the target a minimum (TRUE, as typical for power) or a
 ##'   maximum (FALSE, e.g., an expected uncertainty level)?
 ##' @author Gilles Dutilh
-##' @export
 ##' @examples
 ##' ## ============================================
 ##' ## Typical use case: find lowest n for a certain target power
@@ -162,6 +161,7 @@
 ##' ex_out # note how the printed result indicates that the *maximal permissible SD*
 ##'        # was found for a CI of *at most .88*.
 ##'
+##' @export
 Example = function(x,
                    example = NULL,
                    target = NULL,
