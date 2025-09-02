@@ -35,7 +35,7 @@
 ##' \code{FindTarget} may most often be implicitly called inside
 ##' \code{\link{Example}}, \code{\link{PowerPlot}} or \code{\link{GridPlot}}.
 ##'
-##' @title Find Target Power or Other Value
+##' @title Find requirements for target power (or other objective)
 ##' @param power_slice An array, most commonly of class `power_array`, possibly
 ##'   the result of taking a slice of an object of class \code{power_array}
 ##'   using \code{\link{ArraySlicer}} or the power_array []-indexing method.
