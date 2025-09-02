@@ -211,27 +211,24 @@ PowerPlot =
   ## =======================================================
   ##
   if (!is.null(example)){
-    if (all(class(x) != 'power')){ # power objects already have example
-      ## how many examples given for each par:
-      ns_example = sapply(example, function(x)length(x))[[1]]
-      ## Prepare example for figure.
-      y_ex_value = numeric(ns_example)
-      x_ex_name = numeric(ns_example)
-      x_ex_value = numeric(ns_example)
-      for (example_i in 1:ns_example){
-        cur_example = lapply(example, function(x)x[example_i])
-        example_list =
-          Example(power_array,
-                  example = append(slicer, cur_example),
-                  target = target, minimal_target = minimal_target,
-                  find_min = find_min, method = method)
-        y_ex_value[example_i] = example_list$required_value
-        x_ex_name[example_i] = names(cur_example)
-        x_ex_value[example_i] = cur_example[[x_ex_name[example_i]]]
-      }
+    ## how many examples given for each par:
+    ns_example = sapply(example, function(x)length(x))[[1]]
+    ## Prepare example for figure.
+    y_ex_value = numeric(ns_example)
+    x_ex_name = numeric(ns_example)
+    x_ex_value = numeric(ns_example)
+    for (example_i in 1:ns_example){
+      cur_example = lapply(example, function(x)x[example_i])
+      example_list =
+        Example(ArraySlicer(power_array, slicer = slicer),
+                example = cur_example,
+                target = target, minimal_target = minimal_target,
+                find_min = find_min, method = method)
+      y_ex_value[example_i] = example_list$required_value
+      x_ex_name[example_i] = names(cur_example)
+      x_ex_value[example_i] = cur_example[[x_ex_name[example_i]]]
     }
   }
-
   ## =======================================================
   ## take slice that should be plotted
   ## =======================================================
