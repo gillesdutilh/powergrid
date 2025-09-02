@@ -266,7 +266,7 @@ PowerPlot(powarr_two_returns,
 \code{\link[=Refine]{Refine()}} for adding iterations or parameter combinations to
 exsiting \code{power_array} object, \code{\link[=SummarizeSims]{SummarizeSims()}} for summarizing a
 \code{power_array} object containing individual iterations, \code{\link[=ArraySlicer]{ArraySlicer()}} and
-\code{\link[power_array]{[}} for reducing the dimenstiona of a
+\verb{[.power_array} for reducing the dimenstiona of a
 \code{power_array} object, correctly updating its attributes.
 }
 \author{

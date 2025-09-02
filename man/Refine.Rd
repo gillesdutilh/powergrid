@@ -37,6 +37,8 @@ Note that certain combinations of \code{pars} and \code{n_iter_add} result
 in arrays where some crossings of parameters include more iterations than
 others. This is a feature, not a bug. May result in less aesthetic
 plotting, however.
+
+For details about handling the random seed, see \code{\link{PowerGrid}}.
 }
 \examples{
 ## ============================================
@@ -110,6 +112,9 @@ PowerPlot(power_array_up,
           summary_function = function(x)mean(x, na.rm = TRUE),
           title = 'Zoomed in')
 layout(1)
+}
+\seealso{
+\code{\link{PowerGrid}}
 }
 \author{
 Gilles Dutilh

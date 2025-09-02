@@ -89,7 +89,7 @@
 ##' @seealso [Refine()] for adding iterations or parameter combinations to
 ##'   exsiting `power_array` object, [SummarizeSims()] for summarizing a
 ##'   `power_array` object containing individual iterations, [ArraySlicer()] and
-##'   \code{\link[power_array]{[}} for reducing the dimenstiona of a
+##'   `[.power_array` for reducing the dimenstiona of a
 ##'   `power_array` object, correctly updating its attributes.
 ##' @examples
 ##' ## =======================================================
