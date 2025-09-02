@@ -45,7 +45,6 @@ PrintWrap = function(x,
 ##' @param ... Further arguments passed to 'strwrap()'
 ##' @return a character string of nchar `width`
 ##' @author Gilles Dutilh
-##' @export
 PrintDashes = function(symbol = '=', width = 48, ...)
 {
   paste(rep(symbol, width), collapse = '')
