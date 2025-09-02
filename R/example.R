@@ -35,8 +35,8 @@
 ##' dependencies. If you want to find "Examples" as a function of parameter
 ##' settings and work with these, you can use the workhorse behind 'Example',
 ##' PowerPlot and Gridplot, \code{\link{FindTarget}}
-##' @title Find Combination of Parameters Yielding Desired Value (typically
-##'   power).
+##' @title Find combination of parameters required for achieving a desired power
+##'   (or other objective).
 ##' @param x Object of class `power_array`
 ##' @param example List with named elements representing the constellation of
 ##'   parameter values for which the example should be found. The names of this
