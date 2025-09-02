@@ -7,7 +7,7 @@
 ## 2) to evaluate a function on additional locations of the parameter
 ## grid.
 
-##' @title Refine or Extend Power Array
+##' @title Refine or extend the result of PowerGrid
 ##' @description Add further results to an existing power_array (created by
 ##'   PowerGrid or by another call of Refine), adding further values in
 ##'   \code{pars} and/or larger \code{n_iter}.
