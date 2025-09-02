@@ -118,7 +118,7 @@ GridPlot = function(x,
                           method = 'step',
                           minimal_target = TRUE,
                           find_min = TRUE,
-                          col = grDevices::grey.colors(length(dimnames(x)[[l_par]])),
+                          col = NULL,
                           title = NULL,
                           xlim = NULL,
                           ylim = NULL,
@@ -137,13 +137,25 @@ GridPlot = function(x,
   ## save current par settings
   old_par <- graphics::par(no.readonly = TRUE)
 
+  ## =================================
   ## process input
+  ## =================================
   x = ArraySlicer(x, slicer)
-  if(is.null(y_par))y_par = names(dimnames(x))[1]
-  if(is.null(x_par))x_par = names(dimnames(x))[2]
-  if(is.null(l_par))l_par = names(dimnames(x))[3]
+  ## When no dimensions defined, just guess
+  if(is.null(y_par)){y_par = names(dimnames(x))[1]}
+  if(is.null(x_par)){x_par = names(dimnames(x))[2]}
+  if(is.null(l_par)){l_par = names(dimnames(x))[3]}
   ##
-
+  ## define colors
+  if (is.null(col)){
+    col = grDevices::grey.colors(length(dimnames(x)[[l_par]]))
+  } else {
+    if (length(col) != length(dimnames(x)[[l_par]])){
+      stop('Length of argument col must be equal to the number of lines to be drawn, as defined by the levels of dimension `l_par` of `x` after eventual slicing.')
+    }
+  }
+  names(col) = dimnames(x)[[l_par]]
+  
   ## order dimensions of input, so that we plot the right dimensions
   ## against eachother. Correct attributes while doing so
   attributes_x = attributes(x)
@@ -152,6 +164,9 @@ GridPlot = function(x,
   attributes_x$dim = attributes(x)$dim
   attributes(x) = attributes_x
 
+  ## =================================
+  ## Prepare graphical coordinates
+  ## =================================
   ## find min or max to plot
   y_rec = FindTarget(x, target = target,# min or max required of
                                         # y_par
@@ -159,12 +174,16 @@ GridPlot = function(x,
                      find_min = find_min,
                      minimal_target = minimal_target,
                      method = method)
-  names(col) = dimnames(x)[[l_par]]
+
+  ## declare line coordinate containers
   xvals = as.numeric(dimnames(x)[[x_par]])
   yvals = as.numeric(dimnames(x)[[y_par]])
+  ## plotting limits
   if (is.null(xlim)){xlim = range(xvals)}
   if (is.null(ylim)){ylim = range(yvals)}
-  ## drawing graph
+  ## =================================
+  ## draw graph
+  ## =================================
   graphics::par(las = 1)
   at_x = pretty(xvals[xvals >= xlim[1] & xvals <= xlim[2]])
   at_y = pretty(yvals[yvals >= ylim[1] & yvals <= ylim[2]])
@@ -185,19 +204,28 @@ GridPlot = function(x,
       ys = stats::predict(plm, newdata = data.frame(xs))
     }
     graphics::lines(xs, ys, col = col[i], lwd = 2)}
+  ## =================================
+  ## add legend
+  ## =================================
   graphics::legend('topright', box.lwd = 0, col = col, lwd = 2,
                    legend = names(col),
                    title = Trans(l_par), ncol = min(length(names(col)), 3),
                    bg = 'white', inset = .01)
-  ## example
+  ## =================================
+  ## Add example
+  ## =================================
   if(!is.null(example)){
+    ## multiple examples are possible
     y_ex = ArraySlicer(y_rec, example)
     usr = graphics::par()$usr
     x0 = grDevices::extendrange(usr[1:2], f = -.02)[1]
     y0 = grDevices::extendrange(usr[3:4], f = -.02)[1]
-    graphics::segments(example[[x_par]], y0, example[[x_par]], y_ex)
-    graphics::arrows(example[[x_par]], y_ex, x0, y_ex, length = .15)
-    graphics::text(x = x0, y = y_ex, labels = y_ex, adj = c(0, -1))
+    arrow_col = col[names(y_ex)] # each arrow gets color of the relevant line
+    graphics::segments(example[[x_par]], y0, example[[x_par]], y_ex, col = arrow_col)
+    graphics::arrows(example[[x_par]], y_ex, x0, y_ex, length = .15, col = arrow_col)
+    graphics::text(x = x0, y = y_ex,
+                   labels = paste(y_ex, 'at', Trans(l_par), '=', example[[l_par]]),
+                   adj = c(0, -1), col = arrow_col)
   }
   if(is.null(title)){
     title = paste0(ifelse(find_min, 'Minimum ', 'Maximum '),
