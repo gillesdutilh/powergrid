@@ -135,9 +135,6 @@ GridPlot = function(x,
     return(x)
   }
 
-  ## save current par settings
-  old_par <- graphics::par(no.readonly = TRUE)
-
   ## =================================
   ## process input
   ## =================================
@@ -221,7 +218,8 @@ GridPlot = function(x,
     usr = graphics::par()$usr
     x0 = grDevices::extendrange(usr[1:2], f = -.02)[1]
     y0 = grDevices::extendrange(usr[3:4], f = -.02)[1]
-    arrow_col = col[names(y_ex)] # each arrow gets color of the relevant line
+    arrow_col = col[as.character(example[[l_par]])] # each arrow gets color of
+                                                    # the relevant line
     graphics::segments(example[[x_par]], y0, example[[x_par]], y_ex, col = arrow_col)
     graphics::arrows(example[[x_par]], y_ex, x0, y_ex, length = .15, col = arrow_col)
     graphics::text(x = x0, y = y_ex,
@@ -234,8 +232,6 @@ GridPlot = function(x,
                    ' for a Power of ',
                    target, '')}
   graphics::title(title)
-  ## reset previous par settings
-  graphics::par(old_par)
   invisible(list('at_x' = at_x,
                  'at_y' = at_y,
                  'line_colors' = col))
