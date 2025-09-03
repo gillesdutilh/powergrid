@@ -1,10 +1,10 @@
-##' @description For most use cases of powergrid, you will not need this
-##'   function, but rather use more convenient functions, most notable
-##'   \code{\link{Example}}. `Example` shows you the smallest sample size to
-##'   still find enough power, or the largest standard deviation at which your
-##'   CI95 does not get too large. More insight about the relation between
-##'   parameters and the resulting power may be gained with
-##'   \code{\link{Powerplot}} or \code{\link{GridPlot}}.
+##' @description
+##' For most use cases of powergrid, you will not need this function, but rather
+##' use more convenient functions, most notable \code{\link{Example}}. `Example`
+##' shows you the smallest sample size to still find enough power, or the
+##' largest standard deviation at which your CI95 does not get too large. More
+##' insight about the relation between parameters and the resulting power may be
+##' gained with \code{\link{Powerplot}} or \code{\link{GridPlot}}.
 ##'
 ##' Only if you need to work with, say, the required n for a range of
 ##' assumptions over and above PowerPlot and GridPlot, you will need to use
@@ -172,7 +172,7 @@ FindTarget = function(x,
   if(length(dim(x)) %in% c(1, 0) ){ # if a one-dim array, or a vector
     Find(x)
   } else { # is multidim array, you must say which parameter you want to search
-           # across
+                                        # across
     apply(x,
           names(dimnames(x))[
             names(dimnames(x)) != par_to_search],
