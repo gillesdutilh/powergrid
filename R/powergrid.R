@@ -63,10 +63,11 @@
 ##' @param pars A list where each element is a vector of values named as one of
 ##'   the arguments of \code{fun}. `fun` is applied to the full grid crossing
 ##'   the values of each of these parameters.
-##' @param fun Function applied at each combination of \code{pars}. Arguments
-##'   may contain all element names of \code{pars} and \code{more_args}. Output
-##'   should be a vector, typically of length one, but more outputs are
-##'   generally handled properly in further functions of powergrid.
+##' @param fun A function to be applied at each combination of
+##'   \code{pars}. Arguments may contain all element names of \code{pars} and
+##'   \code{more_args}. Output should always be a numeric vector, typically of
+##'   length one. However, a if you want to work with multiple outpus, each can
+##'   be an element of the returned numeric vector.
 ##' @param more_args Fixed arguments to \code{fun} that are not in
 ##'   \code{pars}. (internally used in \code{.mapply} for supplying argument
 ##'   \code{MoreArgs})
@@ -89,8 +90,8 @@
 ##' @seealso [Refine()] for adding iterations or parameter combinations to
 ##'   exsiting `power_array` object, [SummarizeSims()] for summarizing a
 ##'   `power_array` object containing individual iterations, [ArraySlicer()] and
-##'   `[.power_array` for reducing the dimenstiona of a
-##'   `power_array` object, correctly updating its attributes.
+##'   `[.power_array` for reducing the dimenstiona of a `power_array` object,
+##'   correctly updating its attributes.
 ##' @examples
 ##' ## =======================================================
 ##' ## most basic use case, calculating power when
