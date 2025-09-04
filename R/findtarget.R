@@ -1,23 +1,31 @@
-## Function developed mainly for internal use in the powergrid packagen. For
-## most use cases, you will not need this function, but rather use any of
-## \code{\link{Example}}, \code{\link{AddExample}}, \code{\link{PowerPlot}}, or
-## \code{\link{GridPlot}}. Only if you need to work with, say, the required n
-## for a number of assumptions over and above the standard build in figures,
-## there is a need to use FindTarget.
+##' @description
+##' For most use cases of powergrid, you will not need this function, but rather
+##' use more convenient functions, most notable \code{\link{Example}}. `Example`
+##' shows you the smallest sample size to still find enough power, or the
+##' largest standard deviation at which your CI95 does not get too large. More
+##' insight about the relation between parameters and the resulting power may be
+##' gained with \code{\link{PowerPlot}} or \code{\link{GridPlot}}.
 ##'
-##' FindTarget functions takes as input an array (typically of type
-##' `power_array`), e.g., n by effect size, containing at each crossing the
-##' power. The function then searches along one dimension (say n) for a value
-##' (say, power) of at least (or at most) a chosen target value (say, a power of
-##' at least 90%). This is done for each combination of levels of the other
-##' dimension(s) (say, effect size by SD).
+##' Only if you need to work with, say, the required n for a range of
+##' assumptions over and above PowerPlot and GridPlot, you will need to use
+##' FindTarget.
 ##'
-##' By default, the power_slice is searched along the dimension n
-##' (\code{par_to_search}), searching for the lowest value (\code{find_min} = TRUE)
-##' where the array contains a value of at least (\code{minimal_target} = TRUE)
-##' .9 (the \code{target}), thus finding the minimal sample size required to
-##' achieve a power of 90%. These arguments may seem a bit confusing at first,
-##' but they allow for three additional purposes:
+##' FindTarget takes as input an array (typically of class `power_array`).
+##' FindTarget then searches (up or down) along one chosen dimension for a value
+##' that meets a set target value (at least or at most). It does so for each
+##' combination of the remaining dimensions. Concretely, this may mean: The
+##' array contains the calculated power for each combination of dimensions n,
+##' effect size, and SD. The function may then find, for each combination of
+##' effect size and SD, the lowest n for which power of at least, say, .8 is
+##' achieved. The result would be an array of effect size by SD, containing the
+##' n's yielding acceptable power.
+##'
+##' @details By default FindTarget searches along the dimension called `n`
+##'   (\code{par_to_search}), searching for the lowest value (\code{find_min} =
+##'   TRUE) where the array contains a value of at least (\code{minimal_target}
+##'   = TRUE) .9 (the \code{target}), thus finding the minimal sample size
+##'   required to achieve a power of 90%. These arguments may seem a bit
+##'   confusing at first, but they allow for three additional purposes:
 ##'
 ##' First, the implementation also allows to search for a value that is *at
 ##' most* the \code{target}, by setting \code{minimal_target} to FALSE. This may
@@ -25,21 +33,21 @@
 ##' confidence interval that is not bigger than some maximum width.
 ##'
 ##' Second, the implementation allows to search along another *named* dimension
-##' of the power_slice than n.
+##' of x than n.
 ##'
 ##' Third, the implementation allows to search for a certain target to be
-##' achieved by maximizing (find_minimum = FALSE) the parameter on the searched
+##' achieved by maximizing (find_min = FALSE) the parameter on the searched
 ##' dimension. This may be used, for example, when the aim is to find the
 ##' maximum standard deviation at which a study's power is still acceptable.
 ##'
-##' \code{FindTarget} may most often be implicitly called inside
+##' \code{FindTarget} is most often called as the workhorse of
 ##' \code{\link{Example}}, \code{\link{PowerPlot}} or \code{\link{GridPlot}}.
 ##'
 ##' @title Find requirements for target power (or other objective)
-##' @param power_slice An array, most commonly of class `power_array`, possibly
+##' @param x An array, most commonly of class `power_array`, possibly
 ##'   the result of taking a slice of an object of class \code{power_array}
 ##'   using \code{\link{ArraySlicer}} or the power_array []-indexing method.
-##' @param target The required value in the power_slice (e.g., .9, if the values
+##' @param target The required value in x (e.g., .9, if the values
 ##'   represent power)
 ##' @param minimal_target Is the target a minimum (e.g., the power) or a maximum
 ##'   (e.g., the size of a confidence interval)
@@ -77,7 +85,7 @@
 ##'   return(ptt$power)
 ##' }
 ##' power_array = PowerGrid(pars = sse_pars, fun = PowFun, n_iter = NA)
-##' summary(power_array)
+##' summary(power_array) # four dimensions
 ##' 
 ##' ## We can use Example so find the required sample size, but only for one example:
 ##' Example(power_array,
@@ -105,10 +113,13 @@
 ##' n_by_delta_sd = FindTarget(power_array,
 ##'                            par_to_search = 'n',
 ##'                            target = .85)
-##' ## what is the minimum n to achieve .85 for different values of delta, sd, and sig_level:
-##' print(n_by_delta_sd)
+##' ## what is the minimum n to achieve .85 for different values of delta, sd,
+##' ## when  sig_level = 0.05:
+##' n_by_delta_sd[5, , ] # note that for some combinations of delta and sd, there is
+##'                      # no n yielding the required power at this significance
+##'                      # level (NAs).
 ##' @export
-FindTarget = function(power_slice,
+FindTarget = function(x,
                       target = .9,
                       minimal_target = TRUE,
                       par_to_search = 'n',
@@ -118,16 +129,16 @@ FindTarget = function(power_slice,
   ## If simply finding the first step where the target is achieved:
   ## (note very pragmatic use of environmental variables)
   if (method == 'step') {
-    Find = function(x) {
-      search_par_grid = names(x)
+    Find = function(xx) {
+      search_par_grid = names(xx)
       if(!find_min) {
-        x = rev(x)
+        xx = rev(xx)
         search_par_grid = rev(search_par_grid)
       }
       if (minimal_target) {
-        first_hit_index = match(TRUE, x >= target)
+        first_hit_index = match(TRUE, xx >= target)
       } else {
-        first_hit_index = match(TRUE, x <= target)
+        first_hit_index = match(TRUE, xx <= target)
       }
       return(as.numeric(search_par_grid[first_hit_index]))
     }
@@ -138,14 +149,14 @@ FindTarget = function(power_slice,
     if(!minimal_target | !find_min) {
       stop("Currently the lm method only supports defaults for minimal_target and find_min")
     }
-    SSETrans <- function(x) {
-      ## older versions: 0.5 * log((1 + x) / (1 - x)) # <== this line is
+    SSETrans <- function(xx) {
+      ## older versions: 0.5 * log((1 + xx) / (1 - xx)) # <== this line is
       ## a literal copy of the comment fabbrot in sse
-      (stats::qnorm(x) + stats::qnorm(1 - 0.05)) ^ 2
+      (stats::qnorm(xx) + stats::qnorm(1 - 0.05)) ^ 2
     }
-    Find = function(x) {
-      pred_n = as.numeric(names(x))
-      trans_pow = SSETrans(x)
+    Find = function(xx) {
+      pred_n = as.numeric(names(xx))
+      trans_pow = SSETrans(xx)
       lm_out = stats::lm(pred_n[!is.infinite(trans_pow)] ~
                            trans_pow[!is.infinite(trans_pow)])
       lm_pred = stats::predict(lm_out,
@@ -158,13 +169,13 @@ FindTarget = function(power_slice,
   }
   ## Below functions rather funnily, maybe, I need to do some explicit argument
   ## naming...
-  if(length(dim(power_slice)) %in% c(1, 0) ){ # if a one-dim array, or a vector
-    Find(power_slice)
+  if(length(dim(x)) %in% c(1, 0) ){ # if a one-dim array, or a vector
+    Find(x)
   } else { # is multidim array, you must say which parameter you want to search
                                         # across
-    apply(power_slice,
-          names(dimnames(power_slice))[
-            names(dimnames(power_slice)) != par_to_search],
+    apply(x,
+          names(dimnames(x))[
+            names(dimnames(x)) != par_to_search],
           Find)
   }
 }

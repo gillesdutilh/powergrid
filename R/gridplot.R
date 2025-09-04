@@ -78,7 +78,7 @@
 ##'          target = .8)
 ##'
 ##' ## adjust labels, add example
-##' GridPlot(power_array, target = .8,
+##' GridPlot(power_array, target = .9,
 ##'          slicer = list(sd = seq(.1, .9, .2)),
 ##'          y_par = 'n',
 ##'          x_par = 'delta',
@@ -87,6 +87,14 @@
 ##'                         'delta' = 'Arm Difference',
 ##'                         'sd' = 'Standard Deviation'),
 ##'          example = list(sd = .7, delta = .6))
+##' ## add additional examples useing AddExample. Note that these do not contain
+##' ## info about the line they refer to.
+##' AddExample(power_array,
+##'          target = .9,
+##'          example = list(delta = c(.5, .8), sd = c(.3, .7), col = 3)
+##'          )
+##'
+##' 
 ##' ## Above, GridPlot used the default: The first dimension is what you search
 ##' ## (often n), the 2nd and 3rd define the grid of parameters at which the search
 ##' ## is done. Setting this explicitly, with x, y, and l-par, it looks like:
@@ -102,8 +110,8 @@
 ##'          x_par = 'sd',
 ##'          l_par = 'n')
 ##' ## Too many lines! Take some slices again:
-##' GridPlot(power_array, target = .8,
-##'          slicer = list(n = c(seq(10, 70, 16))),
+##' GridPlot(power_array, target = .9,
+##'          slicer = list(n = c(seq(10, 70, 10))),
 ##'          y_par = 'delta',
 ##'          x_par = 'sd',
 ##'          l_par = 'n', method = 'step')
@@ -115,7 +123,7 @@ GridPlot = function(x,
                           l_par = NULL,
                           par_labels = NULL,
                           example = NULL,
-                          target = .8,
+                          target = NA,
                           method = 'step',
                           minimal_target = TRUE,
                           find_min = TRUE,
@@ -134,9 +142,6 @@ GridPlot = function(x,
     }
     return(x)
   }
-
-  ## save current par settings
-  old_par <- graphics::par(no.readonly = TRUE)
 
   ## =================================
   ## process input
@@ -221,7 +226,8 @@ GridPlot = function(x,
     usr = graphics::par()$usr
     x0 = grDevices::extendrange(usr[1:2], f = -.02)[1]
     y0 = grDevices::extendrange(usr[3:4], f = -.02)[1]
-    arrow_col = col[names(y_ex)] # each arrow gets color of the relevant line
+    arrow_col = col[as.character(example[[l_par]])] # each arrow gets color of
+                                                    # the relevant line
     graphics::segments(example[[x_par]], y0, example[[x_par]], y_ex, col = arrow_col)
     graphics::arrows(example[[x_par]], y_ex, x0, y_ex, length = .15, col = arrow_col)
     graphics::text(x = x0, y = y_ex,
@@ -234,8 +240,6 @@ GridPlot = function(x,
                    ' for a Power of ',
                    target, '')}
   graphics::title(title)
-  ## reset previous par settings
-  graphics::par(old_par)
   invisible(list('at_x' = at_x,
                  'at_y' = at_y,
                  'line_colors' = col))

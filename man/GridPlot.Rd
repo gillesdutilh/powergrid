@@ -13,7 +13,7 @@ GridPlot(
   l_par = NULL,
   par_labels = NULL,
   example = NULL,
-  target = 0.8,
+  target = NA,
   method = "step",
   minimal_target = TRUE,
   find_min = TRUE,

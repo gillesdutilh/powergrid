@@ -20,10 +20,11 @@ PowerGrid(
 the arguments of \code{fun}. \code{fun} is applied to the full grid crossing
 the values of each of these parameters.}
 
-\item{fun}{Function applied at each combination of \code{pars}. Arguments
-may contain all element names of \code{pars} and \code{more_args}. Output
-should be a vector, typically of length one, but more outputs are
-generally handled properly in further functions of powergrid.}
+\item{fun}{A function to be applied at each combination of
+\code{pars}. Arguments may contain all element names of \code{pars} and
+\code{more_args}. Output should always be a numeric vector, typically of
+length one. However, a if you want to work with multiple outpus, each can
+be an element of the returned numeric vector.}
 
 \item{more_args}{Fixed arguments to \code{fun} that are not in
 \code{pars}. (internally used in \code{.mapply} for supplying argument
@@ -266,8 +267,8 @@ PowerPlot(powarr_two_returns,
 \code{\link[=Refine]{Refine()}} for adding iterations or parameter combinations to
 exsiting \code{power_array} object, \code{\link[=SummarizeSims]{SummarizeSims()}} for summarizing a
 \code{power_array} object containing individual iterations, \code{\link[=ArraySlicer]{ArraySlicer()}} and
-\verb{[.power_array} for reducing the dimenstiona of a
-\code{power_array} object, correctly updating its attributes.
+\verb{[.power_array} for reducing the dimenstiona of a \code{power_array} object,
+correctly updating its attributes.
 }
 \author{
 Gilles Dutilh

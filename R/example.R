@@ -173,12 +173,12 @@ Example = function(x,
   ## Warnings and Errors depending on input
   ## warnings for atypical input
   if(inherits(x, 'power')) {
-    warning(PrintWrap("You supplied an object x of type 'power', likely from the sse package. This will only work correctly when the sse package is loaded."))
+    warning("You supplied an object x of type 'power', likely from the sse package. This will only work correctly when the sse package is loaded.")
   } else {
     if (all(class(x) == 'power_array') && !is.na(attr(x, which = 'n_iter')) &&
         !attr(x, which = 'summarized')){
       x = SummarizeSims(x, summary_function)
-      warning(PrintWrap("The object 'x' you supplied to Example() contains individual iterations. For finding an example, these were automatically summarized across simulations using the function given in argument `summary_function`."), call. = FALSE)
+      warning("The object 'x' you supplied to Example() contains individual iterations. For finding an example, these were automatically summarized across simulations using the function given in argument `summary_function`.", call. = FALSE)
       }
   }
   if (!inherits(x, 'power') & is.null(target)){
@@ -189,7 +189,7 @@ Example = function(x,
     }
   ## general warning lm
   if (method == 'lm' && any(target %in% 0:1)){
-    stop(PrintWrap("Method is set to 'lm', which only makes sense for power as a function of n. Searching for a power of 1 or 0 is not supported by this package. For help achieving a power of 1 or 0, see a priest or a shrink, respectively."))}
+    stop("Method is set to 'lm', which only makes sense for power as a function of n. Searching for a power of 1 or 0 is not supported by this package. For help achieving a power of 1 or 0, see a priest or a shrink, respectively.")}
   if (all(class(x) != 'power_array' &
           !inherits(x, 'power'))){
     ## just throw an error (may be implemented later)
