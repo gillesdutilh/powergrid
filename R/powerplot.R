@@ -109,7 +109,7 @@
 ##'   return(ptt$power)
 ##' }
 ##'
-##' ## Evaluat PowFun across the grid defined by sse_pars:
+##' ## Evaluate PowFun across the grid defined by sse_pars:
 ##' power_array = PowerGrid(pars = sse_pars, fun = PowFun, n_iter = NA)
 ##'
 ##' ## explore power graphically in the situation where sd = .7, including an
@@ -492,6 +492,38 @@ PowerPlot =
 ##' @seealso \code{\link{PowerPlot}}, \code{\link{GridPlot}}
 ##' @return Nothing
 ##' @author Gilles Dutilh
+##' @examples
+##'
+##' ## For more examples, see ?PowerPlot
+##'
+##' ## Set up a grid of n, delta and sd:
+##' sse_pars = list(
+##'   n = seq(from = 10, to = 60, by = 4),
+##'   delta = seq(from = 0.5, to = 1.5, by = 0.1), # effect size
+##'   sd = seq(.1, 1.1, .2)) # Standard deviation
+##' ## Define a power function using these parameters:
+##' PowFun <- function(n, delta, sd){ # power for a t-test at alpha = .05
+##'   ptt = power.t.test(n = n/2, delta = delta, sd = sd,
+##'                      sig.level = 0.05)
+##'   return(ptt$power)
+##' }
+##' ## Evaluate PowFun across the grid defined by sse_pars:
+##' power_array = PowerGrid(pars = sse_pars, fun = PowFun, n_iter = NA)
+
+##' PowerPlot(power_array,
+##'           slicer = list(sd = .7),
+##'           par_labels = c(n = 'Total Sample Size',
+##'                          delta = 'Effect Size',
+##'                          sd = 'Standard Deviation'),
+##'           target_levels = c(.8, .9), # draw fewer power isolines
+##'           target = NA # no specific power target (no line thicker)
+##'           )
+##' AddExample(power_array,
+##'            slicer = list(sd = .7),
+##'            example = list(delta = .9),
+##'            target = .9,
+##'            col = 'Orange', lwd = 3)
+
 ##' @export
 AddExample = function(x, slicer = NULL, example = NULL, target = NULL,
                       minimal_target = TRUE, find_min = TRUE,
