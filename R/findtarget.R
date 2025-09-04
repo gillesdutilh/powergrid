@@ -4,7 +4,7 @@
 ##' shows you the smallest sample size to still find enough power, or the
 ##' largest standard deviation at which your CI95 does not get too large. More
 ##' insight about the relation between parameters and the resulting power may be
-##' gained with \code{\link{Powerplot}} or \code{\link{GridPlot}}.
+##' gained with \code{\link{PowerPlot}} or \code{\link{GridPlot}}.
 ##'
 ##' Only if you need to work with, say, the required n for a range of
 ##' assumptions over and above PowerPlot and GridPlot, you will need to use
