@@ -7,20 +7,37 @@
 AddExample(
   x,
   slicer = NULL,
-  example,
-  target = 0.9,
+  example = NULL,
+  target = NULL,
   minimal_target = TRUE,
   find_min = TRUE,
   method = "step",
   col = 1,
+  required_text = TRUE,
   ...
 )
 }
 \arguments{
-\item{x, slicer, example, target, minimal_target, find_min, method}{See help for
+\item{x, target, minimal_target, find_min, method, required_text}{See help for
 \code{PowerPlot}.}
 
-\item{col}{Color or arrow drawn.}
+\item{slicer}{A list, internally passed on to \code{\link{ArraySlicer}} to
+cut out a (multidimensional) slice from x. You can achieve the same by
+appending the vector (s) in \code{slicer} to argument \code{example}. However, to
+make sure the result of AddExample is consistent with a figure previously
+created using PowerPlot or GridPlot, you may copy the arguments \code{slicer}
+and \code{example} given to those functions to AddExample.}
+
+\item{example}{A list, defining at which value (list element value) of which
+parameter(s) (list element name(s)) the example is drawn for a power of
+\code{target}. You may supply par vector(s) longer than 1 for multiple
+examples. If \code{example} contains multiple parameters to define the example,
+all must contain a vector of the same length. Be aware that the first
+element of \code{example} defines the parameter x-axis, so this function is not
+fool proof. See argument \code{slicer} above. If x has only one dimention, the
+example needs not be defined.}
+
+\item{col}{Color of arrow and text drawn.}
 
 \item{...}{Further arguments are passed to the two calls of function
 \code{graphics::arrows} drawing the nicked arrow.}
@@ -29,31 +46,104 @@ AddExample(
 Nothing
 }
 \description{
-Add an example arrow to an existing power plot created by
-PowerPlot.
-\subsection{arguments \code{slicer} and \code{example}}{
+Add example arrow(s) to an existing figure created by PowerPlot
+or GridPlot.
 
 \code{AddExample} is a higher level plotting function, so it does not know
-anything about the figure it draws on top off. Therefore, you need to supply
-the same arguments \code{x} and \code{slicer} that you supplied to the
-\code{\link{PowerPlot}} you are drawing on top off: With \code{slicer} you
+anything about the figure it draws on top off. Therefore, take care your
+figure makes sense, by supplying the same arguments \code{x} and
+\code{slicer} that you supplied to the \code{\link{PowerPlot}} or
+\code{link{GridPlot}} you are drawing on top off: With \code{slicer} you
 define the plotted plain, with \code{example} the value on the x-axis where
-the arrow starts.
+the arrow starts. To be sure of a sensible result, use the argument
+\code{example} inside \code{Powerplot} or \code{GridPlot}.
+}
+\details{
+\subsection{arguments \code{slicer} and \code{example}}{
 
-When drawing arrows on top of a \code{\link{GridPlot}}, AddExample cannot
-guess which dimensions defined lines, and which defined the axes. Therefore,
-you need to make an even more explicit \code{slicer}, which defines the line
-that you want the example on. See examples for an illustration.
+\code{slicer} takes the slice of x that is in the figure, \code{example} defines at
+which value of which parameter, the example is drawn. These arguments' use
+is the same as in PowerPlot and GridPlot. If you want to make sure that the
+result of AddExample is consistent with a figure previously created using
+PowerPlot or GridPlot, copy the argument \code{slicer} to such function to
+AddExample, and define your example in \code{example}.
+
+Note however, that:
+
+slicer = list(a = c(1, 2)) and example = list(b = c(3, 4))
+
+has the same result as:
+
+example = list(b = c(3, 4) and a = c(1, 2))  (not defining slicer)
+
+Importantly, the the order of \code{example} matters here, where the first
+element defines the x-axis.
 }
 
 \subsection{multiple examples}{
 
-Argument \code{example} may contain a vector with length longer than one to
-draw multiple examples. Note that these examples should always be on one
-line, in one plain. In particular when drawing on top of a \code{GridPlot},
-be aware that you can't draw examples on two different lines in one call of
-\code{AddExample}.
+Argument \code{example} may contain vectors with length longer than one to
+draw multiple examples.
 }
+}
+\examples{
+
+## For more examples, see ?PowerPlot
+
+## Set up a grid of n, delta and sd:
+sse_pars = list(
+  n = seq(from = 10, to = 60, by = 4),
+  delta = seq(from = 0.5, to = 1.5, by = 0.1), # effect size
+  sd = seq(.1, 1.1, .2)) # Standard deviation
+## Define a power function using these parameters:
+PowFun <- function(n, delta, sd){ # power for a t-test at alpha = .05
+  ptt = power.t.test(n = n/2, delta = delta, sd = sd,
+                     sig.level = 0.05)
+  return(ptt$power)
+}
+## Evaluate PowFun across the grid defined by sse_pars:
+power_array = PowerGrid(pars = sse_pars, fun = PowFun, n_iter = NA)
+
+## ======================
+## PowerPlot
+## ======================
+PowerPlot(power_array,
+          slicer = list(sd = .7),
+          )
+AddExample(power_array,
+           slicer = list(sd = .7), # be sure to cut out the same plain as above
+           example = list(delta = .9),
+           target = .9,
+           col = 'blue')
+AddExample(power_array,
+           slicer = list(sd = .7),
+           example = list(delta = c(.7, 1)), # multiple examples
+           target = .9,
+           col = 'yellow')
+## Careful, you can move the slicer argument to example:
+AddExample(power_array,
+           example = list(delta = 1.2, sd = .7), # delta (x-axis) first
+           target = .9,
+           col = 'green')
+## Careful, because you can put the wrong value on x-axis!
+AddExample(power_array,
+           example = list(sd = .7, delta = 1.2), # sd first?!
+           target = .9,
+           col = 'red')
+
+## ======================
+## GridPlot
+## ======================
+GridPlot(power_array, target = .9)
+AddExample(power_array,
+           example = list(delta = 1, sd = .7),
+           target = .9
+           )
+## two examples
+AddExample(power_array,
+           example = list(delta = c(.9, 1.2), sd = c(.5, 1.1)),
+           target = .9, col = 3
+           )
 }
 \seealso{
 \code{\link{PowerPlot}}, \code{\link{GridPlot}}

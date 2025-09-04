@@ -12,13 +12,14 @@ PowerPlot(
   find_min = TRUE,
   example = NULL,
   method = "step",
-  target = 0.9,
+  target = NA,
   minimal_target = TRUE,
   summary_function = mean,
   target_levels = c(0.8, 0.9, 0.95),
   col = grDevices::grey.colors(1, 0.2, 0.2),
   shades_of_grey = TRUE,
   shades_legend = FALSE,
+  required_text = TRUE,
   title = NULL,
   par_labels = NULL,
   smooth = NA,
@@ -78,6 +79,9 @@ addition to isolines to show power levels.}
 \item{shades_legend}{Logical indicating whether a legend for the shading is
 added. Note that this legend is drawn in a separate plotting region, and
 does effect setting \code{par(mfrow)} of the current plotting device.}
+
+\item{required_text}{When an example is drawn, should the the required par
+value be printed alongside the arrow(s)}
 
 \item{title}{Character string, if not \code{NULL}, replaces default figure
 title.}
@@ -158,14 +162,15 @@ PowFun <- function(n, delta, sd){ # power for a t-test at alpha = .05
   return(ptt$power)
 }
 
-## Evaluat PowFun across the grid defined by sse_pars:
+## Evaluate PowFun across the grid defined by sse_pars:
 power_array = PowerGrid(pars = sse_pars, fun = PowFun, n_iter = NA)
 
 ## explore power graphically in the situation where sd = .7, including an
 ## example situation where delta is .9:
 PowerPlot(power_array,
           slicer = list(sd = .7),
-          example = list(delta = .9)
+          example = list(delta = c(.7, .9)), # two examples
+          target = .9 # 90\% power
           )
 
 ## Some graphical adjustments. Note that example is drawn on top of

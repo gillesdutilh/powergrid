@@ -5,7 +5,7 @@
 \title{Find requirements for target power (or other objective)}
 \usage{
 FindTarget(
-  power_slice,
+  x,
   target = 0.9,
   minimal_target = TRUE,
   par_to_search = "n",
@@ -14,11 +14,11 @@ FindTarget(
 )
 }
 \arguments{
-\item{power_slice}{An array, most commonly of class \code{power_array}, possibly
+\item{x}{An array, most commonly of class \code{power_array}, possibly
 the result of taking a slice of an object of class \code{power_array}
 using \code{\link{ArraySlicer}} or the power_array []-indexing method.}
 
-\item{target}{The required value in the power_slice (e.g., .9, if the values
+\item{target}{The required value in x (e.g., .9, if the values
 represent power)}
 
 \item{minimal_target}{Is the target a minimum (e.g., the power) or a maximum
@@ -47,20 +47,34 @@ the lowest n for which the power is larger than .9), for each crossing of
 the levels of the other dimensions (say, delta, SD).
 }
 \description{
-FindTarget functions takes as input an array (typically of type
-\code{power_array}), e.g., n by effect size, containing at each crossing the
-power. The function then searches along one dimension (say n) for a value
-(say, power) of at least (or at most) a chosen target value (say, a power of
-at least 90\%). This is done for each combination of levels of the other
-dimension(s) (say, effect size by SD).
+For most use cases of powergrid, you will not need this function, but rather
+use more convenient functions, most notable \code{\link{Example}}. \code{Example}
+shows you the smallest sample size to still find enough power, or the
+largest standard deviation at which your CI95 does not get too large. More
+insight about the relation between parameters and the resulting power may be
+gained with \code{\link{PowerPlot}} or \code{\link{GridPlot}}.
+
+Only if you need to work with, say, the required n for a range of
+assumptions over and above PowerPlot and GridPlot, you will need to use
+FindTarget.
+
+FindTarget takes as input an array (typically of class \code{power_array}).
+FindTarget then searches (up or down) along one chosen dimension for a value
+that meets a set target value (at least or at most). It does so for each
+combination of the remaining dimensions. Concretely, this may mean: The
+array contains the calculated power for each combination of dimensions n,
+effect size, and SD. The function may then find, for each combination of
+effect size and SD, the lowest n for which power of at least, say, .8 is
+achieved. The result would be an array of effect size by SD, containing the
+n's yielding acceptable power.
 }
 \details{
-By default, the power_slice is searched along the dimension n
-(\code{par_to_search}), searching for the lowest value (\code{find_min} = TRUE)
-where the array contains a value of at least (\code{minimal_target} = TRUE)
-.9 (the \code{target}), thus finding the minimal sample size required to
-achieve a power of 90\%. These arguments may seem a bit confusing at first,
-but they allow for three additional purposes:
+By default FindTarget searches along the dimension called \code{n}
+(\code{par_to_search}), searching for the lowest value (\code{find_min} =
+TRUE) where the array contains a value of at least (\code{minimal_target}
+= TRUE) .9 (the \code{target}), thus finding the minimal sample size
+required to achieve a power of 90\%. These arguments may seem a bit
+confusing at first, but they allow for three additional purposes:
 
 First, the implementation also allows to search for a value that is \emph{at
 most} the \code{target}, by setting \code{minimal_target} to FALSE. This may
@@ -68,14 +82,14 @@ be used, for example, when the aim is to find a sample size yielding a
 confidence interval that is not bigger than some maximum width.
 
 Second, the implementation allows to search along another \emph{named} dimension
-of the power_slice than n.
+of x than n.
 
 Third, the implementation allows to search for a certain target to be
-achieved by maximizing (find_minimum = FALSE) the parameter on the searched
+achieved by maximizing (find_min = FALSE) the parameter on the searched
 dimension. This may be used, for example, when the aim is to find the
 maximum standard deviation at which a study's power is still acceptable.
 
-\code{FindTarget} may most often be implicitly called inside
+\code{FindTarget} is most often called as the workhorse of
 \code{\link{Example}}, \code{\link{PowerPlot}} or \code{\link{GridPlot}}.
 }
 \examples{
@@ -93,7 +107,7 @@ PowFun <- function(n, sig_level, delta, sd){
   return(ptt$power)
 }
 power_array = PowerGrid(pars = sse_pars, fun = PowFun, n_iter = NA)
-summary(power_array)
+summary(power_array) # four dimensions
 
 ## We can use Example so find the required sample size, but only for one example:
 Example(power_array,
@@ -121,8 +135,11 @@ plot(as.numeric(names(n_by_delta_sd_03)),
 n_by_delta_sd = FindTarget(power_array,
                            par_to_search = 'n',
                            target = .85)
-## what is the minimum n to achieve .85 for different values of delta, sd, and sig_level:
-print(n_by_delta_sd)
+## what is the minimum n to achieve .85 for different values of delta, sd,
+## when  sig_level = 0.05:
+n_by_delta_sd[5, , ] # note that for some combinations of delta and sd, there is
+                     # no n yielding the required power at this significance
+                     # level (NAs).
 }
 \seealso{
 \code{\link{PowerGrid}}, \code{\link{Example}}, \code{\link{PowerPlot}}
