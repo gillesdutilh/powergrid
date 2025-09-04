@@ -466,18 +466,23 @@ PowerPlot =
 ##' be aware that you can't draw examples on two different lines in one call of
 ##' \code{AddExample}.
 ##' 
-##' @param x,slicer, target,minimal_target,find_min,method See help for
+##' @param x,target,minimal_target,find_min,method See help for
 ##'   \code{PowerPlot}.
+##' @param slicer A list, internally passed on to \code{\link{ArraySlicer}} to
+##'   cut out a (multidimensional) slice from x. You can achieve the same by
+##'   appending the vector (s) in `slicer` to argument `example`. However, to
+##'   make sure the result of AddExample is consistent with a figure previously
+##'   created using PowerPlot or GridPlot, you may copy the arguments `slicer`
+##'   and `example` given to those functions to AddExample.
 ##' @param example A list, defining at which value (list element value) of which
 ##'   parameter(s) (list element name(s)) the example is drawn for a power of
 ##'   \code{target}. You may supply par vector(s) longer than 1 for multiple
-##'   examples. If list contains multiple parameters to define the example, each
-##'   must contain a vector of the same length. The first element of `example`
-##'   must define the parameter x-axis, so you can plot nonsense. To be certain,
-##'   use the example argument in PowerPlot or GridPlot (losing some
-##'   flexibility). If x has only one dimention, the example needs not be
-##'   defined.
-##' @param col Color or arrow drawn.
+##'   examples. If `example` contains multiple parameters to define the example,
+##'   all must contain a vector of the same length. Be aware that the first
+##'   element of `example` defines the parameter x-axis, so this function is not
+##'   fool proof. See argument `slicer` above. If x has only one dimention, the
+##'   example needs not be defined.
+##' @param col Color of arrow and text drawn.
 ##' @param ... Further arguments are passed to the two calls of function
 ##'   \code{graphics::arrows} drawing the nicked arrow.
 ##' @seealso \code{\link{PowerPlot}}, \code{\link{GridPlot}}
@@ -496,7 +501,6 @@ AddExample = function(x, slicer = NULL, example = NULL, target = .9,
   ## I grasp lwd here to make text and circle lwd match arrows
   if('lwd' %in% names(args)){lwd = args$lwd}else{lwd = 1}
   ## slice
-  browser()
   sliced_x = ArraySlicer(x = x, slicer = slicer)
   ## =================================
   ## Check example input
