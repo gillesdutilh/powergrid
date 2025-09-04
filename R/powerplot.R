@@ -69,6 +69,8 @@
 ##' @param shades_legend Logical indicating whether a legend for the shading is
 ##'   added. Note that this legend is drawn in a separate plotting region, and
 ##'   does effect setting \code{par(mfrow)} of the current plotting device.
+##' @param required_text When an example is drawn, should the the required par
+##'   value be printed alongside the arrow(s)
 ##' @param title Character string, if not \code{NULL}, replaces default figure
 ##'   title.
 ##' @param par_labels Named vector with elements named as the parameters
@@ -114,7 +116,8 @@
 ##' ## example situation where delta is .9:
 ##' PowerPlot(power_array,
 ##'           slicer = list(sd = .7),
-##'           example = list(delta = .9)
+##'           example = list(delta = .9),
+##'           target = .9 # 90% power
 ##'           )
 ##'
 ##' ## Some graphical adjustments. Note that example is drawn on top of
@@ -174,13 +177,14 @@ PowerPlot =
            find_min = TRUE, # search for min or max in par_to_search
            example = NULL, # a list(<parameter> = <value>)
            method = 'step',
-           target = .9, # the minimum (or maximum, see below)
+           target = NA, # the minimum (or maximum, see below)
            minimal_target = TRUE,
            summary_function = mean,
            target_levels = c(.8, .9, .95), # which power iso lines to draw
            col = grDevices::grey.colors(1, .2, .2),
            shades_of_grey = TRUE, # do you want shades of grey on background
            shades_legend = FALSE, # do you want a legend for the shades
+           required_text = TRUE, # do you want a text next to the Example arrow
            title = NULL,
            par_labels = NULL,
            smooth = NA,
@@ -207,29 +211,27 @@ PowerPlot =
   } else {
     stop("The object 'x' should be of class 'power_array'. ", call. = FALSE)
     power_array = x} # if just any array, give it a try
-  ## =======================================================
-  ## Create Example from input
-  ## =======================================================
+
   ##
-  if (!is.null(example)){
-    ## how many examples given for each par:
-    ns_example = sapply(example, function(x)length(x))[[1]]
-    ## Prepare example for figure.
-    y_ex_value = numeric(ns_example)
-    x_ex_name = numeric(ns_example)
-    x_ex_value = numeric(ns_example)
-    for (example_i in 1:ns_example){
-      cur_example = lapply(example, function(x)x[example_i])
-      example_list =
-        Example(ArraySlicer(power_array, slicer = slicer),
-                example = cur_example,
-                target = target, minimal_target = minimal_target,
-                find_min = find_min, method = method)
-      y_ex_value[example_i] = example_list$required_value
-      x_ex_name[example_i] = names(cur_example)
-      x_ex_value[example_i] = cur_example[[x_ex_name[example_i]]]
-    }
-  }
+  ## if (!is.null(example)){
+  ##   ## how many examples given for each par:
+  ##   ns_example = sapply(example, function(x)length(x))[[1]]
+  ##   ## Prepare example for figure.
+  ##   y_ex_value = numeric(ns_example)
+  ##   x_ex_name = numeric(ns_example)
+  ##   x_ex_value = numeric(ns_example)
+  ##   for (example_i in 1:ns_example){
+  ##     cur_example = lapply(example, function(x)x[example_i])
+  ##     example_list =
+  ##       Example(ArraySlicer(power_array, slicer = slicer),
+  ##               example = cur_example,
+  ##               target = target, minimal_target = minimal_target,
+  ##               find_min = find_min, method = method)
+  ##     y_ex_value[example_i] = example_list$required_value
+  ##     x_ex_name[example_i] = names(cur_example)
+  ##     x_ex_value[example_i] = cur_example[[x_ex_name[example_i]]]
+  ##   }
+  ## }
   ## =======================================================
   ## take slice that should be plotted
   ## =======================================================
@@ -271,6 +273,15 @@ PowerPlot =
   dimorder = c(par_to_search, dimnms[dimnms != par_to_search])
   array_toplot = aperm(array_toplot, dimorder)
   margins_toplot = dimnames(array_toplot) # what are the values on the axes
+  ## =======================================================
+  ## About example
+  ## =======================================================
+  if (!is.null(example) | left_dims == 1){
+    ## when either explicitly ordered, or in on-dimentional case.
+    draw_example = TRUE
+  } else {
+    draw_example = FALSE
+  }
   ##
   ## =======================================================
   ## Graphical preparation
@@ -369,7 +380,7 @@ PowerPlot =
     ## grid lines
     graphics::abline(h = margins_toplot[[1]], v = margins_toplot[[2]], col = 'white')
     ## power contour lines
-    if (!is.na(target)) # if a target is given
+    if (!is.null(target)) # if a target is given
     {
       if (!(target %in% target_levels)){ # but not one of levels, attach.
         target_levels = sort(unique(c(target_levels, target)))
@@ -406,67 +417,60 @@ PowerPlot =
     ## ============================================
   }
   ## Draw Example Arrow
-  if(!is.null(example)){
+  if (draw_example){
     AddExample(x = x,
                slicer = slicer,
                example = example,
                target = target,
-               col = col[1])
-### remove after testing ->
-    ## x0 = grDevices::extendrange(graphics::par()$usr[1:2], f = -.02)[1]
-    ## y0 = grDevices::extendrange(graphics::par()$usr[3:4], f = -.02)[1]
-    ## graphics::arrows(x0 = x_ex_value, y0 = y0,
-    ##                  x1 = x_ex_value, y1 = y_ex_value, length = .15, code = 0)
-    ## graphics::arrows(x0 = x_ex_value, y0 = y_ex_value,
-    ##                  x1 = x0, y1 = y_ex_value, length = .15)
-    ## graphics::points(rep(x_ex_value, each = 2), rep(y_ex_value, each = 2),
-    ##                  pch = c(19, 1), cex = c(1, 3))
-
-    ## if (!is.null(example)){
-    ##   ## When the example is drawn automaticaly when array_toplot is
-    ##   ## 1-dimensional, no value at arrow head.
-    ##   graphics::text(x = x0, y = y_ex_value,
-    ##                  labels = y_ex_value, adj = c(0, -1))
-    ## }
-### remove after testing <-
-  } else if (left_dims == 1) {
-        AddExample(x = x,
-               slicer = slicer,
-               example = example,
-               target = target,
-               col = col[1])
+               col = col[1],
+               required_text = required_text)
   }
 }
 
 ## ======================================================= lower level function
 ## for plotting example =======================================================
 ##' @title Add an example to an existing PowerPlot or GridPlot
-##' @description Add an example arrow to an existing power plot created by
-##'   PowerPlot.
+##' @description
 ##'
-##' ## arguments \code{slicer} and \code{example}
+##' Add example arrow(s) to an existing figure created by PowerPlot
+##' or GridPlot.
 ##'
 ##' `AddExample` is a higher level plotting function, so it does not know
-##' anything about the figure it draws on top off. Therefore, you need to supply
-##' the same arguments \code{x} and \code{slicer} that you supplied to the
-##' \code{\link{PowerPlot}} you are drawing on top off: With \code{slicer} you
+##' anything about the figure it draws on top off. Therefore, take care your
+##' figure makes sense, by supplying the same arguments \code{x} and
+##' \code{slicer} that you supplied to the \code{\link{PowerPlot}} or
+##' \code{link{GridPlot}} you are drawing on top off: With \code{slicer} you
 ##' define the plotted plain, with \code{example} the value on the x-axis where
-##' the arrow starts.
+##' the arrow starts. To be sure of a sensible result, use the argument
+##' `example` inside \code{Powerplot} or \code{GridPlot}.
+
+##' @details
+##' ## arguments \code{slicer} and \code{example}
 ##'
-##' When drawing arrows on top of a \code{\link{GridPlot}}, AddExample cannot
-##' guess which dimensions defined lines, and which defined the axes. Therefore,
-##' you need to make an even more explicit \code{slicer}, which defines the line
-##' that you want the example on. See examples for an illustration.
+##' `slicer` takes the slice of x that is in the figure, `example` defines at
+##' which value of which parameter, the example is drawn. These arguments' use
+##' is the same as in PowerPlot and GridPlot. If you want to make sure that the
+##' result of AddExample is consistent with a figure previously created using
+##' PowerPlot or GridPlot, copy the argument `slicer` to such function to
+##' AddExample, and define your example in `example`.
 ##'
+##' Note however, that:
+##' 
+##' slicer = list(a = c(1, 2)) and example = list(b = c(3, 4))
+##'
+##' has the same result as:
+##'
+##' example = list(b = c(3, 4) and a = c(1, 2))  (not defining slicer)
+##'
+##' Importantly, the the order of `example` matters here, where the first
+##' element defines the x-axis.
+##' 
 ##' ## multiple examples
 ##'
-##' Argument \code{example} may contain a vector with length longer than one to
-##' draw multiple examples. Note that these examples should always be on one
-##' line, in one plain. In particular when drawing on top of a \code{GridPlot},
-##' be aware that you can't draw examples on two different lines in one call of
-##' \code{AddExample}.
+##' Argument \code{example} may contain vectors with length longer than one to
+##' draw multiple examples.
 ##' 
-##' @param x,target,minimal_target,find_min,method See help for
+##' @param x,target,minimal_target,find_min,method,required_text See help for
 ##'   \code{PowerPlot}.
 ##' @param slicer A list, internally passed on to \code{\link{ArraySlicer}} to
 ##'   cut out a (multidimensional) slice from x. You can achieve the same by
@@ -489,9 +493,10 @@ PowerPlot =
 ##' @return Nothing
 ##' @author Gilles Dutilh
 ##' @export
-AddExample = function(x, slicer = NULL, example = NULL, target = .9,
+AddExample = function(x, slicer = NULL, example = NULL, target = NULL,
                       minimal_target = TRUE, find_min = TRUE,
-                      method = 'step', col = 1, ...)
+                      method = 'step', col = 1,
+                      required_text = TRUE, ...)
 {
   ## =======================================================
   ## process input
@@ -502,6 +507,7 @@ AddExample = function(x, slicer = NULL, example = NULL, target = .9,
   if('lwd' %in% names(args)){lwd = args$lwd}else{lwd = 1}
   ## slice
   sliced_x = ArraySlicer(x = x, slicer = slicer)
+  one_dim = FALSE # the default
   ## =================================
   ## Check example input
   ## =================================
@@ -516,6 +522,13 @@ AddExample = function(x, slicer = NULL, example = NULL, target = .9,
     ns_example = sapply(example, function(x)length(x))[[1]]
     ## The first element of example always defines the par on the x-axis
     x_ex_name = names(example)[1] # (also if only one parameret in example)
+  } else { # if example NULL
+    if (length(dim(sliced_x)) > 1){
+      stop("When x (after slicer has been applied) has more than one dimension, 'example' must be supplied")
+    }
+    one_dim = TRUE # we're in the on-dimensional situation, where we plot the
+                   # value (power) on the y-axis
+    ns_example = 1
   }
   ## =================================
   ## Prepare example(s) for plotting
@@ -532,8 +545,13 @@ AddExample = function(x, slicer = NULL, example = NULL, target = .9,
               find_min = find_min, method = method)
     ## Prepare example for figure. Note that it is possible to have any
     ## parameter on x and y, whereas the default is to have 'n' on y.
-    y_ex_value[example_i] = example_list$required_value
-    x_ex_value[example_i] = cur_example[[x_ex_name]]
+    if (!one_dim){
+      y_ex_value[example_i] = example_list$required_value
+      x_ex_value[example_i] = cur_example[[x_ex_name]]
+    } else {
+      x_ex_value[example_i] = example_list$required_value
+      y_ex_value[example_i] = example_list$target      
+    }
   }
   ## note that "y_ex_name" is not defined, this is par_to_search
   ## Draw Example Arrow
@@ -554,6 +572,8 @@ AddExample = function(x, slicer = NULL, example = NULL, target = .9,
   graphics::points(x_ex_value, y_ex_value,
                    pch = 1, cex = 3, col = col,
                    lwd = 1)
-  graphics::text(x = x0, y = y_ex_value, labels = y_ex_value,
-                 adj = c(0, -1), col = col, lwd = lwd)
+  if (required_text){
+    graphics::text(x = x0, y = y_ex_value, labels = y_ex_value,
+                   adj = c(0, -1), col = col, lwd = lwd)
+  }
 }
