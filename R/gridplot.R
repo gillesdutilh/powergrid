@@ -78,7 +78,7 @@
 ##'          target = .8)
 ##'
 ##' ## adjust labels, add example
-##' GridPlot(power_array, target = .8,
+##' GridPlot(power_array, target = .9,
 ##'          slicer = list(sd = seq(.1, .9, .2)),
 ##'          y_par = 'n',
 ##'          x_par = 'delta',
@@ -87,6 +87,14 @@
 ##'                         'delta' = 'Arm Difference',
 ##'                         'sd' = 'Standard Deviation'),
 ##'          example = list(sd = .7, delta = .6))
+##' ## add additional examples useing AddExample. Note that these do not contain
+##' ## info about the line they refer to.
+##' AddExample(power_array,
+##'          target = .9,
+##'          example = list(delta = c(.5, .8), sd = c(.3, .7), col = 3)
+##'          )
+##'
+##' 
 ##' ## Above, GridPlot used the default: The first dimension is what you search
 ##' ## (often n), the 2nd and 3rd define the grid of parameters at which the search
 ##' ## is done. Setting this explicitly, with x, y, and l-par, it looks like:
@@ -102,8 +110,8 @@
 ##'          x_par = 'sd',
 ##'          l_par = 'n')
 ##' ## Too many lines! Take some slices again:
-##' GridPlot(power_array, target = .8,
-##'          slicer = list(n = c(seq(10, 70, 16))),
+##' GridPlot(power_array, target = .9,
+##'          slicer = list(n = c(seq(10, 70, 10))),
 ##'          y_par = 'delta',
 ##'          x_par = 'sd',
 ##'          l_par = 'n', method = 'step')
