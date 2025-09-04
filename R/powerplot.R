@@ -116,7 +116,7 @@
 ##' ## example situation where delta is .9:
 ##' PowerPlot(power_array,
 ##'           slicer = list(sd = .7),
-##'           example = list(delta = .9),
+##'           example = list(delta = c(.7, .9)), # two examples
 ##'           target = .9 # 90% power
 ##'           )
 ##'
