@@ -509,21 +509,47 @@ PowerPlot =
 ##' }
 ##' ## Evaluate PowFun across the grid defined by sse_pars:
 ##' power_array = PowerGrid(pars = sse_pars, fun = PowFun, n_iter = NA)
-
+##'
+##' ## ======================
+##' ## PowerPlot
+##' ## ======================
 ##' PowerPlot(power_array,
 ##'           slicer = list(sd = .7),
-##'           par_labels = c(n = 'Total Sample Size',
-##'                          delta = 'Effect Size',
-##'                          sd = 'Standard Deviation'),
-##'           target_levels = c(.8, .9), # draw fewer power isolines
-##'           target = NA # no specific power target (no line thicker)
 ##'           )
 ##' AddExample(power_array,
-##'            slicer = list(sd = .7),
+##'            slicer = list(sd = .7), # be sure to cut out the same plain as above
 ##'            example = list(delta = .9),
 ##'            target = .9,
-##'            col = 'Orange', lwd = 3)
-
+##'            col = 'blue')
+##' AddExample(power_array,
+##'            slicer = list(sd = .7),
+##'            example = list(delta = c(.7, 1)), # multiple examples
+##'            target = .9,
+##'            col = 'yellow')
+##' ## Careful, you can move the slicer argument to example:
+##' AddExample(power_array,
+##'            example = list(delta = 1.2, sd = .7), # delta (x-axis) first
+##'            target = .9,
+##'            col = 'green')
+##' ## Careful, because you can put the wrong value on x-axis!
+##' AddExample(power_array,
+##'            example = list(sd = .7, delta = 1.2), # sd first?!
+##'            target = .9,
+##'            col = 'red')
+##' 
+##' ## ======================
+##' ## GridPlot
+##' ## ======================
+##' GridPlot(power_array, target = .9)
+##' AddExample(power_array,
+##'            example = list(delta = 1, sd = .7),
+##'            target = .9
+##'            )
+##' ## two examples
+##' AddExample(power_array,
+##'            example = list(delta = c(.9, 1.2), sd = c(.5, 1.1)),
+##'            target = .9, col = 3
+##'            )
 ##' @export
 AddExample = function(x, slicer = NULL, example = NULL, target = NULL,
                       minimal_target = TRUE, find_min = TRUE,
