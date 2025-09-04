@@ -406,21 +406,35 @@ PowerPlot =
     ## ============================================
   }
   ## Draw Example Arrow
-  if(!is.null(example) | left_dims == 1){
-    x0 = grDevices::extendrange(graphics::par()$usr[1:2], f = -.02)[1]
-    y0 = grDevices::extendrange(graphics::par()$usr[3:4], f = -.02)[1]
-    graphics::arrows(x0 = x_ex_value, y0 = y0,
-                     x1 = x_ex_value, y1 = y_ex_value, length = .15, code = 0)
-    graphics::arrows(x0 = x_ex_value, y0 = y_ex_value,
-                     x1 = x0, y1 = y_ex_value, length = .15)
-    graphics::points(rep(x_ex_value, each = 2), rep(y_ex_value, each = 2),
-                     pch = c(19, 1), cex = c(1, 3))
-    if (!is.null(example)){
-      ## When the example is drawn automaticaly when array_toplot is
-      ## 1-dimensional, no value at arrow head.
-      graphics::text(x = x0, y = y_ex_value,
-                     labels = y_ex_value, adj = c(0, -1))
-    }
+  if(!is.null(example)){
+    AddExample(x = x,
+               slicer = slicer,
+               example = example,
+               target = target,
+               col = col[1])
+### remove after testing ->
+    ## x0 = grDevices::extendrange(graphics::par()$usr[1:2], f = -.02)[1]
+    ## y0 = grDevices::extendrange(graphics::par()$usr[3:4], f = -.02)[1]
+    ## graphics::arrows(x0 = x_ex_value, y0 = y0,
+    ##                  x1 = x_ex_value, y1 = y_ex_value, length = .15, code = 0)
+    ## graphics::arrows(x0 = x_ex_value, y0 = y_ex_value,
+    ##                  x1 = x0, y1 = y_ex_value, length = .15)
+    ## graphics::points(rep(x_ex_value, each = 2), rep(y_ex_value, each = 2),
+    ##                  pch = c(19, 1), cex = c(1, 3))
+
+    ## if (!is.null(example)){
+    ##   ## When the example is drawn automaticaly when array_toplot is
+    ##   ## 1-dimensional, no value at arrow head.
+    ##   graphics::text(x = x0, y = y_ex_value,
+    ##                  labels = y_ex_value, adj = c(0, -1))
+    ## }
+### remove after testing <-
+  } else if (left_dims == 1) {
+        AddExample(x = x,
+               slicer = slicer,
+               example = example,
+               target = target,
+               col = col[1])
   }
 }
 
@@ -452,8 +466,17 @@ PowerPlot =
 ##' be aware that you can't draw examples on two different lines in one call of
 ##' \code{AddExample}.
 ##' 
-##' @param x,slicer,example,target,minimal_target,find_min,method See help for
+##' @param x,slicer, target,minimal_target,find_min,method See help for
 ##'   \code{PowerPlot}.
+##' @param example A list, defining at which value (list element value) of which
+##'   parameter(s) (list element name(s)) the example is drawn for a power of
+##'   \code{target}. You may supply par vector(s) longer than 1 for multiple
+##'   examples. If list contains multiple parameters to define the example, each
+##'   must contain a vector of the same length. The first element of `example`
+##'   must define the parameter x-axis, so you can plot nonsense. To be certain,
+##'   use the example argument in PowerPlot or GridPlot (losing some
+##'   flexibility). If x has only one dimention, the example needs not be
+##'   defined.
 ##' @param col Color or arrow drawn.
 ##' @param ... Further arguments are passed to the two calls of function
 ##'   \code{graphics::arrows} drawing the nicked arrow.
@@ -461,7 +484,7 @@ PowerPlot =
 ##' @return Nothing
 ##' @author Gilles Dutilh
 ##' @export
-AddExample = function(x, slicer = NULL, example, target = .9,
+AddExample = function(x, slicer = NULL, example = NULL, target = .9,
                       minimal_target = TRUE, find_min = TRUE,
                       method = 'step', col = 1, ...)
 {
@@ -470,33 +493,51 @@ AddExample = function(x, slicer = NULL, example, target = .9,
   ## =======================================================
   ## further args
   args = list(...)
+  ## I grasp lwd here to make text and circle lwd match arrows
   if('lwd' %in% names(args)){lwd = args$lwd}else{lwd = 1}
-  ## check that example defined only a single parameter, otherwise throw error.
-  if(!is.null(example) && length(example) > 1){
-    stop("The list in argument 'example' should not contain more than one parameter. You may want to use argument 'slicer' to cut out the same slice that you cut out and plotted in 'PowerPlot'.", call. = FALSE)
+  ## slice
+  browser()
+  sliced_x = ArraySlicer(x = x, slicer = slicer)
+  ## =================================
+  ## Check example input
+  ## =================================
+  ## User may define multiple requested examples. Are they correctly defined and
+  ## How many are there?
+  if(!is.null(example)){
+    if(length(unique(sapply(example, function(x)length(x)))) != 1){
+      ## if more than one example is requested, each parameter in example must have
+      ## the same length
+      stop("If multiple pars are listed in argument 'example', all must contain a vector of the same length.", call. = FALSE)
+    }
+    ns_example = sapply(example, function(x)length(x))[[1]]
+    ## The first element of example always defines the par on the x-axis
+    x_ex_name = names(example)[1] # (also if only one parameret in example)
   }
-  ns_example = sapply(example, function(x)length(x))[[1]]
-  ## Prepare example for figure.
+  ## =================================
+  ## Prepare example(s) for plotting
+  ## =================================
   y_ex_value = numeric(ns_example)
-  x_ex_name = numeric(ns_example)
   x_ex_value = numeric(ns_example)
   for (example_i in 1:ns_example){
+    ## run over examples and calculate and store coordinates
     cur_example = lapply(example, function(x)x[example_i])
     example_list =
-      Example(x,
-              example = append(slicer, cur_example),
+      Example(sliced_x,
+              example = cur_example, # append(slicer, cur_example),
               target = target, minimal_target = minimal_target,
               find_min = find_min, method = method)
     ## Prepare example for figure. Note that it is possible to have any
     ## parameter on x and y, whereas the default is to have 'n' on y.
     y_ex_value[example_i] = example_list$required_value
-    x_ex_name[example_i] = names(cur_example)
-    x_ex_value[example_i] = cur_example[[x_ex_name[example_i]]]
+    x_ex_value[example_i] = cur_example[[x_ex_name]]
   }
   ## note that "y_ex_name" is not defined, this is par_to_search
   ## Draw Example Arrow
   x0 = grDevices::extendrange(graphics::par()$usr[1:2], f = -.02)[1]
   y0 = grDevices::extendrange(graphics::par()$usr[3:4], f = -.02)[1]
+  ## =================================
+  ## Draw
+  ## =================================
   graphics::arrows(x0 = x_ex_value, y0 = y0,
                    x1 = x_ex_value, y1 = y_ex_value, length = .15,
                    code = 0, col = col, ...)
