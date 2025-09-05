@@ -47,14 +47,16 @@
 ##'   maximally allowed SD).
 ##' @param col A vector with the length of \code{l_par} defining the color(s) of
 ##'   the lines.
+##' @param example_text When an example is drawn, should the the required par
+##'   value, and the line parameter value be printed alongside the arrow(s)
 ##' @param title Character string, if not \code{NULL}, replaces default figure
 ##'   title.
 ##' @param xlim,ylim See \code{?graphics::plot}.
 ##' @param smooth Logical. If TRUE, a 5th order polynomial is fitted though the
 ##'   points constituting each line for smoothing.
 ##' @seealso \code{\link{PowerGrid}}, \code{\link{AddExample}},
-##'   \code{\link{Example}}, \code{\link{PowerPlot}} for more basic plotting
-##'   of 2 parameters.
+##'   \code{\link{Example}}, \code{\link{PowerPlot}} for more basic plotting of
+##'   2 parameters.
 ##' @return A list with graphical information to use in further plotting.
 ##' @author Gilles Dutilh
 ##' @examples
@@ -230,9 +232,11 @@ GridPlot = function(x,
                                                     # the relevant line
     graphics::segments(example[[x_par]], y0, example[[x_par]], y_ex, col = arrow_col)
     graphics::arrows(example[[x_par]], y_ex, x0, y_ex, length = .15, col = arrow_col)
-    graphics::text(x = x0, y = y_ex,
-                   labels = paste(y_ex, 'at', Trans(l_par), '=', example[[l_par]]),
-                   adj = c(0, -1), col = arrow_col)
+    if (example_text){
+      graphics::text(x = x0, y = y_ex,
+                     labels = paste(y_ex, 'at', Trans(l_par), '=', example[[l_par]]),
+                     adj = c(0, -1), col = arrow_col)
+    }
   }
   if(is.null(title)){
     title = paste0(ifelse(find_min, 'Minimum ', 'Maximum '),
