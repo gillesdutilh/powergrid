@@ -69,7 +69,7 @@
 ##' @param shades_legend Logical indicating whether a legend for the shading is
 ##'   added. Note that this legend is drawn in a separate plotting region, and
 ##'   does effect setting \code{par(mfrow)} of the current plotting device.
-##' @param required_text When an example is drawn, should the the required par
+##' @param example_text When an example is drawn, should the the required par
 ##'   value be printed alongside the arrow(s)
 ##' @param title Character string, if not \code{NULL}, replaces default figure
 ##'   title.
@@ -184,7 +184,7 @@ PowerPlot =
            col = grDevices::grey.colors(1, .2, .2),
            shades_of_grey = TRUE, # do you want shades of grey on background
            shades_legend = FALSE, # do you want a legend for the shades
-           required_text = TRUE, # do you want a text next to the Example arrow
+           example_text = TRUE, # do you want a text next to the Example arrow
            title = NULL,
            par_labels = NULL,
            smooth = NA,
@@ -423,7 +423,7 @@ PowerPlot =
                example = example,
                target = target,
                col = col[1],
-               required_text = required_text)
+               example_text = example_text)
   }
 }
 
@@ -470,7 +470,7 @@ PowerPlot =
 ##' Argument \code{example} may contain vectors with length longer than one to
 ##' draw multiple examples.
 ##' 
-##' @param x,target,minimal_target,find_min,method,required_text See help for
+##' @param x,target,minimal_target,find_min,method,example_text See help for
 ##'   \code{PowerPlot}.
 ##' @param slicer A list, internally passed on to \code{\link{ArraySlicer}} to
 ##'   cut out a (multidimensional) slice from x. You can achieve the same by
@@ -554,7 +554,7 @@ PowerPlot =
 AddExample = function(x, slicer = NULL, example = NULL, target = NULL,
                       minimal_target = TRUE, find_min = TRUE,
                       method = 'step', col = 1,
-                      required_text = TRUE, ...)
+                      example_text = TRUE, ...)
 {
   ## =======================================================
   ## process input
@@ -630,7 +630,7 @@ AddExample = function(x, slicer = NULL, example = NULL, target = NULL,
   graphics::points(x_ex_value, y_ex_value,
                    pch = 1, cex = 3, col = col,
                    lwd = 1)
-  if (required_text){
+  if (example_text){
     graphics::text(x = x0, y = y_ex_value, labels = y_ex_value,
                    adj = c(0, -1), col = col, lwd = lwd)
   }
