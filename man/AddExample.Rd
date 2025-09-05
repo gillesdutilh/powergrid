@@ -13,12 +13,12 @@ AddExample(
   find_min = TRUE,
   method = "step",
   col = 1,
-  required_text = TRUE,
+  example_text = TRUE,
   ...
 )
 }
 \arguments{
-\item{x, target, minimal_target, find_min, method, required_text}{See help for
+\item{x, target, minimal_target, find_min, method, example_text}{See help for
 \code{PowerPlot}.}
 
 \item{slicer}{A list, internally passed on to \code{\link{ArraySlicer}} to

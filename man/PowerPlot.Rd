@@ -19,7 +19,7 @@ PowerPlot(
   col = grDevices::grey.colors(1, 0.2, 0.2),
   shades_of_grey = TRUE,
   shades_legend = FALSE,
-  required_text = TRUE,
+  example_text = TRUE,
   title = NULL,
   par_labels = NULL,
   smooth = NA,
@@ -80,7 +80,7 @@ addition to isolines to show power levels.}
 added. Note that this legend is drawn in a separate plotting region, and
 does effect setting \code{par(mfrow)} of the current plotting device.}
 
-\item{required_text}{When an example is drawn, should the the required par
+\item{example_text}{When an example is drawn, should the the required par
 value be printed alongside the arrow(s)}
 
 \item{title}{Character string, if not \code{NULL}, replaces default figure

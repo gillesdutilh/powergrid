@@ -93,7 +93,8 @@
 ##' ## info about the line they refer to.
 ##' AddExample(power_array,
 ##'          target = .9,
-##'          example = list(delta = c(.5, .8), sd = c(.3, .7), col = 3)
+##'          example = list(delta = c(.5, .8), sd = c(.3, .7)),
+##'          col = 3
 ##'          )
 ##'
 ##' 
