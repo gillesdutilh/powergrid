@@ -98,11 +98,14 @@ FindTarget(products,
 In typical use cases, you will use Example(), PowerPlot(), and GridPlot() and
 AddExample(), which rely on FindTarget internally.
 
-# Two typical use cases
-I describe two basic use cases here. Both concern studying the relation between
-power, sample size, and two further parameters. In the first situation, a
-function for calculating the power is available. In the second situation, the
-power needs to be found through (re-)sampling.
+# Four use cases
+I describe two basic use cases here, and two slightly more fancy once. The first
+two concern the relation between power, sample size, and two further
+parameters. In the first situation, a function for calculating the power is
+available. In the second situation, the power needs to be found through
+(re-)sampling. The third and fourth example concern situations where the
+objective is not a minimal power, but a CI-width that must be at most a certain
+value.
 
 ## Power and sample size for a t-test
 Assume we aim to collect data in a two-armed RCT and plan to perform a simple
@@ -234,7 +237,7 @@ sse_pars = list(
 PowFun = function(n, delta, pilot_data){
   arm_1 = sample(pilot_data, n, replace = TRUE)
   arm_2 = sample(pilot_data, n, replace = TRUE) + delta
-  significant = wilcox.test(arm_1, arm_2)$p.value < .05
+  significant = wilcox.test(arm_1, arm_2)$p.value < .03 # the typical 3% alpha threshold
   return(significant) # each call of this function gives significant either TRUE
                       # or FALSE
   }
@@ -259,10 +262,100 @@ A couple of notes:
   individual iterations, be aware that plotting functions and `Example`
   automatically summarize these taking the mean. You can, however, choose a
   different `summary_function`.
-* There are a range of graphical options, including the labeling of axes and
-  lines.
 * As in PowerPlot, any dimension of the `power_array` may be represented by the
   x-axis, y-axis, and lines.
+  
+## Target a maximum CI97-width
+The powergrid package allows to do more than finding a power of at least some
+value. Instead, we can target, for example, a 95% confidence interval that
+should have at most a certain width. Say, we have the following situation, where
+we plan to compare two groups with a t-test and we want the CI not to be wider
+than .7 points on our outcome scale. Maybe, 7 is considered a clinically
+important difference according to the literature and when our estimates are not
+further than .7 points apart, we can't really conclude anything. We can use the
+powergrid functionality to find the sample size that gives us an expected CI of
+at most that value:
 
+```{r, CI example, fig.width=5.5, fig.height=5.5, fig.align='center'}
+CIFun = function(n, delta, sd){
+  x1 = rnorm(n, mean = 0, sd = sd)
+  x2 = rnorm(n, mean = delta, sd = sd) 
+  abs(diff(t.test(x1, x2)$conf.int)) # return the CI-width
+}
+pars = list( # a normal list
+  n = seq(from = 10, to = 60, by = 5), # sample size
+  delta = seq(from = 0.5, to = 1.7, by = 0.1), # effect size
+  sd = seq(.5, 1, .1) # variability
+)
+set.seed(1)
+CI_array = PowerGrid(pars, CIFun, n_iter = 20) 
+summary(CI_array)
+## This object now contains, for each parameter combination, the CI-width
+## averaged over 20 iterations.
 
+Example(CI_array,
+        example = list(delta = .7, sd = .8),
+        target = .7,
+        minimal_target = FALSE,
+        find_min = TRUE)
+## Show results
+PowerPlot(CI_array, slicer = list(delta = .7),
+          target_levels = c(.6, .7, .8), # this defines the lines
+          title = "CI-width as a funtion of sd and n,\nassuming delta = .7")
+AddExample(CI_array, slicer = list(delta = .7),
+           example = list(sd = .8),
+           target = .7,
+           minimal_target = FALSE)
+```
 
+A couple of things to observe: 
+* We set "minimal_target" to FALSE, since we are looking for a CI of *at most*
+  .7
+* The lines in the figure now connect situations with the same CI-width (not
+  power, as in the earlier examples)
+* We changed the title accordingly.
+
+## A special case
+We have the same situation as above, where we saw that the average CI with
+decreased with n, and increased with SD. Say, we have a limited number of
+participants of 45 per study arm, but we can have invest a bit in our
+measurement tools to have some control over SD. We may ask ourselves: what is
+the highest SD at which we still find, on average, a CI width smaller than the
+intended .7 points?
+
+In this case, we may want to find for a certain n (on the x-axis) the maxmimum
+sd where the width is still below .7. Note that two things are special here: 
+* we look for something (CI width) that should be small, not large (like
+  power). Therefore, we set `minimal_target = FALSE`
+* we look for the largest acceptable SD (not the smallest n) where we can
+  achieve the target value of .7. Therefore, we set `find_min = FALSE`.
+
+```{R}
+PowerPlot(CI_array, slicer = list(delta = .7),
+          target_levels = c(.6, .7, .8), # this defines the lines
+          par_to_search = 'sd',
+          title = "CI-width as a funtion of sd and n,\nassuming delta = .7")
+
+AddExample(CI_array, slicer = list(delta = .7),
+           example = list(n = 45),
+           minimal_target = FALSE, # average width not larger
+           target = .7, ## than .7
+           find_min = FALSE)
+
+```
+
+We see that the highest SD for which the CI-width is still smaller than .7 is .8.
+
+We could also get this answer in text:
+
+```{R}
+CI_example = Example(CI_array,
+                     example = list(delta = .7, n = 40),
+                     minimal_target = FALSE, # average width not larger
+                     target = .7, ## than .7
+                     find_min = FALSE)
+print(CI_example)
+## The output of Example is a list that you can use when writing your markdown
+## product.
+print.default(CI_example)
+```
