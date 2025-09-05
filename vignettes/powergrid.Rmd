@@ -330,7 +330,7 @@ sd where the width is still below .7. Note that two things are special here:
 * we look for the largest acceptable SD (not the smallest n) where we can
   achieve the target value of .7. Therefore, we set `find_min = FALSE`.
 
-```{R}
+```{R, special case, fig.width=5.5, fig.height=5.5, fig.align='center'}
 PowerPlot(CI_array, slicer = list(delta = .7),
           target_levels = c(.6, .7, .8), # this defines the lines
           par_to_search = 'sd',
@@ -348,7 +348,7 @@ We see that the highest SD for which the CI-width is still smaller than .7 is .8
 
 We could also get this answer in text:
 
-```{R}
+```{R, special case Example, fig.width=5.5, fig.height=5.5, fig.align='center'}
 CI_example = Example(CI_array,
                      example = list(delta = .7, n = 40),
                      minimal_target = FALSE, # average width not larger
@@ -358,4 +358,9 @@ print(CI_example)
 ## The output of Example is a list that you can use when writing your markdown
 ## product.
 print.default(CI_example)
+```
+
+We can also show this situation in a GridPlot:
+```{R, special case GridPlot, fig.width=5.5, fig.height=5.5, fig.align='center'}
+GridPlot(CI_array, target = .7, minimal_target = FALSE)
 ```
