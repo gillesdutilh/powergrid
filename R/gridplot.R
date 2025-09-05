@@ -119,21 +119,22 @@
 ##'          l_par = 'n', method = 'step')
 ##' @export
 GridPlot = function(x,
-                          slicer = NULL,
-                          y_par = NULL,
-                          x_par = NULL,
-                          l_par = NULL,
-                          par_labels = NULL,
-                          example = NULL,
-                          target = NA,
-                          method = 'step',
-                          minimal_target = TRUE,
-                          find_min = TRUE,
-                          col = NULL,
-                          title = NULL,
-                          xlim = NULL,
-                          ylim = NULL,
-                          smooth = FALSE)
+                    slicer = NULL,
+                    y_par = NULL,
+                    x_par = NULL,
+                    l_par = NULL,
+                    par_labels = NULL,
+                    example = NULL,
+                    target = NA,
+                    method = 'step',
+                    minimal_target = TRUE,
+                    find_min = TRUE,
+                    col = NULL,
+                    example_text = TRUE,
+                    title = NULL,
+                    xlim = NULL,
+                    ylim = NULL,
+                    smooth = FALSE)
 {
   ## translator for labels; translates if label is available
   Trans = function(x){
