@@ -287,6 +287,7 @@ PowerPlot =
   ## Graphical preparation
   ## =======================================================
   ##
+  old_par = par(no.readonly = TRUE) # to restore afterwards
   ## ============================================
   ## Calculate colors and legend values if shades_of_grey
   if(shades_of_grey){
@@ -422,9 +423,12 @@ PowerPlot =
                slicer = slicer,
                example = example,
                target = target,
+               find_min = find_min,
+               minimal_target = minimal_target,
                col = col[1],
                example_text = example_text)
   }
+  par(old_par)
 }
 
 ## ======================================================= lower level function
