@@ -1,11 +1,11 @@
 ##' @title Plot requirements for achieving a target power as a function of
 ##'   assumptions about two parameters
-##' @description Plots the relation between up to three parameters and,
-##'   typically, power. Two parameters are represented by x- and y-axes, one by
-##'   separate lines.
+##' @description Plots how the required sample size (or any other parameter) to
+##'   achieve a certain power (or other objective) depends on two furhter
+##'   parameters.
 ##' @details In the most typical use case, the y-axis shows the *minimal* sample
 ##'   size required to achieve a power of *at least* \code{target}, assuming the
-##'   value of the parameter on the x-axis, and the value of the parameter
+##'   value of a parameter on the x-axis, and the value of another parameter
 ##'   represented by each line.
 ##'
 ##' The use of this function is, however, not limited to finding a minimum n to
@@ -13,7 +13,7 @@
 ##' use of `minimal_target` and `fin_min`.
 ##'
 ##' Note that a line may stop in a corner of the plotting region, not reaching
-##' the margin. This is often natural behavior, when the \code{target} level is
+##' the margin. This is often correct behavior, when the \code{target} level is
 ##' not reached anywhere in that corner of the parameter range. In case n is on
 ##' the y-axis, this may easily be solved by adding larger sample sizes to the
 ##' grid (consider \code{Update}), and then adjusting the y-limit to only
@@ -25,10 +25,16 @@
 ##'   3-dimensional slice must be cut out using \code{slicer}, a list whose
 ##'   elements define at which values (the list element value) of which
 ##'   parameter (the list element name) the slice should be cut.
-##' @param y_par,x_par,l_par Which parameter is varied on the x- and y-axis, and
-##'   between lines, respectively. If NULL, \code{y_par} is set to the first,
-##'   \code{x_par} to the second, and \code{l_par} to the third dimension name
-##'   of \code{x}.
+##' @param y_par Which parameter is searched for the minimum (or maximum if
+##'   find_min == FALSE) yielding the target; and shown on the y-axis. If NULL,
+##'   \code{y_par} is set to the first, \code{x_par} to the second, and
+##'   \code{l_par} to the third dimension name of 3-dimensional array
+##'   \code{x}. If you want another than the first dimension as `y_par`, you
+##'   need to see `y_par`, `x_par`, and `l_par` explicitly.
+##' @param x_par,l_par Which parameter is varied on the x-axis, and between
+##'   lines, respectively. If none of `y_par`, `x_par` and `l_par` are given,
+##'   the first, second, and third dimension of x are mapped to y_par, x_par,
+##'   and l_par, respectively.
 ##' @param par_labels Named vector where elements names represent the parameters
 ##'   that are plotted, and the values set the desired labels.
 ##' @param example A list defining for which combination of levels of
@@ -55,8 +61,8 @@
 ##' @param smooth Logical. If TRUE, a 5th order polynomial is fitted though the
 ##'   points constituting each line for smoothing.
 ##' @seealso \code{\link{PowerGrid}}, \code{\link{AddExample}},
-##'   \code{\link{Example}}, \code{\link{PowerPlot}} for more basic plotting of
-##'   2 parameters.
+##'   \code{\link{Example}}, \code{\link{PowerPlot}} for similar plotting of
+##'   just 2 parameters, at multiple power (target) levels.
 ##' @return A list with graphical information to use in further plotting.
 ##' @author Gilles Dutilh
 ##' @examples
@@ -126,7 +132,7 @@ GridPlot = function(x,
                     l_par = NULL,
                     par_labels = NULL,
                     example = NULL,
-                    target = NA,
+                    target = .9,
                     method = 'step',
                     minimal_target = TRUE,
                     find_min = TRUE,
