@@ -199,11 +199,14 @@ GridPlot() and AddExample(), which rely on FindTarget internally.</p>
 </h2>
 <p>I describe two basic use cases here, and two slightly more fancy
 once. The first two concern the relation between power, sample size, and
-two further parameters. In the first situation, a function for
-calculating the power is available. In the second situation, the power
-needs to be found through (re-)sampling. The third and fourth example
-concern situations where the objective is not a minimal power, but a
-CI-width that must be at most a certain value.</p>
+two further parameters. In the <a href="#Power%20and%20sample%20size%20for%20a%20t-test">first
+situation</a>, a function for calculating the power is available. In the
+<a href="#Power%20evaluation%20using%20simulation%20and%20resampling">second
+situation</a>, the power needs to be found through (re-)sampling. The <a href="#Target%20a%20maximum%20CI95-width">third example</a> concerns a
+situation where the objective is not a minimal power, but a CI-width
+that must be at most a certain value. In the <a href="#Find%20the%20upper%20boundary">fourth example</a>, we do not
+search the <em>lowest required</em> sample size, but the <em>highest
+permissible</em> standard deviation to achieve a target power.</p>
 <div class="section level3">
 <h3 id="power-and-sample-size-for-a-t-test">Power and sample size for a t-test<a class="anchor" aria-label="anchor" href="#power-and-sample-size-for-a-t-test"></a>
 </h3>
@@ -402,7 +405,7 @@ be represented by the x-axis, y-axis, and lines.</li>
 </ul>
 </div>
 <div class="section level3">
-<h3 id="target-a-maximum-ci97-width">Target a maximum CI97-width<a class="anchor" aria-label="anchor" href="#target-a-maximum-ci97-width"></a>
+<h3 id="target-a-maximum-ci95-width">Target a maximum CI95-width<a class="anchor" aria-label="anchor" href="#target-a-maximum-ci95-width"></a>
 </h3>
 <p>The powergrid package allows to do more than finding a power of at
 least some value. Instead, we can target, for example, a 95% confidence
@@ -460,8 +463,11 @@ most that value:</p>
 <span><span class="co">## Show results</span></span>
 <span><span class="fu"><a href="../reference/PowerPlot.html">PowerPlot</a></span><span class="op">(</span><span class="va">CI_array</span>, slicer <span class="op">=</span> <span class="fu"><a href="https://rdrr.io/r/base/list.html" class="external-link">list</a></span><span class="op">(</span>delta <span class="op">=</span> <span class="fl">.7</span><span class="op">)</span>,</span>
 <span>          target_levels <span class="op">=</span> <span class="fu"><a href="https://rdrr.io/r/base/c.html" class="external-link">c</a></span><span class="op">(</span><span class="fl">.6</span>, <span class="fl">.7</span>, <span class="fl">.8</span><span class="op">)</span>, <span class="co"># this defines the lines</span></span>
-<span>          title <span class="op">=</span> <span class="st">"CI-width as a funtion of sd and n,\nassuming delta = .7"</span><span class="op">)</span></span>
-<span><span class="fu"><a href="../reference/AddExample.html">AddExample</a></span><span class="op">(</span><span class="va">CI_array</span>, slicer <span class="op">=</span> <span class="fu"><a href="https://rdrr.io/r/base/list.html" class="external-link">list</a></span><span class="op">(</span>delta <span class="op">=</span> <span class="fl">.7</span><span class="op">)</span>,</span>
+<span>          title <span class="op">=</span> <span class="st">"CI-width as a funtion of sd and n,\nassuming delta = .7"</span>,</span>
+<span>          shades_of_grey <span class="op">=</span> <span class="cn">FALSE</span><span class="op">)</span> <span class="co"># Grey scale is optimized for situation where</span></span>
+<span>                                  <span class="co"># the array contains power.</span></span>
+<span><span class="fu"><a href="../reference/AddExample.html">AddExample</a></span><span class="op">(</span><span class="va">CI_array</span>,</span>
+<span>           slicer <span class="op">=</span> <span class="fu"><a href="https://rdrr.io/r/base/list.html" class="external-link">list</a></span><span class="op">(</span>delta <span class="op">=</span> <span class="fl">.7</span><span class="op">)</span>,</span>
 <span>           example <span class="op">=</span> <span class="fu"><a href="https://rdrr.io/r/base/list.html" class="external-link">list</a></span><span class="op">(</span>sd <span class="op">=</span> <span class="fl">.8</span><span class="op">)</span>,</span>
 <span>           target <span class="op">=</span> <span class="fl">.7</span>,</span>
 <span>           minimal_target <span class="op">=</span> <span class="cn">FALSE</span><span class="op">)</span></span></code></pre></div>
@@ -472,88 +478,67 @@ figure now connect situations with the same CI-width (not power, as in
 the earlier examples) * We changed the title accordingly.</p>
 </div>
 <div class="section level3">
-<h3 id="a-special-case">A special case<a class="anchor" aria-label="anchor" href="#a-special-case"></a>
+<h3 id="find-the-upper-bound">Find the upper bound<a class="anchor" aria-label="anchor" href="#find-the-upper-bound"></a>
 </h3>
-<p>We have the same situation as above, where we saw that the average CI
-with decreased with n, and increased with SD. Say, we have a limited
-number of participants of 45 per study arm, but we can have invest a bit
-in our measurement tools to have some control over SD. We may ask
-ourselves: what is the highest SD at which we still find, on average, a
-CI width smaller than the intended .7 points?</p>
-<p>In this case, we may want to find for a certain n (on the x-axis) the
-maxmimum sd where the width is still below .7. Note that two things are
-special here: * we look for something (CI width) that should be small,
-not large (like power). Therefore, we set
-<code>minimal_target = FALSE</code> * we look for the largest acceptable
-SD (not the smallest n) where we can achieve the target value of .7.
-Therefore, we set <code>find_min = FALSE</code>.</p>
+<p>We have the same situation as in the first use case, where we plan a
+t-test and aim for a power of 90%. In the current situation, however, we
+have a very limited flexibility in the number of participants that we
+can recruit. We do have some way of decreasing the variability by
+improving our measurements, however. We want to study how small our SD
+must be for our study to have desirable power.</p>
+<summary in numbers here><ul>
+<li>we look for the largest acceptable SD (not the smallest n) where we
+can achieve the target value of .7. Therefore, we set
+<code>find_min = FALSE</code>.</li>
+</ul>
 <div class="sourceCode" id="cb11"><pre class="downlit sourceCode r">
-<code class="sourceCode R"><span><span class="fu"><a href="../reference/PowerPlot.html">PowerPlot</a></span><span class="op">(</span><span class="va">CI_array</span>, slicer <span class="op">=</span> <span class="fu"><a href="https://rdrr.io/r/base/list.html" class="external-link">list</a></span><span class="op">(</span>delta <span class="op">=</span> <span class="fl">.7</span><span class="op">)</span>,</span>
-<span>          target_levels <span class="op">=</span> <span class="fu"><a href="https://rdrr.io/r/base/c.html" class="external-link">c</a></span><span class="op">(</span><span class="fl">.6</span>, <span class="fl">.7</span>, <span class="fl">.8</span><span class="op">)</span>, <span class="co"># this defines the lines</span></span>
-<span>          par_to_search <span class="op">=</span> <span class="st">'sd'</span>,</span>
-<span>          title <span class="op">=</span> <span class="st">"CI-width as a funtion of sd and n,\nassuming delta = .7"</span><span class="op">)</span></span>
-<span></span>
-<span><span class="fu"><a href="../reference/AddExample.html">AddExample</a></span><span class="op">(</span><span class="va">CI_array</span>, slicer <span class="op">=</span> <span class="fu"><a href="https://rdrr.io/r/base/list.html" class="external-link">list</a></span><span class="op">(</span>delta <span class="op">=</span> <span class="fl">.7</span><span class="op">)</span>,</span>
-<span>           example <span class="op">=</span> <span class="fu"><a href="https://rdrr.io/r/base/list.html" class="external-link">list</a></span><span class="op">(</span>n <span class="op">=</span> <span class="fl">45</span><span class="op">)</span>,</span>
-<span>           minimal_target <span class="op">=</span> <span class="cn">FALSE</span>, <span class="co"># average width not larger</span></span>
-<span>           target <span class="op">=</span> <span class="fl">.7</span>, <span class="co">## than .7</span></span>
-<span>           find_min <span class="op">=</span> <span class="cn">FALSE</span><span class="op">)</span></span></code></pre></div>
-<p><img src="powergrid_files/figure-html/special%20case-1.png" width="550" style="display: block; margin: auto;"></p>
-<p>We see that the highest SD for which the CI-width is still smaller
-than .7 is .8.</p>
-<p>We could also get this answer in text:</p>
-<div class="sourceCode" id="cb12"><pre class="downlit sourceCode r">
-<code class="sourceCode R"><span><span class="va">CI_example</span> <span class="op">=</span> <span class="fu"><a href="../reference/Example.html">Example</a></span><span class="op">(</span><span class="va">CI_array</span>,</span>
-<span>                     example <span class="op">=</span> <span class="fu"><a href="https://rdrr.io/r/base/list.html" class="external-link">list</a></span><span class="op">(</span>delta <span class="op">=</span> <span class="fl">.7</span>, n <span class="op">=</span> <span class="fl">40</span><span class="op">)</span>,</span>
-<span>                     minimal_target <span class="op">=</span> <span class="cn">FALSE</span>, <span class="co"># average width not larger</span></span>
-<span>                     target <span class="op">=</span> <span class="fl">.7</span>, <span class="co">## than .7</span></span>
-<span>                     find_min <span class="op">=</span> <span class="cn">FALSE</span><span class="op">)</span></span>
-<span><span class="fu"><a href="https://rdrr.io/r/base/print.html" class="external-link">print</a></span><span class="op">(</span><span class="va">CI_example</span><span class="op">)</span></span>
+<code class="sourceCode R"><span><span class="va">sse_pars</span> <span class="op">=</span> <span class="fu"><a href="https://rdrr.io/r/base/list.html" class="external-link">list</a></span><span class="op">(</span></span>
+<span>  n <span class="op">=</span> <span class="fu"><a href="https://rdrr.io/r/base/c.html" class="external-link">c</a></span><span class="op">(</span><span class="fl">30</span>, <span class="fl">40</span><span class="op">)</span>,</span>
+<span>  delta <span class="op">=</span> <span class="fu"><a href="https://rdrr.io/r/base/seq.html" class="external-link">seq</a></span><span class="op">(</span>from <span class="op">=</span> <span class="fl">0.4</span>, to <span class="op">=</span> <span class="fl">1.2</span>, by <span class="op">=</span> <span class="fl">0.01</span><span class="op">)</span>, <span class="co">## effect size</span></span>
+<span>  sd <span class="op">=</span> <span class="fu"><a href="https://rdrr.io/r/base/seq.html" class="external-link">seq</a></span><span class="op">(</span><span class="fl">.3</span>, <span class="fl">.9</span>, <span class="fl">.01</span><span class="op">)</span><span class="op">)</span> <span class="co">## Standard deviation</span></span>
+<span><span class="va">PowFun</span> <span class="op">&lt;-</span> <span class="kw">function</span><span class="op">(</span><span class="va">n</span>, <span class="va">delta</span>, <span class="va">sd</span><span class="op">)</span><span class="op">{</span></span>
+<span>  <span class="va">ptt</span> <span class="op">=</span> <span class="fu"><a href="https://rdrr.io/r/stats/power.t.test.html" class="external-link">power.t.test</a></span><span class="op">(</span>n <span class="op">=</span> <span class="va">n</span><span class="op">/</span><span class="fl">2</span>, delta <span class="op">=</span> <span class="va">delta</span>, sd <span class="op">=</span> <span class="va">sd</span>,</span>
+<span>                     sig.level <span class="op">=</span> <span class="fl">0.05</span><span class="op">)</span></span>
+<span>  <span class="kw"><a href="https://rdrr.io/r/base/function.html" class="external-link">return</a></span><span class="op">(</span><span class="va">ptt</span><span class="op">$</span><span class="va">power</span><span class="op">)</span></span>
+<span><span class="op">}</span></span>
+<span><span class="va">power_array</span> <span class="op">=</span> <span class="fu"><a href="../reference/PowerGrid.html">PowerGrid</a></span><span class="op">(</span>pars <span class="op">=</span> <span class="va">sse_pars</span>, fun <span class="op">=</span> <span class="va">PowFun</span>, n_iter <span class="op">=</span> <span class="cn">NA</span><span class="op">)</span></span>
+<span><span class="fu"><a href="../reference/Example.html">Example</a></span><span class="op">(</span><span class="va">power_array</span>,</span>
+<span>        example <span class="op">=</span> <span class="fu"><a href="https://rdrr.io/r/base/list.html" class="external-link">list</a></span><span class="op">(</span>n <span class="op">=</span> <span class="fl">30</span>, delta <span class="op">=</span> <span class="fl">.8</span><span class="op">)</span>,</span>
+<span>        find_min <span class="op">=</span> <span class="cn">FALSE</span>,</span>
+<span>        target <span class="op">=</span> <span class="fl">.9</span><span class="op">)</span></span>
 <span><span class="co">#&gt; ================================================</span></span>
-<span><span class="co">#&gt; To achieve the target of at most 0.7 assuming</span></span>
-<span><span class="co">#&gt; delta = 0.7</span></span>
-<span><span class="co">#&gt; n = 40,</span></span>
-<span><span class="co">#&gt; maximal permissible sd = 0.7</span></span>
+<span><span class="co">#&gt; To achieve the target of at least 0.9 assuming</span></span>
+<span><span class="co">#&gt; n = 30</span></span>
+<span><span class="co">#&gt; delta = 0.8,</span></span>
+<span><span class="co">#&gt; maximal permissible sd = 0.65</span></span>
 <span><span class="co">#&gt; ------------------------------------------------</span></span>
 <span><span class="co">#&gt; Description: Method "step" was used to find the</span></span>
 <span><span class="co">#&gt; highest sd in the searched grid that yields a</span></span>
-<span><span class="co">#&gt; target (typically power) of at most 0.7.</span></span>
-<span><span class="co">#&gt; ================================================</span></span>
-<span><span class="co">## The output of Example is a list that you can use when writing your markdown</span></span>
-<span><span class="co">## product.</span></span>
-<span><span class="fu"><a href="https://rdrr.io/r/base/print.default.html" class="external-link">print.default</a></span><span class="op">(</span><span class="va">CI_example</span><span class="op">)</span></span>
-<span><span class="co">#&gt; $requested_example</span></span>
-<span><span class="co">#&gt; $requested_example$delta</span></span>
-<span><span class="co">#&gt; [1] 0.7</span></span>
-<span><span class="co">#&gt; </span></span>
-<span><span class="co">#&gt; $requested_example$n</span></span>
-<span><span class="co">#&gt; [1] 40</span></span>
-<span><span class="co">#&gt; </span></span>
-<span><span class="co">#&gt; </span></span>
-<span><span class="co">#&gt; $objective</span></span>
-<span><span class="co">#&gt; [1] "achieve target or lower"</span></span>
-<span><span class="co">#&gt; </span></span>
-<span><span class="co">#&gt; $target</span></span>
-<span><span class="co">#&gt; [1] 0.7</span></span>
-<span><span class="co">#&gt; </span></span>
-<span><span class="co">#&gt; $required_name</span></span>
-<span><span class="co">#&gt; [1] "sd"</span></span>
-<span><span class="co">#&gt; </span></span>
-<span><span class="co">#&gt; $required_value</span></span>
-<span><span class="co">#&gt; [1] 0.7</span></span>
-<span><span class="co">#&gt; </span></span>
-<span><span class="co">#&gt; $searched</span></span>
-<span><span class="co">#&gt; [1] "max"</span></span>
-<span><span class="co">#&gt; </span></span>
-<span><span class="co">#&gt; $method</span></span>
-<span><span class="co">#&gt; [1] "step"</span></span>
-<span><span class="co">#&gt; </span></span>
-<span><span class="co">#&gt; attr(,"class")</span></span>
-<span><span class="co">#&gt; [1] "power_example"</span></span></code></pre></div>
-<p>We can also show this situation in a GridPlot:</p>
+<span><span class="co">#&gt; target (typically power) of at least 0.9.</span></span>
+<span><span class="co">#&gt; ================================================</span></span></code></pre></div>
+<p>We see that, by setting <code>find_min = FALSE</code> Example() shows
+us the “maximal permissible” value that sd may take in order to achieve
+the set target.</p>
+<p>Below, inspect the situation in graphic form. Note that the argument
+<code>par_to_search</code> is set to “sd”, putting that parameter on the
+y-axis.</p>
+<div class="sourceCode" id="cb12"><pre class="downlit sourceCode r">
+<code class="sourceCode R"><span><span class="fu"><a href="../reference/PowerPlot.html">PowerPlot</a></span><span class="op">(</span><span class="va">power_array</span>,</span>
+<span>          slicer <span class="op">=</span> <span class="fu"><a href="https://rdrr.io/r/base/list.html" class="external-link">list</a></span><span class="op">(</span>n <span class="op">=</span> <span class="fl">30</span><span class="op">)</span>,</span>
+<span>          par_to_search <span class="op">=</span> <span class="st">'sd'</span>,</span>
+<span>          example <span class="op">=</span> <span class="fu"><a href="https://rdrr.io/r/base/list.html" class="external-link">list</a></span><span class="op">(</span>delta <span class="op">=</span> <span class="fl">.8</span><span class="op">)</span>,</span>
+<span>          find_min <span class="op">=</span> <span class="cn">FALSE</span>,</span>
+<span>          target <span class="op">=</span> <span class="fl">.9</span><span class="op">)</span></span></code></pre></div>
+<p><img src="powergrid_files/figure-html/maximum%20SD%20PowerPlot-1.png" width="550" style="display: block; margin: auto;"></p>
 <div class="sourceCode" id="cb13"><pre class="downlit sourceCode r">
-<code class="sourceCode R"><span><span class="fu"><a href="../reference/GridPlot.html">GridPlot</a></span><span class="op">(</span><span class="va">CI_array</span>, target <span class="op">=</span> <span class="fl">.7</span>, minimal_target <span class="op">=</span> <span class="cn">FALSE</span><span class="op">)</span></span></code></pre></div>
-<p><img src="powergrid_files/figure-html/special%20case%20GridPlot-1.png" width="550" style="display: block; margin: auto;"></p>
+<code class="sourceCode R"><span><span class="fu"><a href="../reference/GridPlot.html">GridPlot</a></span><span class="op">(</span><span class="va">power_array</span>,</span>
+<span>         y_par <span class="op">=</span> <span class="st">'sd'</span>,</span>
+<span>         x_par <span class="op">=</span> <span class="st">'delta'</span>,</span>
+<span>         l_par <span class="op">=</span> <span class="st">'n'</span>,</span>
+<span>         target <span class="op">=</span> <span class="fl">.9</span>, find_min <span class="op">=</span> <span class="cn">FALSE</span>,</span>
+<span>         ylim <span class="op">=</span> <span class="fu"><a href="https://rdrr.io/r/base/c.html" class="external-link">c</a></span><span class="op">(</span><span class="fl">.3</span>, <span class="fl">1</span><span class="op">)</span><span class="op">)</span></span></code></pre></div>
+<p><img src="powergrid_files/figure-html/maximum%20SD%20GridPlot-1.png" width="550" style="display: block; margin: auto;"></p>
+</summary>
 </div>
 </div>
   </main><aside class="col-md-3"><nav id="toc" aria-label="Table of contents"><h2>On this page</h2>
