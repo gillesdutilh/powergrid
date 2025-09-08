@@ -177,7 +177,7 @@ PowerPlot =
            find_min = TRUE, # search for min or max in par_to_search
            example = NULL, # a list(<parameter> = <value>)
            method = 'step',
-           target = NA, # the minimum (or maximum, see below)
+           target = .9, # the minimum (or maximum, see below)
            minimal_target = TRUE,
            summary_function = mean,
            target_levels = c(.8, .9, .95), # which power iso lines to draw
@@ -287,7 +287,7 @@ PowerPlot =
   ## Graphical preparation
   ## =======================================================
   ##
-  old_par = par(no.readonly = TRUE) # to restore afterwards
+  ##  old_par = par(no.readonly = TRUE) # to restore afterwards
   ## ============================================
   ## Calculate colors and legend values if shades_of_grey
   if(shades_of_grey){
@@ -428,7 +428,6 @@ PowerPlot =
                col = col[1],
                example_text = example_text)
   }
-  par(old_par)
 }
 
 ## ======================================================= lower level function
@@ -557,7 +556,8 @@ PowerPlot =
 ##' @export
 AddExample = function(x, slicer = NULL, example = NULL, target = NULL,
                       minimal_target = TRUE, find_min = TRUE,
-                      method = 'step', col = 1,
+                      method = 'step',
+                      col = grDevices::grey.colors(1, .2, .2),
                       example_text = TRUE, ...)
 {
   ## =======================================================
