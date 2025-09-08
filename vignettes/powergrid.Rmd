@@ -105,7 +105,7 @@ parameters. In the [first situation](#Power and sample size for a t-test), a
 function for calculating the power is available. In the [second
 situation](#Power evaluation using simulation and resampling), the power needs
 to be found through (re-)sampling. The [third example](#Target a maximum
-CI97-width) concerns a situation where the objective is not a minimal power, but
+CI95-width) concerns a situation where the objective is not a minimal power, but
 a CI-width that must be at most a certain value. In the [fourth example](#Find
 the upper boundary), we do not search the *lowest required* sample size, but the
 *highest permissible* standard deviation to achieve a target power.
@@ -268,7 +268,7 @@ A couple of notes:
 * As in PowerPlot, any dimension of the `power_array` may be represented by the
   x-axis, y-axis, and lines.
   
-## Target a maximum CI97-width
+## Target a maximum CI95-width
 The powergrid package allows to do more than finding a power of at least some
 value. Instead, we can target, for example, a 95% confidence interval that
 should have at most a certain width. Say, we have the following situation, where
@@ -304,7 +304,9 @@ Example(CI_array,
 ## Show results
 PowerPlot(CI_array, slicer = list(delta = .7),
           target_levels = c(.6, .7, .8), # this defines the lines
-          title = "CI-width as a funtion of sd and n,\nassuming delta = .7")
+          title = "CI-width as a funtion of sd and n,\nassuming delta = .7",
+          shades_of_grey = FALSE) # Grey scale is optimized for situation where
+                                  # the array contains power.
 AddExample(CI_array,
            slicer = list(delta = .7),
            example = list(sd = .8),
