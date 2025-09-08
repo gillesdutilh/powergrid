@@ -12,7 +12,7 @@ AddExample(
   minimal_target = TRUE,
   find_min = TRUE,
   method = "step",
-  col = 1,
+  col = grDevices::grey.colors(1, 0.2, 0.2),
   example_text = TRUE,
   ...
 )

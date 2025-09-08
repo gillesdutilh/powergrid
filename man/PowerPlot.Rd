@@ -12,7 +12,7 @@ PowerPlot(
   find_min = TRUE,
   example = NULL,
   method = "step",
-  target = NA,
+  target = 0.9,
   minimal_target = TRUE,
   summary_function = mean,
   target_levels = c(0.8, 0.9, 0.95),
