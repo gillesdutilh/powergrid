@@ -101,11 +101,14 @@ AddExample(), which rely on FindTarget internally.
 # Four use cases
 I describe two basic use cases here, and two slightly more fancy once. The first
 two concern the relation between power, sample size, and two further
-parameters. In the first situation, a function for calculating the power is
-available. In the second situation, the power needs to be found through
-(re-)sampling. The third and fourth example concern situations where the
-objective is not a minimal power, but a CI-width that must be at most a certain
-value.
+parameters. In the [first situation](#Power and sample size for a t-test), a
+function for calculating the power is available. In the [second
+situation](#Power evaluation using simulation and resampling), the power needs
+to be found through (re-)sampling. The [third example](#Target a maximum
+CI97-width) concerns a situation where the objective is not a minimal power, but
+a CI-width that must be at most a certain value. In the [fourth example](#Find
+the upper boundary), we do not search the *lowest required* sample size, but the
+*highest permissible* standard deviation to achieve a target power.
 
 ## Power and sample size for a t-test
 Assume we aim to collect data in a two-armed RCT and plan to perform a simple
@@ -302,7 +305,8 @@ Example(CI_array,
 PowerPlot(CI_array, slicer = list(delta = .7),
           target_levels = c(.6, .7, .8), # this defines the lines
           title = "CI-width as a funtion of sd and n,\nassuming delta = .7")
-AddExample(CI_array, slicer = list(delta = .7),
+AddExample(CI_array,
+           slicer = list(delta = .7),
            example = list(sd = .8),
            target = .7,
            minimal_target = FALSE)
@@ -315,52 +319,58 @@ A couple of things to observe:
   power, as in the earlier examples)
 * We changed the title accordingly.
 
-## A special case
-We have the same situation as above, where we saw that the average CI with
-decreased with n, and increased with SD. Say, we have a limited number of
-participants of 45 per study arm, but we can have invest a bit in our
-measurement tools to have some control over SD. We may ask ourselves: what is
-the highest SD at which we still find, on average, a CI width smaller than the
-intended .7 points?
+## Find the upper bound
+We have the same situation as in the first use case, where we plan a t-test and
+aim for a power of 90%. In the current situation, however, we have a very
+limited flexibility in the number of participants that we can recruit. We do
+have some way of decreasing the variability by improving our measurements,
+however. We want to study how small our SD must be for our study to have
+desirable power.
 
-In this case, we may want to find for a certain n (on the x-axis) the maxmimum
-sd where the width is still below .7. Note that two things are special here: 
-* we look for something (CI width) that should be small, not large (like
-  power). Therefore, we set `minimal_target = FALSE`
+<summary in numbers here>
 * we look for the largest acceptable SD (not the smallest n) where we can
   achieve the target value of .7. Therefore, we set `find_min = FALSE`.
 
-```{R, special case, fig.width=5.5, fig.height=5.5, fig.align='center'}
-PowerPlot(CI_array, slicer = list(delta = .7),
-          target_levels = c(.6, .7, .8), # this defines the lines
+```{R, maximum SD, fig.width=5.5, fig.height=5.5, fig.align='center'}
+sse_pars = list(
+  n = c(30, 40),
+  delta = seq(from = 0.4, to = 1.2, by = 0.01), ## effect size
+  sd = seq(.3, .9, .01)) ## Standard deviation
+PowFun <- function(n, delta, sd){
+  ptt = power.t.test(n = n/2, delta = delta, sd = sd,
+                     sig.level = 0.05)
+  return(ptt$power)
+}
+power_array = PowerGrid(pars = sse_pars, fun = PowFun, n_iter = NA)
+Example(power_array,
+        example = list(n = 30, delta = .8),
+        find_min = FALSE,
+        target = .9)
+```
+
+We see that, by setting <code>find_min = FALSE</code> Example() shows us the
+"maximal permissible" value that sd may take in order to achieve the set target.
+
+Below, inspect the situation in graphic form. Note that the argument
+`par_to_search` is set to "sd", putting that parameter on the y-axis.
+```{R, maximum SD PowerPlot, fig.width=5.5, fig.height=5.5, fig.align='center'}
+PowerPlot(power_array,
+          slicer = list(n = 30),
           par_to_search = 'sd',
-          title = "CI-width as a funtion of sd and n,\nassuming delta = .7")
-
-AddExample(CI_array, slicer = list(delta = .7),
-           example = list(n = 45),
-           minimal_target = FALSE, # average width not larger
-           target = .7, ## than .7
-           find_min = FALSE)
+          example = list(delta = .8),
+          find_min = FALSE,
+          target = .9)
 
 ```
 
-We see that the highest SD for which the CI-width is still smaller than .7 is .8.
+```{R, maximum SD GridPlot, fig.width=5.5, fig.height=5.5, fig.align='center'}
+GridPlot(power_array,
+         y_par = 'sd',
+         x_par = 'delta',
+         l_par = 'n',
+         target = .9, find_min = FALSE,
+         ylim = c(.3, 1))
 
-We could also get this answer in text:
 
-```{R, special case Example, fig.width=5.5, fig.height=5.5, fig.align='center'}
-CI_example = Example(CI_array,
-                     example = list(delta = .7, n = 40),
-                     minimal_target = FALSE, # average width not larger
-                     target = .7, ## than .7
-                     find_min = FALSE)
-print(CI_example)
-## The output of Example is a list that you can use when writing your markdown
-## product.
-print.default(CI_example)
 ```
 
-We can also show this situation in a GridPlot:
-```{R, special case GridPlot, fig.width=5.5, fig.height=5.5, fig.align='center'}
-GridPlot(CI_array, target = .7, minimal_target = FALSE)
-```
