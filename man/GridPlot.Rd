@@ -13,11 +13,12 @@ GridPlot(
   l_par = NULL,
   par_labels = NULL,
   example = NULL,
-  target = NA,
+  target = 0.9,
   method = "step",
   minimal_target = TRUE,
   find_min = TRUE,
   col = NULL,
+  example_text = TRUE,
   title = NULL,
   xlim = NULL,
   ylim = NULL,
@@ -33,10 +34,17 @@ sse::powEx) or "powCalc" (from sse::powCalc).}
 elements define at which values (the list element value) of which
 parameter (the list element name) the slice should be cut.}
 
-\item{y_par, x_par, l_par}{Which parameter is varied on the x- and y-axis, and
-between lines, respectively. If NULL, \code{y_par} is set to the first,
-\code{x_par} to the second, and \code{l_par} to the third dimension name
-of \code{x}.}
+\item{y_par}{Which parameter is searched for the minimum (or maximum if
+find_min == FALSE) yielding the target; and shown on the y-axis. If NULL,
+\code{y_par} is set to the first, \code{x_par} to the second, and
+\code{l_par} to the third dimension name of 3-dimensional array
+\code{x}. If you want another than the first dimension as \code{y_par}, you
+need to see \code{y_par}, \code{x_par}, and \code{l_par} explicitly.}
+
+\item{x_par, l_par}{Which parameter is varied on the x-axis, and between
+lines, respectively. If none of \code{y_par}, \code{x_par} and \code{l_par} are given,
+the first, second, and third dimension of x are mapped to y_par, x_par,
+and l_par, respectively.}
 
 \item{par_labels}{Named vector where elements names represent the parameters
 that are plotted, and the values set the desired labels.}
@@ -63,6 +71,9 @@ maximally allowed SD).}
 \item{col}{A vector with the length of \code{l_par} defining the color(s) of
 the lines.}
 
+\item{example_text}{When an example is drawn, should the the required par
+value, and the line parameter value be printed alongside the arrow(s)}
+
 \item{title}{Character string, if not \code{NULL}, replaces default figure
 title.}
 
@@ -75,14 +86,14 @@ points constituting each line for smoothing.}
 A list with graphical information to use in further plotting.
 }
 \description{
-Plots the relation between up to three parameters and,
-typically, power. Two parameters are represented by x- and y-axes, one by
-separate lines.
+Plots how the required sample size (or any other parameter) to
+achieve a certain power (or other objective) depends on two furhter
+parameters.
 }
 \details{
 In the most typical use case, the y-axis shows the \emph{minimal} sample
 size required to achieve a power of \emph{at least} \code{target}, assuming the
-value of the parameter on the x-axis, and the value of the parameter
+value of a parameter on the x-axis, and the value of another parameter
 represented by each line.
 
 The use of this function is, however, not limited to finding a minimum n to
@@ -90,7 +101,7 @@ achieve at least a certain power. See help of \code{Example} to understand the
 use of \code{minimal_target} and \code{fin_min}.
 
 Note that a line may stop in a corner of the plotting region, not reaching
-the margin. This is often natural behavior, when the \code{target} level is
+the margin. This is often correct behavior, when the \code{target} level is
 not reached anywhere in that corner of the parameter range. In case n is on
 the y-axis, this may easily be solved by adding larger sample sizes to the
 grid (consider \code{Update}), and then adjusting the y-limit to only
@@ -114,7 +125,7 @@ GridPlot(power_array,
          target = .8)
 
 ## adjust labels, add example
-GridPlot(power_array, target = .8,
+GridPlot(power_array, target = .9,
          slicer = list(sd = seq(.1, .9, .2)),
          y_par = 'n',
          x_par = 'delta',
@@ -123,6 +134,15 @@ GridPlot(power_array, target = .8,
                         'delta' = 'Arm Difference',
                         'sd' = 'Standard Deviation'),
          example = list(sd = .7, delta = .6))
+## add additional examples useing AddExample. Note that these do not contain
+## info about the line they refer to.
+AddExample(power_array,
+         target = .9,
+         example = list(delta = c(.5, .8), sd = c(.3, .7)),
+         col = 3
+         )
+
+
 ## Above, GridPlot used the default: The first dimension is what you search
 ## (often n), the 2nd and 3rd define the grid of parameters at which the search
 ## is done. Setting this explicitly, with x, y, and l-par, it looks like:
@@ -138,16 +158,16 @@ GridPlot(power_array, target = .8,
          x_par = 'sd',
          l_par = 'n')
 ## Too many lines! Take some slices again:
-GridPlot(power_array, target = .8,
-         slicer = list(n = c(seq(10, 70, 16))),
+GridPlot(power_array, target = .9,
+         slicer = list(n = c(seq(10, 70, 10))),
          y_par = 'delta',
          x_par = 'sd',
          l_par = 'n', method = 'step')
 }
 \seealso{
 \code{\link{PowerGrid}}, \code{\link{AddExample}},
-\code{\link{Example}}, \code{\link{PowerPlot}} for more basic plotting
-of 2 parameters.
+\code{\link{Example}}, \code{\link{PowerPlot}} for similar plotting of
+just 2 parameters, at multiple power (target) levels.
 }
 \author{
 Gilles Dutilh

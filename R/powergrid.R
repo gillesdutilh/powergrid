@@ -610,6 +610,15 @@ SummarizeSims = function(x, summary_function, ...){
   aa = attributes(x)
   summarized_x = apply(x, names(dimnames(x))[names(dimnames(x)) != 'sim'],
                        summary_function, ...)
+  ## In case the summarizing results in only a vector, we need to transform back
+  ## to array, resetting dims and dimnames
+  if(is.vector(summarized_x)){
+    constructed_dimnames = aa$dimnames[names(aa$dimnames) != 'sim']
+    names(constructed_dimnames) = names(aa$dimnames)[names(aa$dimnames) != 'sim']
+    summarized_x = as.array(summarized_x)
+    dimnames(summarized_x) = constructed_dimnames
+  }
+  ## now, complete the new object's attributes with the old attributes
   new_attributes = attributes(summarized_x)
   for (cur_attribute in names(aa)[!(names(aa) %in% c('dim', 'dimnames'))])
     { # copy attributes
