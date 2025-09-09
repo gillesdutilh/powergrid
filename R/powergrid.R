@@ -16,6 +16,7 @@
 ##' \code{pars}. For this to work, the element names of \code{pars} must match
 ##' the argument names of \code{fun}.
 ##'
+##' 
 ##' ## Further arguments to \code{fun}
 ##'
 ##' If input parameters to \code{fun} are not
@@ -30,6 +31,15 @@
 ##' with length larger than one, the power_array will have an additional
 ##' dimension `fun_out`, with levels named after the names of \code{fun}'s
 ##' return vector (if given).
+##'
+##' ## Non-numeric parameters
+##' 
+##' You may want to study the effect of non-numeric parameters. This option is
+##' not supported for the argument `pars`, since the essential powergrid
+##' functions \code{link{Example}}, \code{link{PowerPlot}}, and
+##' \code{link{GridPlot}} need a direction to search. Nonetheless, you can study
+##' non-numeric parameters by having function `fun` returning multiple values,
+##' as described above.
 ##'
 ##' ## Evaluating a function over iterations
 ##' 
@@ -60,9 +70,10 @@
 ##' attr(<your_power_array>, which = 'random.seed')[[2]]}, etc.
 ##'
 ##' @title Evaluate function (iteratively) at a grid of input arguments
-##' @param pars A list where each element is a vector of values named as one of
-##'   the arguments of \code{fun}. `fun` is applied to the full grid crossing
-##'   the values of each of these parameters.
+##' @param pars A list where each element is a numeric vector of values named as
+##'   one of the arguments of \code{fun}. `fun` is applied to the full grid
+##'   crossing the values of each of these parameters. If you aim to study other
+##'   than numeric parameters, see details.
 ##' @param fun A function to be applied at each combination of
 ##'   \code{pars}. Arguments may contain all element names of \code{pars} and
 ##'   \code{more_args}. Output should always be a numeric vector, typically of
