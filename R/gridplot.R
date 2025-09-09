@@ -175,9 +175,9 @@ GridPlot = function(x,
     if(length(dim(x)) != 3){
       stop(paste0(
         ifelse(is.null(slicer),
-               "'x' should be a 3-dimensional array", summarize_text,", but it is a ",
-               "After slicing, 'x' should be a 3-dimensional array", summarize_text, ", but it is a "),
-        left_dims, "-dimensional array instead."))
+               paste0("'x' should be a 3-dimensional array", summarize_text,", but it is a "),
+               paste("After slicing, 'x' should be a 3-dimensional array", summarize_text, ", but it is a ")),
+        length(dim(x)), "-dimensional array instead."))
     }
   } else {
     stop("The object 'x' should be of class 'power_array'. ", call. = FALSE)
