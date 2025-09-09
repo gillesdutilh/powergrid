@@ -51,6 +51,10 @@
 ##'   minimizes an assumption (e.g., minimal required n) to achieve the
 ##'   \code{target} or an example that maximizes this assumption (e.g.,
 ##'   maximally allowed SD).
+##' @param summary_function If \code{x} is an object of class \code{power_array}
+##'   where attribute \code{summarized} is FALSE (and individual iterations are
+##'   stored in dimension \code{sim}, the iterations dimension is aggregated by
+##'   \code{summary_fun}. Otherwise ignored.
 ##' @param col A vector with the length of \code{l_par} defining the color(s) of
 ##'   the lines.
 ##' @param example_text When an example is drawn, should the the required par
@@ -130,15 +134,16 @@ GridPlot = function(x,
                     y_par = NULL,
                     x_par = NULL,
                     l_par = NULL,
-                    par_labels = NULL,
                     example = NULL,
-                    target = .9,
-                    method = 'step',
-                    minimal_target = TRUE,
                     find_min = TRUE,
+                    target = .9,
+                    minimal_target = TRUE,
+                    method = 'step',
+                    summary_function = mean,
                     col = NULL,
                     example_text = TRUE,
                     title = NULL,
+                    par_labels = NULL,
                     xlim = NULL,
                     ylim = NULL,
                     smooth = FALSE)
