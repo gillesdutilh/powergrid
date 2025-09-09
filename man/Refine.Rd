@@ -52,7 +52,7 @@ original = PowerGrid(pars = pars,
                      n_iter = 3,
                      summarize = FALSE)
 refined = Refine(original, n_iter_add = 2, pars = list(x = 2:3))
-## note that refined does not have each parameter sampled in each simulation
+## note that refined does not have each parameter sampled in each iteration
 
 ## ============================================
 ## a realistic example, simply increasing n_iter

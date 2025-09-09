@@ -9,11 +9,11 @@ PowerPlot(
   x,
   slicer = NULL,
   par_to_search = "n",
-  find_min = TRUE,
   example = NULL,
+  find_lowest = TRUE,
+  target_value = 0.9,
+  target_at_least = TRUE,
   method = "step",
-  target = 0.9,
-  minimal_target = TRUE,
   summary_function = mean,
   target_levels = c(0.8, 0.9, 0.95),
   col = grDevices::grey.colors(1, 0.2, 0.2),
@@ -36,36 +36,39 @@ list element value) of which parameter (the list element name) the slice
 should be cut out.}
 
 \item{par_to_search}{The variable whose minimum (or maximum, when
-\code{find_min == FALSE}) is searched for achieving the
+\code{find_lowest == FALSE}) is searched for achieving the
 \code{target_levels}.}
-
-\item{find_min}{Logical, indicating whether the example should be found that
-minimizes an assumption (e.g., minimal required n) to achieve the
-\code{target} or an example that maximizes this assumption (e.g.,
-maximally allowed SD).}
 
 \item{example}{If not NULL, a list of length one, defining at which value
 (list element value) of which parameter (list element name) the example is
-drawn for a power of \code{target}. You may supply a vector longer than 1
+drawn for a power of \code{target_value}. You may supply a vector longer than 1
 for multiple examples.}
 
+\item{find_lowest}{Logical, indicating whether the example should be found
+that minimizes an assumption (e.g., minimal required n) to achieve the
+\code{target_value} or an example that maximizes this assumption (e.g.,
+maximally allowed SD).}
+
+\item{target_value}{The power (or whatever the target is) for which the
+example, if requested, is drawn. Also defines which of the power lines is
+drawn with a thicker line width, among or in addition to the power lines
+defined by target_levels.}
+
+\item{target_at_least}{Logical. Should the target value be minimally
+achieved (e.g., power), or maximially allowed (e.g., estimation
+uncertainty).}
+
 \item{method}{Method used for finding the required \code{par_to_search}
-needed to achieve \code{target}. Either \code{step}: walking in steps
+needed to achieve \code{target_value}. Either \code{step}: walking in steps
 along \code{par_to_search} or \code{lm}: Interpolating assuming a linear
 relation between \code{par_to_search} and \code{(qnorm(x) + qnorm(1 -
   0.05)) ^ 2}. The setting \code{lm} is inspired on the implementation in
 the \code{sse} package by Thomas Fabbro.}
 
-\item{target}{The power (or whatever the target is) for which the example,
-if requested, is drawn. Also defines which of the power lines is drawn
-with a thicker line width, among or in addition to the power lines defined
-by target_levels.}
-
-\item{minimal_target}{Logical. Should target be minimally achieved (e.g.,
-power), or maximially allowed (e.g., estimation uncertainty).}
-
-\item{summary_function}{When x' attribute \code{summarized} is FALSE, x is
-summarized across sims using this function.}
+\item{summary_function}{If \code{x} is an object of class \code{power_array}
+where attribute \code{summarized} is FALSE (and individual iterations are
+stored in dimension \code{iter}, the iterations dimension is aggregated by
+\code{summary_fun}. Otherwise ignored.}
 
 \item{target_levels}{For which levels of power (or whichever variable is
 contained in x) lines are drawn.}
@@ -129,16 +132,16 @@ drawn on the x-axis.
 One may also search not the minimum, as in the case of sample
 size, but the maximum, e.g., the highest sd at which a certain power may
 still be achieved. In this case, the \code{par_to_search} is sd, and
-\code{find_min = FALSE}.
+\code{find_lowest = FALSE}.
 }
 
 \subsection{When smaller is better}{
 
 In the standard case of power, higher is better, so you search for a
 \emph{minimal} level of power. One may however also aim at, e.g., a \emph{maximal}
-width of a confidence interval. For this purpose, set \code{minimal_target}
-to \code{FALSE}. See Example for more details about \code{find_min} and
-\code{minimal_target}.
+width of a confidence interval. For this purpose, set \code{target_at_least}
+to \code{FALSE}. See Example for more details about \code{find_lowest} and
+\code{target_at_least}.
 }
 
 }
@@ -170,7 +173,7 @@ power_array = PowerGrid(pars = sse_pars, fun = PowFun, n_iter = NA)
 PowerPlot(power_array,
           slicer = list(sd = .7),
           example = list(delta = c(.7, .9)), # two examples
-          target = .9 # 90\% power
+          target_value = .9 # 90\% power
           )
 
 ## Some graphical adjustments. Note that example is drawn on top of
@@ -181,12 +184,12 @@ PowerPlot(power_array,
                          delta = 'Effect Size',
                          sd = 'Standard Deviation'),
           target_levels = c(.8, .9), # draw fewer power isolines
-          target = NA # no specific power target (no line thicker)
+          target_value = NA # no specific power target (no line thicker)
           )
 AddExample(power_array,
            slicer = list(sd = .7),
            example = list(delta = .9),
-           target = .9,
+           target_value = .9,
            col = 'Orange', lwd = 3)
 
 ## ============================================
@@ -211,17 +214,17 @@ PowerPlot(power_array,
 
 PowerPlot(power_array,
           par_to_search = 'sd',
-          find_min = FALSE,
+          find_lowest = FALSE,
           slicer = list(n = 30))
 
 ## Adding an example works the same: If we expect a delta of 1, and the n =
 ## 30, what is the maximal SD we can have still yielding 90\% power?
 
 AddExample(power_array,
-           find_min = FALSE,
+           find_lowest = FALSE,
            slicer = list(n = 30),
            example = list(delta = 1),
-           target = .9)
+           target_value = .9)
 }
 \seealso{
 \code{\link{PowerGrid}}, \code{\link{AddExample}},

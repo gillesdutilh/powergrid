@@ -16,9 +16,10 @@ PowerGrid(
 )
 }
 \arguments{
-\item{pars}{A list where each element is a vector of values named as one of
-the arguments of \code{fun}. \code{fun} is applied to the full grid crossing
-the values of each of these parameters.}
+\item{pars}{A list where each element is a numeric vector of values named as
+one of the arguments of \code{fun}. \code{fun} is applied to the full grid
+crossing the values of each of these parameters. If you aim to study other
+than numeric parameters, see details.}
 
 \item{fun}{A function to be applied at each combination of
 \code{pars}. Arguments may contain all element names of \code{pars} and
@@ -37,7 +38,7 @@ at each point in the grid defined by \code{pars}.}
 given) are to be summarized by \code{summary_function}.}
 
 \item{summary_function}{A function to be applied to aggregate across
-simulations. Defaults to \code{mean}, ignored when \code{keep_sims} ==
+iterations. Defaults to \code{mean}, ignored when \code{keep_iters} ==
 TRUE or when \code{is.na(n_iter)}.}
 
 \item{parallel}{Logical indicating whether parallel computing should be
@@ -83,16 +84,26 @@ dimension \code{fun_out}, with levels named after the names of \code{fun}'s
 return vector (if given).
 }
 
+\subsection{Non-numeric parameters}{
+
+You may want to study the effect of non-numeric parameters. This option is
+not supported for the argument \code{pars}, since the essential powergrid
+functions \code{link{Example}}, \code{link{PowerPlot}}, and
+\code{link{GridPlot}} need a direction to search. Nonetheless, you can study
+non-numeric parameters by having function \code{fun} returning multiple values,
+as described above.
+}
+
 \subsection{Evaluating a function over iterations}{
 
 If \code{n_iter} is not NA (the default) but an integer, function \code{fun}
-is evaluated n_iter times. This will add an additional dimension 'sim' to
+is evaluated n_iter times. This will add an additional dimension 'iter' to
 the resulting array of class \code{power_array}. If your simulation is heavy, you
 may wanna set \code{parallel = TRUE} and choose the \code{n_cores}, invoking
 parallel computing using t\code{future::future_replicate}.
 
 You may summarize the object with individual iterations across these
-iterations using function \code{\link{SummarizeSims}}. Note that both
+iterations using function \code{\link{SummarizeIterations}}. Note that both
 summarized and non-summarized output of \code{PowerGrid} have class
 \code{power_array}. The summary status is saved in the attributes. This allows
 the \code{powergrid} utilities \code{\link{Example}}, \code{\link{PowerPlot}},
@@ -142,13 +153,13 @@ summary(powarr)
 
 ## get required sample size n, when delta is .7, sd = .5, for achieving a
 ## power of 90\%:
-Example(powarr, example = list(delta = .7, sd = .5), target = .9)
+Example(powarr, example = list(delta = .7, sd = .5), target_value = .9)
 
 ## Draw a figure illustrating how the required n depends on delta (given an
 ## sd of .7):
 PowerPlot(powarr,
           slicer = list(sd = .7), # slice out the plane with sd = .7
-          target = .9, # set target power to 90\%, defining the thick line
+          target_value = .9, # set target power to 90\%, defining the thick line
           example = list(delta = .7) # Highlight the example with arrow
           )
 ## Slice out a sub-array (making sure attributes stay intact for further use in
@@ -203,15 +214,15 @@ summary(powarr) # indicates that iterations were summarized (not stored)
 
 powarr_no_summary = PowerGrid(pars = sse_pars, fun = PowFun,
                                     n_iter = n_iter , summarize = FALSE)
-dimnames(powarr_no_summary) # additional dimension "sim"
+dimnames(powarr_no_summary) # additional dimension "iter"
 summary(powarr_no_summary)
 
-## To summarize this object containing iterations, use the SummarizeSims
+## To summarize this object containing iterations, use the SummarizeIterations
 ## function. Among other things, this assures that attributes relevant for
 ## further use in powergrid's functionality are kept intact.
 
 powarr_summarized =
-  SummarizeSims(powarr_no_summary, summary_function = mean)
+  SummarizeIterations(powarr_no_summary, summary_function = mean)
 dimnames(powarr_summarized)
 summary(powarr_summarized)
 
@@ -220,11 +231,11 @@ summary(powarr_summarized)
 
 ## Note that Example and Powerplot detect when a `power_array` object is not
 #summarized, and behave sensibly with a warning:
-Example(powarr_no_summary, example = list(delta = .7, sd = .5), target = .9)
+Example(powarr_no_summary, example = list(delta = .7, sd = .5), target_value = .9)
 
 PowerPlot(powarr_no_summary,
           slicer = list(sd = .7), # slice out the plane with sd = .7
-          target = .9, # set target power to 90\%, defining the thick line
+          target_value = .9, # set target power to 90\%, defining the thick line
           example = list(delta = .7) # Highlight the example with arrow
           )
 
@@ -254,18 +265,18 @@ summary(powarr_two_returns)
 ## note that you need to tell Example and other powergrid functions, which
 ## of the outputs you are interested in:
 Example(powarr_two_returns, example = list(delta = .7, sd = .5, fun_out = 'p1'),
-        target = .9)
+        target_value = .9)
 
 PowerPlot(powarr_two_returns,
           slicer = list(sd = .7, fun_out = 'p1'), # slice out the plane with the
                                                   # output of interest
-          target = .9, # set target power to 90\%, defining the thick line
+          target_value = .9, # set target power to 90\%, defining the thick line
           example = list(delta = .7) # Highlight the example with arrow
           )
 }
 \seealso{
 \code{\link[=Refine]{Refine()}} for adding iterations or parameter combinations to
-exsiting \code{power_array} object, \code{\link[=SummarizeSims]{SummarizeSims()}} for summarizing a
+exsiting \code{power_array} object, \code{\link[=SummarizeIterations]{SummarizeIterations()}} for summarizing a
 \code{power_array} object containing individual iterations, \code{\link[=ArraySlicer]{ArraySlicer()}} and
 \verb{[.power_array} for reducing the dimenstiona of a \code{power_array} object,
 correctly updating its attributes.

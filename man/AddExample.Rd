@@ -8,18 +8,18 @@ AddExample(
   x,
   slicer = NULL,
   example = NULL,
-  target = NULL,
-  minimal_target = TRUE,
-  find_min = TRUE,
+  find_lowest = TRUE,
+  target_value = NULL,
+  target_at_least = TRUE,
   method = "step",
+  summary_function = mean,
   col = grDevices::grey.colors(1, 0.2, 0.2),
   example_text = TRUE,
   ...
 )
 }
 \arguments{
-\item{x, target, minimal_target, find_min, method, example_text}{See help for
-\code{PowerPlot}.}
+\item{x, target_value, target_at_least, find_lowest, method, example_text, summary_function}{See help for \code{PowerPlot}.}
 
 \item{slicer}{A list, internally passed on to \code{\link{ArraySlicer}} to
 cut out a (multidimensional) slice from x. You can achieve the same by
@@ -30,7 +30,7 @@ and \code{example} given to those functions to AddExample.}
 
 \item{example}{A list, defining at which value (list element value) of which
 parameter(s) (list element name(s)) the example is drawn for a power of
-\code{target}. You may supply par vector(s) longer than 1 for multiple
+\code{target_value}. You may supply par vector(s) longer than 1 for multiple
 examples. If \code{example} contains multiple parameters to define the example,
 all must contain a vector of the same length. Be aware that the first
 element of \code{example} defines the parameter x-axis, so this function is not
@@ -113,36 +113,36 @@ PowerPlot(power_array,
 AddExample(power_array,
            slicer = list(sd = .7), # be sure to cut out the same plain as above
            example = list(delta = .9),
-           target = .9,
+           target_value = .9,
            col = 'blue')
 AddExample(power_array,
            slicer = list(sd = .7),
            example = list(delta = c(.7, 1)), # multiple examples
-           target = .9,
+           target_value = .9,
            col = 'yellow')
 ## Careful, you can move the slicer argument to example:
 AddExample(power_array,
            example = list(delta = 1.2, sd = .7), # delta (x-axis) first
-           target = .9,
+           target_value = .9,
            col = 'green')
 ## Careful, because you can put the wrong value on x-axis!
 AddExample(power_array,
            example = list(sd = .7, delta = 1.2), # sd first?!
-           target = .9,
+           target_value = .9,
            col = 'red')
 
 ## ======================
 ## GridPlot
 ## ======================
-GridPlot(power_array, target = .9)
+GridPlot(power_array, target_value = .9)
 AddExample(power_array,
            example = list(delta = 1, sd = .7),
-           target = .9
+           target_value = .9
            )
 ## two examples
 AddExample(power_array,
            example = list(delta = c(.9, 1.2), sd = c(.5, 1.1)),
-           target = .9, col = 3
+           target_value = .9, col = 3
            )
 }
 \seealso{

@@ -8,9 +8,9 @@
 Example(
   x,
   example = NULL,
-  target = NULL,
-  minimal_target = TRUE,
-  find_min = TRUE,
+  target_value = NULL,
+  target_at_least = TRUE,
+  find_lowest = TRUE,
   method = "step",
   summary_function = mean
 )
@@ -23,17 +23,17 @@ parameter values for which the example should be found. The names of this
 list should match the dimension names of \code{x}, their values should be exact
 values available at these dimensions. See example for an illustration.}
 
-\item{target}{Which value (of typically power) should be achieved at the
-example.}
+\item{target_value}{Which value (of typically power) should be achieved at
+the example.}
 
-\item{minimal_target}{Logical. Set to TRUE if you aim to achieve a minimum
+\item{target_at_least}{Logical. Set to TRUE if you aim to achieve a minimum
 value (e.g., a power must be \emph{at least} 90\%), or FALSE if you want to
 allow a maximum value (e.g., the width of the expected CI may be \emph{at most}
 a certain value).}
 
-\item{find_min}{Logical, indicating whether the example should be found that
-minimizes a parameter (typically: minimal required n) to achieve the
-\code{target} or maximizes this assumption (e.g., maximal allowed SD).}
+\item{find_lowest}{Logical, indicating whether the example should be found
+that minimizes a parameter (typically: minimal required n) to achieve the
+\code{target_value} or maximizes this assumption (e.g., maximal allowed SD).}
 
 \item{method}{Character string, indicating how the location of the example
 is found, passed on internally to \code{FindTarget}. Either "step": walking in
@@ -45,23 +45,24 @@ sse package by Thomas Fabbro.
 }}
 
 \item{summary_function}{When x' attribute \code{summarized} is FALSE, x is
-summarized across sims using this function before searching the example.}
+summarized across iterations using this function before searching the
+example.}
 }
 \value{
 Example returns a list containing:
 \itemize{
 \item "requested_example": the parameter combination at which the power (or
-whatever the values represent) was searched to achieve level \code{target}
+whatever the values represent) was searched to achieve level \code{target_value}
 (typically the minimal power, e.g., .9), searching along parameter \verb{required name} (typically n).
 \item "objective": was \code{required_name} searched to find the "min" or "max" of
 x?
-\item "target": which value should the power (or any other value) have?
+\item "target_value": which value should the power (or any other value) have?
 \item "required_name": the parameter searched along to find the minimum (or
 maximized if slot \code{searched} = 'max') to achieve objective. (typically n)
 \item "required_value": the minimum (or maximum if \code{searched} = "max") for
 parameter \code{required_name} (which is typically n)
 \item "searched": was the "min" or "max" for \code{required_name} searched?
-\item "minimal_target": Is the target a minimum (TRUE, as typical for power) or a
+\item "target_at_least": Is the target_value a minimum (TRUE, as typical for power) or a
 maximum (FALSE, e.g., an expected uncertainty level)?
 }
 }
@@ -87,11 +88,11 @@ the target power is achieved.
 Two complications are made to allow for complete flexibility:
 \enumerate{
 \item In the above description, \emph{minimal} can be changed to \emph{maximal} by
-setting argument \code{find_min} to FALSE. This is useful in the situation where
+setting argument \code{find_lowest} to FALSE. This is useful in the situation where
 one, e.g., searches for the highest standard deviation at which it is still
 possible to find a desirable power.
 \item In the above description, \emph{at least} can be changed to \emph{at most} by
-setting \code{minimal_target} to FALSE. This allows to search, for example, for
+setting \code{target_at_least} to FALSE. This allows to search, for example, for
 the minimal sample size where the expected confidence interval is smaller
 than a certain desired width.
 }
@@ -122,23 +123,23 @@ power_array = PowerGrid(pars = sse_pars, fun = PowFun, n_iter = NA)
 ##'
 ex_out = Example(power_array,
                  example = list(delta = .7, sd = .7),
-                 target = .9)
+                 target_value = .9)
 ex_out #
 
 ## ============================================
-## Illustration argument `find_min`
+## Illustration argument `find_lowest`
 ## ============================================
 ##
 ## In this example, we search for the *highest sd* for which the power is at
 ## least .9.
 ex_out = Example(power_array,
                  example = list(n = 40, delta = .7),
-                 target = .9, find_min = FALSE)
+                 target_value = .9, find_lowest = FALSE)
 ex_out # note how the printed result indicates it searched for a maximal
                                         # permissible sd.
 
 ## ============================================
-## Illustration argument `minimal_target`
+## Illustration argument `target_at_least`
 ## ============================================
 ##
 ## In the example below, we search for the lowest n where the expected CI-width
@@ -160,23 +161,23 @@ summary(power_array)
 ## Now, find lowest n for which the average CI width is *smaller than .88*.
 ex_out = Example(power_array,
                  example = list(delta = .7, sd = .7),
-                 target = .88,
-                 find_min = TRUE, # we search the *lowest* n
-                 minimal_target = FALSE # for a *maximal* mean CI width
+                 target_value = .88,
+                 find_lowest = TRUE, # we search the *lowest* n
+                 target_at_least = FALSE # for a *maximal* mean CI width
                  )
 ex_out # note how the printed result indicates the target CI is a maximum.
 
 ## ============================================
-## When both `find_min` and `minimal_target` are FALSE
+## When both `find_lowest` and `target_at_least` are FALSE
 ## ============================================
 ##
 ## In this example, we search for the *highest sd* for which the average CI
 ## width is still *smaller than or equal to .88*.
 ex_out = Example(power_array,
                  example = list(delta = .7, n = 60),
-                 target = .88,
-                 find_min = FALSE, # we search the *highest* sd
-                 minimal_target = FALSE # for a *maximal* mean CI width
+                 target_value = .88,
+                 find_lowest = FALSE, # we search the *highest* sd
+                 target_at_least = FALSE # for a *maximal* mean CI width
                  )
 
 ex_out # note how the printed result indicates that the *maximal permissible SD*

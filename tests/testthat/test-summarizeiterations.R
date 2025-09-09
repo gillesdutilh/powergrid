@@ -1,6 +1,6 @@
 rm(list=ls())
 ## ===============================================================
-#' Test that the output of SummarizeSims are correctly assigned in the
+#' Test that the output of SummarizeIterations are correctly assigned in the
 #' array.
 
 TestFun <- function(prop_min, threshold){
@@ -14,7 +14,7 @@ test_pars = list(
 n_iter = 100
 power_array <- PowerGrid(pars = test_pars, fun = TestFun,
                         n_iter = n_iter, summarize = FALSE)
-summarized_power_array <- SummarizeSims(power_array, summary_function = min)
+summarized_power_array <- SummarizeIterations(power_array, summary_function = min)
 test_result <-
   summarized_power_array[lower.tri(summarized_power_array, diag = TRUE)]
 test_that(
@@ -26,7 +26,7 @@ test_that(
 #'
 #' Based on input this no now just uses the results of power.t.test to generate
 #' the template. The actual iterations are very basic, and are 0 or 1 based on
-#' the power. We then check if the SummarizeSims() accurately calculates the mean.
+#' the power. We then check if the SummarizeIterations() accurately calculates the mean.
 sse_pars = list(
   n = seq(from = 10, to = 60, by = 20),
   delta = seq(from = 0.5, to = 1.5, by = 0.5),
@@ -49,9 +49,9 @@ InterFun <- function(n, delta, sd){
 # set.seed(c(123, 726)[1])
 power_array = PowerGrid(pars = sse_pars, fun = InterFun,
                         n_iter = 1469, summarize = FALSE)
-summarized_power_array <- SummarizeSims(power_array,summary_function = mean)
+summarized_power_array <- SummarizeIterations(power_array,summary_function = mean)
 test_that(
-  "SummariseSims accurately summarises iterations, given a typrical power distribution",
+  "SummariseIterations accurately summarises iterations, given a typrical power distribution",
   {expect_equal(summarized_power_array, closed_power_array, ignore_attr=TRUE,
                 tolerance = 0.02)}
 )

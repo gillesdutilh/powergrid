@@ -16,6 +16,7 @@
 ##' \code{pars}. For this to work, the element names of \code{pars} must match
 ##' the argument names of \code{fun}.
 ##'
+##' 
 ##' ## Further arguments to \code{fun}
 ##'
 ##' If input parameters to \code{fun} are not
@@ -31,16 +32,25 @@
 ##' dimension `fun_out`, with levels named after the names of \code{fun}'s
 ##' return vector (if given).
 ##'
+##' ## Non-numeric parameters
+##' 
+##' You may want to study the effect of non-numeric parameters. This option is
+##' not supported for the argument `pars`, since the essential powergrid
+##' functions \code{link{Example}}, \code{link{PowerPlot}}, and
+##' \code{link{GridPlot}} need a direction to search. Nonetheless, you can study
+##' non-numeric parameters by having function `fun` returning multiple values,
+##' as described above.
+##'
 ##' ## Evaluating a function over iterations
 ##' 
 ##' If \code{n_iter} is not NA (the default) but an integer, function \code{fun}
-##' is evaluated n_iter times. This will add an additional dimension 'sim' to
+##' is evaluated n_iter times. This will add an additional dimension 'iter' to
 ##' the resulting array of class `power_array`. If your simulation is heavy, you
 ##' may wanna set \code{parallel = TRUE} and choose the \code{n_cores}, invoking
 ##' parallel computing using t\code{future::future_replicate}.
 ##'
 ##' You may summarize the object with individual iterations across these
-##' iterations using function \code{\link{SummarizeSims}}. Note that both
+##' iterations using function \code{\link{SummarizeIterations}}. Note that both
 ##' summarized and non-summarized output of \code{PowerGrid} have class
 ##' `power_array`. The summary status is saved in the attributes. This allows
 ##' the `powergrid` utilities \code{\link{Example}}, \code{\link{PowerPlot}},
@@ -60,9 +70,10 @@
 ##' attr(<your_power_array>, which = 'random.seed')[[2]]}, etc.
 ##'
 ##' @title Evaluate function (iteratively) at a grid of input arguments
-##' @param pars A list where each element is a vector of values named as one of
-##'   the arguments of \code{fun}. `fun` is applied to the full grid crossing
-##'   the values of each of these parameters.
+##' @param pars A list where each element is a numeric vector of values named as
+##'   one of the arguments of \code{fun}. `fun` is applied to the full grid
+##'   crossing the values of each of these parameters. If you aim to study other
+##'   than numeric parameters, see details.
 ##' @param fun A function to be applied at each combination of
 ##'   \code{pars}. Arguments may contain all element names of \code{pars} and
 ##'   \code{more_args}. Output should always be a numeric vector, typically of
@@ -76,7 +87,7 @@
 ##' @param summarize Logical indicating whether iterations (if \code{n_iter} is
 ##'   given) are to be summarized by \code{summary_function}.
 ##' @param summary_function A function to be applied to aggregate across
-##'   simulations. Defaults to \code{mean}, ignored when \code{keep_sims} ==
+##'   iterations. Defaults to \code{mean}, ignored when \code{keep_iters} ==
 ##'   TRUE or when \code{is.na(n_iter)}.
 ##' @param parallel Logical indicating whether parallel computing should be
 ##'   applied. If TRUE, future::future_replicate is used internally.
@@ -88,7 +99,7 @@
 ##'   \code{\link{PowerPlot}}, and \code{\link{GridPlot}}.
 ##' @author Gilles Dutilh
 ##' @seealso [Refine()] for adding iterations or parameter combinations to
-##'   exsiting `power_array` object, [SummarizeSims()] for summarizing a
+##'   exsiting `power_array` object, [SummarizeIterations()] for summarizing a
 ##'   `power_array` object containing individual iterations, [ArraySlicer()] and
 ##'   `[.power_array` for reducing the dimenstiona of a `power_array` object,
 ##'   correctly updating its attributes.
@@ -121,13 +132,13 @@
 ##'
 ##' ## get required sample size n, when delta is .7, sd = .5, for achieving a
 ##' ## power of 90%:
-##' Example(powarr, example = list(delta = .7, sd = .5), target = .9)
+##' Example(powarr, example = list(delta = .7, sd = .5), target_value = .9)
 ##'
 ##' ## Draw a figure illustrating how the required n depends on delta (given an
 ##' ## sd of .7):
 ##' PowerPlot(powarr,
 ##'           slicer = list(sd = .7), # slice out the plane with sd = .7
-##'           target = .9, # set target power to 90%, defining the thick line
+##'           target_value = .9, # set target power to 90%, defining the thick line
 ##'           example = list(delta = .7) # Highlight the example with arrow
 ##'           )
 ##' ## Slice out a sub-array (making sure attributes stay intact for further use in
@@ -182,15 +193,15 @@
 ##'
 ##' powarr_no_summary = PowerGrid(pars = sse_pars, fun = PowFun,
 ##'                                     n_iter = n_iter , summarize = FALSE)
-##' dimnames(powarr_no_summary) # additional dimension "sim"
+##' dimnames(powarr_no_summary) # additional dimension "iter"
 ##' summary(powarr_no_summary)
 ##' 
-##' ## To summarize this object containing iterations, use the SummarizeSims
+##' ## To summarize this object containing iterations, use the SummarizeIterations
 ##' ## function. Among other things, this assures that attributes relevant for
 ##' ## further use in powergrid's functionality are kept intact.
 ##'
 ##' powarr_summarized =
-##'   SummarizeSims(powarr_no_summary, summary_function = mean)
+##'   SummarizeIterations(powarr_no_summary, summary_function = mean)
 ##' dimnames(powarr_summarized)
 ##' summary(powarr_summarized)
 ##'
@@ -199,11 +210,11 @@
 ##'
 ##' ## Note that Example and Powerplot detect when a `power_array` object is not
 ##' #summarized, and behave sensibly with a warning:
-##' Example(powarr_no_summary, example = list(delta = .7, sd = .5), target = .9)
+##' Example(powarr_no_summary, example = list(delta = .7, sd = .5), target_value = .9)
 ##'
 ##' PowerPlot(powarr_no_summary,
 ##'           slicer = list(sd = .7), # slice out the plane with sd = .7
-##'           target = .9, # set target power to 90%, defining the thick line
+##'           target_value = .9, # set target power to 90%, defining the thick line
 ##'           example = list(delta = .7) # Highlight the example with arrow
 ##'           )
 ##'
@@ -233,12 +244,12 @@
 ##' ## note that you need to tell Example and other powergrid functions, which
 ##' ## of the outputs you are interested in:
 ##' Example(powarr_two_returns, example = list(delta = .7, sd = .5, fun_out = 'p1'),
-##'         target = .9)
+##'         target_value = .9)
 ##'
 ##' PowerPlot(powarr_two_returns,
 ##'           slicer = list(sd = .7, fun_out = 'p1'), # slice out the plane with the
 ##'                                                   # output of interest
-##'           target = .9, # set target power to 90%, defining the thick line
+##'           target_value = .9, # set target power to 90%, defining the thick line
 ##'           example = list(delta = .7) # Highlight the example with arrow
 ##'           )
 ##' @export
@@ -253,7 +264,7 @@ PowerGrid = function(pars, fun, more_args = NULL, n_iter = NA,
   ## catch the very unlikely case someone takes e1d42fl5z7b6 as a
   ## parameter name, or a parameter name including funout_
   if ('e1d42fl5z7b6' %in% names(pars) || any(grepl('funout_', names(pars))) ||
-      any(grepl('sim', names(pars)))) {
+      any(grepl('iter', names(pars)))) {
     stop('You chose one of few parameter names that are not allowed (e1d42fl5z7b6 or funout_...)')}
   ## All pars arguments of fun?
   if (!all(names(pars) %in% methods::formalArgs(fun))){
@@ -269,7 +280,7 @@ PowerGrid = function(pars, fun, more_args = NULL, n_iter = NA,
   ## The next block of code goes through 3 routes (A1-A3) depending on whether iterations
   ## are needed, and whether parallel computation is requested.
   ## =================================
-  ## Route A1) No simulation ('n_iter' not supplied)
+  ## Route A1) No iteration ('n_iter' not supplied)
   if(is.na(n_iter)) {
     e1d42fl5z7b6 = sapply( # the long name is to make it very unlikely
       # to get the same name in the grid, which
@@ -280,7 +291,7 @@ PowerGrid = function(pars, fun, more_args = NULL, n_iter = NA,
     ## result is a n_result_vars by nrow(pars_grid) matrix
   }
   ## =================================
-  ## Route A2) Series simulation ('n_iter' supplied)
+  ## Route A2) Series iteration ('n_iter' supplied)
   if (!is.na(n_iter) && !parallel) {
     e1d42fl5z7b6 =
       drop(replicate(
@@ -289,7 +300,7 @@ PowerGrid = function(pars, fun, more_args = NULL, n_iter = NA,
           function(x)unlist(x))))
   }
   ## =================================
-  ## Route A3) Parallel simulation using future_replicate
+  ## Route A3) Parallel iteration using future_replicate
   if (!is.na(n_iter) && parallel) {
     if (!requireNamespace("future.apply", quietly = TRUE)) {
       stop("Setting argument `parallel' to TRUE requires installation of future.apply", call. = FALSE)}
@@ -306,7 +317,7 @@ PowerGrid = function(pars, fun, more_args = NULL, n_iter = NA,
   ## =================================
   ## A1-A3 briefly converge and then diverge into B1-B2 depending on whether
   ## multiple outputs are returned.
-  ## Check length of the returned output (per parameter set & simulation)
+  ## Check length of the returned output (per parameter set & iteration)
   n_funouts = length(.mapply(fun, pars_grid[1, ], MoreArgs = more_args)[[1]])
   ##
 
@@ -328,7 +339,7 @@ PowerGrid = function(pars, fun, more_args = NULL, n_iter = NA,
     if(any(dimnames(e1d42fl5z7b6)[[1]] %in% names(pars))){
       dimnames(e1d42fl5z7b6)[[1]] =
         paste0('funout_', dimnames(e1d42fl5z7b6)[[1]])}
-    ## if, else to control the wrangling based on if multiple simulations present
+    ## if, else to control the wrangling based on if multiple iterations present
     ## nitt is a dummy version of n_iteration which is 1 if there is no interations.
     if(!is.na(n_iter)) {
       var_order =  c(2, 1, 3)
@@ -342,20 +353,20 @@ PowerGrid = function(pars, fun, more_args = NULL, n_iter = NA,
       as.data.frame(stats::ftable(e1d42fl5z7b6, row.vars = var_order)),
       apply(pars_grid, 2, rep, n_funouts * nitt))
     ## easiest to set dimnames before xtabs
-    colnames(flat)[seq_len(length(var_order)+1)] = c(c('fun_out', 'parscom', 'sim')[var_order], 'value')
+    colnames(flat)[seq_len(length(var_order)+1)] = c(c('fun_out', 'parscom', 'iter')[var_order], 'value')
     out_array = stats::xtabs(value ~ ., data = flat[, -1])
     ## Sort such that the first dimensions are the pars
-    L = names(dimnames(out_array)) %in% c('fun_out', 'sim')
+    L = names(dimnames(out_array)) %in% c('fun_out', 'iter')
     out_array = aperm(out_array, c(which(!L), which(L)))
     ##'
     ##'
   }
 
-  ## allenr: Ensure the simulation dimension is correctly labelled (regardless of
+  ## allenr: Ensure the iteration dimension is correctly labelled (regardless of
   ## which route it took)
   if(!is.na(n_iter)) {
-    names(dimnames(out_array))[length(dimnames(out_array))] = "sim"
-    dimnames(out_array)[['sim']] = seq_along(dimnames(out_array)[['sim']])
+    names(dimnames(out_array))[length(dimnames(out_array))] = "iter"
+    dimnames(out_array)[['iter']] = seq_along(dimnames(out_array)[['iter']])
   }
 
   ## set attributes of output object. Summarised is FALSE as not summarised yet
@@ -371,7 +382,7 @@ PowerGrid = function(pars, fun, more_args = NULL, n_iter = NA,
   
   ## If the array has iterations, and needs summarising, summarize it
   if((!is.na(n_iter) && summarize)) {
-    out_array = SummarizeSims(out_array, summary_function = summary_function)
+    out_array = SummarizeIterations(out_array, summary_function = summary_function)
   }
   ## If the object never needed summarizing, it is already summarized:
   if(is.na(n_iter)) {
@@ -430,16 +441,16 @@ PowerGrid = function(pars, fun, more_args = NULL, n_iter = NA,
   if (all(names(dimnames(x)) != 'fun_out')){
     the_attributes$sim_function_nval = 1
   } else {the_attributes$sim_function_nval = length(dimnames(x)$fun_out)}
-  ## if there are sims, and these are selected with index, update n_iter
+  ## if there are iters, and these are selected with index, update n_iter
   if (!the_attributes$summarized && !is.na(the_attributes$n_iter))
   {
-    if (!('sim' %in% names(dimnames(x))))
+    if (!('iter' %in% names(dimnames(x))))
     {
-      the_attributes$n_iter = 1 # sim dimension dropped, stil n_iter
+      the_attributes$n_iter = 1 # iter dimension dropped, stil n_iter
     } else {
       the_attributes$n_iter =
         dim(x)[
-          which(names(dimnames(x)) == 'sim')]
+          which(names(dimnames(x)) == 'iter')]
     }
   }
   ## update pars if reduced by indexing.
@@ -473,10 +484,10 @@ print.power_array = function(x, ...){
   print.table(x)
   note_type_created_by = paste0(
     'Array of class `power_array` created using PowerGrid',
-    ## Are individual sims in object?
+    ## Are individual iters in object?
     ifelse(!is.na(attr(x, which = 'n_iter')) &
            !attr(x, which = 'summarized'),
-           ', keeping individual simulations',
+           ', keeping individual iterations',
            ''),
     ## Are there multiple outputs from function?
     ifelse(attr(x, which = 'sim_function_nval') > 1,
@@ -490,7 +501,7 @@ print.power_array = function(x, ...){
            paste0('Resulting dimensions:\n ',
                   paste(names(dimnames(x)), collapse = ', '), '.')
            )
-  ## If there are simulations (summarized or not), show n_iter
+  ## If there are iterations (summarized or not), show n_iter
   note_iterations =
     ifelse(!is.na(attr(x, which = 'n_iter')),
            paste0('Results from ', attr(x, which = 'n_iter'), ' iteration',
@@ -534,7 +545,7 @@ print.power_array = function(x, ...){
 ##' @export
 summary.power_array = function(object, ...){
   aa = attributes(object)
-  parnames = names(aa$dimnames[!(names(aa$dimnames) %in% c('sim', 'fun_out'))])
+  parnames = names(aa$dimnames[!(names(aa$dimnames) %in% c('iter', 'fun_out'))])
   if(!is.na(aa$n_iter) && aa$summarized){
     note_summary_iter =
       paste0("Containing summary over ", aa$n_iter,
@@ -591,11 +602,11 @@ summary.power_array = function(object, ...){
     , ...)
 }
 
-##' @title Summary of object that has simulations saved.
+##' @title Summary of object that has individual iterations saved.
 ##' @description Summarizes objects of class `power_array` that have individual
-##'   simulations saved across simulations.
+##'   iterations saved.
 ##' @param x Object of class `power_array`
-##' @param summary_function function to apply across simulations
+##' @param summary_function function to apply across iterations
 ##' @param ... Further arguments passed to 'summary_function'
 ##' @return An object of class `power_array`, with attributes \code{summarized =
 ##'   TRUE}.
@@ -603,18 +614,18 @@ summary.power_array = function(object, ...){
 ##' @seealso
 ##' \code{\link{PowerGrid}}
 ##' @export
-SummarizeSims = function(x, summary_function, ...){
+SummarizeIterations = function(x, summary_function, ...){
   if(attr(x, which = 'summarized') | !inherits(x, 'power_array')){
-    stop('Object x should be an object of class `power_array`, where attribute `summarized` is FALSE; containing individual simulations.')
+    stop('Object x should be an object of class `power_array`, where attribute `summarized` is FALSE; containing individual iterations.')
   }
   aa = attributes(x)
-  summarized_x = apply(x, names(dimnames(x))[names(dimnames(x)) != 'sim'],
+  summarized_x = apply(x, names(dimnames(x))[names(dimnames(x)) != 'iter'],
                        summary_function, ...)
   ## In case the summarizing results in only a vector, we need to transform back
   ## to array, resetting dims and dimnames
   if(is.vector(summarized_x)){
-    constructed_dimnames = aa$dimnames[names(aa$dimnames) != 'sim']
-    names(constructed_dimnames) = names(aa$dimnames)[names(aa$dimnames) != 'sim']
+    constructed_dimnames = aa$dimnames[names(aa$dimnames) != 'iter']
+    names(constructed_dimnames) = names(aa$dimnames)[names(aa$dimnames) != 'iter']
     summarized_x = as.array(summarized_x)
     dimnames(summarized_x) = constructed_dimnames
   }

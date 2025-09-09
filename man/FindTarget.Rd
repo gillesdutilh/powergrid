@@ -6,45 +6,45 @@
 \usage{
 FindTarget(
   x,
-  target = 0.9,
-  minimal_target = TRUE,
   par_to_search = "n",
-  find_min = TRUE,
+  find_lowest = TRUE,
+  target_value = 0.9,
+  target_at_least = TRUE,
   method = "step"
 )
 }
 \arguments{
-\item{x}{An array, most commonly of class \code{power_array}, possibly
-the result of taking a slice of an object of class \code{power_array}
-using \code{\link{ArraySlicer}} or the power_array []-indexing method.}
-
-\item{target}{The required value in x (e.g., .9, if the values
-represent power)}
-
-\item{minimal_target}{Is the target a minimum (e.g., the power) or a maximum
-(e.g., the size of a confidence interval)}
+\item{x}{An array, most commonly of class \code{power_array}, possibly the result
+of taking a slice of an object of class \code{power_array} using
+\code{\link{ArraySlicer}} or the power_array []-indexing method.}
 
 \item{par_to_search}{Which parameter should be searched to achieve the
-required target. In the typical power analysis case, this is n.}
+required target value. In the typical power analysis case, this is n.}
 
-\item{find_min}{If TRUE, the lowest value of par_to_search is found that
+\item{find_lowest}{If TRUE, the lowest value of par_to_search is found that
 yields a value that meets the target. This is typical for n in a sample
 size estimation, where one searches the lowest n to achieve a certain
 power. For, e.g. the variance, one would however search for the maximum
 where the target power can still be achieved.}
 
+\item{target_value}{The required value in x (e.g., .9, if the values
+represent power)}
+
+\item{target_at_least}{Is the \code{target_value} a minimum (e.g., the power) or
+a maximum (e.g., the size of a confidence interval)}
+
 \item{method}{How is the required \code{par_to_search} to achieve
-\code{target} found. Either \code{'step'}: walking in steps along
+\code{target_value} found. Either \code{'step'}: walking in steps along
 \code{par_to_search} or \code{'lm'}: Interpolating assuming a linear
 relation between \code{par_to_search} and \code{(qnorm(x) + qnorm(1 -
   0.05)) ^ 2}. Setting 'lm' is inspired on the implementation in the sse
 package by Thomas Fabbro.}
 }
 \value{
-Returns an array or vector: containing the value that is found for the
-par_to_search (say, n) meeting the target following above criteria (say,
-the lowest n for which the power is larger than .9), for each crossing of
-the levels of the other dimensions (say, delta, SD).
+Returns an array or vector: containing the value that is found for
+the par_to_search (say, n) meeting the target following above criteria
+(say, the lowest n for which the power is larger than .9), for each
+crossing of the levels of the other dimensions (say, delta, SD).
 }
 \description{
 For most use cases of powergrid, you will not need this function, but rather
@@ -70,22 +70,23 @@ n's yielding acceptable power.
 }
 \details{
 By default FindTarget searches along the dimension called \code{n}
-(\code{par_to_search}), searching for the lowest value (\code{find_min} =
-TRUE) where the array contains a value of at least (\code{minimal_target}
-= TRUE) .9 (the \code{target}), thus finding the minimal sample size
-required to achieve a power of 90\%. These arguments may seem a bit
-confusing at first, but they allow for three additional purposes:
+(\code{par_to_search}), searching for the lowest value (\code{find_lowest}
+= TRUE) where the array contains a value of at least
+(\code{target_at_least} = TRUE) .9 (the \code{target_value}), thus finding the
+minimal sample size required to achieve a power of 90\%. These arguments
+may seem a bit confusing at first, but they allow for three additional
+purposes:
 
 First, the implementation also allows to search for a value that is \emph{at
-most} the \code{target}, by setting \code{minimal_target} to FALSE. This may
+most} the \code{target_value}, by setting \code{target_at_least} to FALSE. This may
 be used, for example, when the aim is to find a sample size yielding a
 confidence interval that is not bigger than some maximum width.
 
 Second, the implementation allows to search along another \emph{named} dimension
 of x than n.
 
-Third, the implementation allows to search for a certain target to be
-achieved by maximizing (find_min = FALSE) the parameter on the searched
+Third, the implementation allows to search for a certain target value to be
+achieved by maximizing (find_lowest = FALSE) the parameter on the searched
 dimension. This may be used, for example, when the aim is to find the
 maximum standard deviation at which a study's power is still acceptable.
 
@@ -112,14 +113,14 @@ summary(power_array) # four dimensions
 ## We can use Example so find the required sample size, but only for one example:
 Example(power_array,
         example = list(delta = .7, sd = .7, sig_level = .05),
-        target = .9)
+        target_value = .9)
 
 ## If we want to see the required sample size for all delta's, we can use
 ## FindTarget. Get the minimal n needed for achieving a value of 0.9, at sd =
 ## .3:
 n_by_delta_sd_03 = FindTarget(power_array[, sig_level = '0.05', , sd = '0.3'],
                               par_to_search = 'n',
-                              target = .9)
+                              target_value = .9)
 
 n_by_delta_sd_03
 ## just as an illustration, a figure (that can be much more aestetically made
@@ -134,7 +135,7 @@ plot(as.numeric(names(n_by_delta_sd_03)),
 ## The function works also for higher dimensionality:
 n_by_delta_sd = FindTarget(power_array,
                            par_to_search = 'n',
-                           target = .85)
+                           target_value = .85)
 ## what is the minimum n to achieve .85 for different values of delta, sd,
 ## when  sig_level = 0.05:
 n_by_delta_sd[5, , ] # note that for some combinations of delta and sd, there is
@@ -142,7 +143,8 @@ n_by_delta_sd[5, , ] # note that for some combinations of delta and sd, there is
                      # level (NAs).
 }
 \seealso{
-\code{\link{PowerGrid}}, \code{\link{Example}}, \code{\link{PowerPlot}}
+\code{\link{PowerGrid}}, \code{\link{Example}},
+\code{\link{PowerPlot}}
 }
 \author{
 Gilles Dutilh

@@ -18,14 +18,14 @@ power_array = PowerGrid(pars = sse_pars, fun = PowFun, n_iter = NA)
 test_that(
   "Error when example list elements are not equally long",
   {expect_error(
-     AddExample(power_array, target = .8,
+     AddExample(power_array, target_value = .8,
                 example = list(delta = c(.7, .9), sd = c(.3)), col = 3)
    )})
 
 test_that(
   "Error when example list contains elements not in array (after slicing)",
   {expect_error(
-     AddExample(power_array, target = .8,
+     AddExample(power_array, target_value = .8,
                 example = list(delta = c(.7, .9), bla = c(.3, .5)), col = 3)
    )})
 

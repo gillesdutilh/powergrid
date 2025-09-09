@@ -20,13 +20,13 @@
 ##'   One may also search not the minimum, as in the case of sample
 ##'   size, but the maximum, e.g., the highest sd at which a certain power may
 ##'   still be achieved. In this case, the \code{par_to_search} is sd, and
-##'   \code{find_min = FALSE}.
+##'   \code{find_lowest = FALSE}.
 ##'   ### When smaller is better
 ##'   In the standard case of power, higher is better, so you search for a
 ##'   *minimal* level of power. One may however also aim at, e.g., a *maximal*
-##'   width of a confidence interval. For this purpose, set \code{minimal_target}
-##'   to \code{FALSE}. See Example for more details about `find_min` and
-##'   `minimal_target`.
+##'   width of a confidence interval. For this purpose, set \code{target_at_least}
+##'   to \code{FALSE}. See Example for more details about `find_lowest` and
+##'   `target_at_least`.
 ##' @param x An object of class `power_array` (from powergrid).
 ##' @param slicer If the parameter grid for which `x' was constructed has more
 ##'   than 2 dimensions, a 2-dimensional slice may be cut out using
@@ -34,32 +34,29 @@
 ##'   list element value) of which parameter (the list element name) the slice
 ##'   should be cut out.
 ##' @param par_to_search The variable whose minimum (or maximum, when
-##'   \code{find_min == FALSE}) is searched for achieving the
+##'   \code{find_lowest == FALSE}) is searched for achieving the
 ##'   \code{target_levels}.
-##' @param find_min Logical, indicating whether the example should be found that
-##'   minimizes an assumption (e.g., minimal required n) to achieve the
-##'   \code{target} or an example that maximizes this assumption (e.g.,
+##' @param find_lowest Logical, indicating whether the example should be found
+##'   that minimizes an assumption (e.g., minimal required n) to achieve the
+##'   \code{target_value} or an example that maximizes this assumption (e.g.,
 ##'   maximally allowed SD).
+##' @param target_value The power (or whatever the target is) for which the
+##'   example, if requested, is drawn. Also defines which of the power lines is
+##'   drawn with a thicker line width, among or in addition to the power lines
+##'   defined by target_levels.
+##' @param target_at_least Logical. Should the target value be minimally
+##'   achieved (e.g., power), or maximially allowed (e.g., estimation
+##'   uncertainty).
 ##' @param example If not NULL, a list of length one, defining at which value
 ##'   (list element value) of which parameter (list element name) the example is
-##'   drawn for a power of \code{target}. You may supply a vector longer than 1
+##'   drawn for a power of \code{target_value}. You may supply a vector longer than 1
 ##'   for multiple examples.
 ##' @param method Method used for finding the required \code{par_to_search}
-##'   needed to achieve \code{target}. Either \code{step}: walking in steps
+##'   needed to achieve \code{target_value}. Either \code{step}: walking in steps
 ##'   along \code{par_to_search} or \code{lm}: Interpolating assuming a linear
 ##'   relation between \code{par_to_search} and \code{(qnorm(x) + qnorm(1 -
 ##'   0.05)) ^ 2}. The setting \code{lm} is inspired on the implementation in
 ##'   the \code{sse} package by Thomas Fabbro.
-##' @param target The power (or whatever the target is) for which the example,
-##'   if requested, is drawn. Also defines which of the power lines is drawn
-##'   with a thicker line width, among or in addition to the power lines defined
-##'   by target_levels.
-##' @param minimal_target Logical. Should target be minimally achieved (e.g.,
-##'   power), or maximially allowed (e.g., estimation uncertainty).
-##' @param summary_function If \code{x} is an object of class \code{power_array}
-##'   where attribute \code{summarized} is FALSE (and individual iterations are
-##'   stored in dimension \code{sim}, the iterations dimension is aggregated by
-##'   \code{summary_fun}. Otherwise ignored.
 ##' @param target_levels For which levels of power (or whichever variable is
 ##'   contained in x) lines are drawn.
 ##' @param col Color for the contour lines. Does not effect eventual example
@@ -81,8 +78,10 @@
 ##'   .35. Functionality implemented for consistency with \code{sse} package,
 ##'   but use is discouraged, since regressing the contour values flattens the
 ##'   contour plot, thereby *biasing* the contour lines.
-##' @param summary_function When x' attribute `summarized` is FALSE, x is
-##'   summarized across sims using this function.
+##' @param summary_function If \code{x} is an object of class \code{power_array}
+##'   where attribute \code{summarized} is FALSE (and individual iterations are
+##'   stored in dimension \code{iter}, the iterations dimension is aggregated by
+##'   \code{summary_fun}. Otherwise ignored.
 ##' @param ... Further arguments are passed on to function `image`
 ##'   internally. Most useful for zooming with xlim and ylim.
 ##' @seealso \code{\link{PowerGrid}}, \code{\link{AddExample}},
@@ -117,7 +116,7 @@
 ##' PowerPlot(power_array,
 ##'           slicer = list(sd = .7),
 ##'           example = list(delta = c(.7, .9)), # two examples
-##'           target = .9 # 90% power
+##'           target_value = .9 # 90% power
 ##'           )
 ##'
 ##' ## Some graphical adjustments. Note that example is drawn on top of
@@ -128,12 +127,12 @@
 ##'                          delta = 'Effect Size',
 ##'                          sd = 'Standard Deviation'),
 ##'           target_levels = c(.8, .9), # draw fewer power isolines
-##'           target = NA # no specific power target (no line thicker)
+##'           target_value = NA # no specific power target (no line thicker)
 ##'           )
 ##' AddExample(power_array,
 ##'            slicer = list(sd = .7),
 ##'            example = list(delta = .9),
-##'            target = .9,
+##'            target_value = .9,
 ##'            col = 'Orange', lwd = 3)
 ##' 
 ##' ## ============================================
@@ -158,27 +157,27 @@
 ##' 
 ##' PowerPlot(power_array,
 ##'           par_to_search = 'sd',
-##'           find_min = FALSE,
+##'           find_lowest = FALSE,
 ##'           slicer = list(n = 30))
 ##'
 ##' ## Adding an example works the same: If we expect a delta of 1, and the n =
 ##' ## 30, what is the maximal SD we can have still yielding 90% power?
 ##' 
 ##' AddExample(power_array,
-##'            find_min = FALSE,
+##'            find_lowest = FALSE,
 ##'            slicer = list(n = 30),
 ##'            example = list(delta = 1),
-##'            target = .9)
+##'            target_value = .9)
 ##' @export
 PowerPlot =
   function(x, # object of class `power_array` or powEx output (class `power`)
            slicer = NULL, # which plain of the grid
            par_to_search = 'n', # default, for what should we find the min/max
-           find_min = TRUE, # search for min or max in par_to_search
            example = NULL, # a list(<parameter> = <value>)
+           find_lowest = TRUE, # search for min or max in par_to_search
+           target_value = .9, # the minimum (or maximum, see below)
+           target_at_least = TRUE,
            method = 'step',
-           target = .9, # the minimum (or maximum, see below)
-           minimal_target = TRUE,
            summary_function = mean,
            target_levels = c(.8, .9, .95), # which power iso lines to draw
            col = grDevices::grey.colors(1, .2, .2),
@@ -198,11 +197,11 @@ PowerPlot =
   {
     if(!attr(x, which = 'summarized')){ # if object contains iterations, first
                                         # summarize
-      power_array = SummarizeSims(x, summary_function)
+      power_array = SummarizeIterations(x, summary_function)
       warning(paste0(
         "The object 'x' you supplied to PowerPlot contains individual ",
         "iterations. For sensible plotting, these were automatically ",
-        "summarized across simulations using the function given in ",
+        "summarized across iterations using the function given in ",
         "argument `summary_function`."), call. = FALSE)
     } else # power_array that is ready to use
     {
@@ -212,26 +211,6 @@ PowerPlot =
     stop("The object 'x' should be of class 'power_array'. ", call. = FALSE)
     power_array = x} # if just any array, give it a try
 
-  ##
-  ## if (!is.null(example)){
-  ##   ## how many examples given for each par:
-  ##   ns_example = sapply(example, function(x)length(x))[[1]]
-  ##   ## Prepare example for figure.
-  ##   y_ex_value = numeric(ns_example)
-  ##   x_ex_name = numeric(ns_example)
-  ##   x_ex_value = numeric(ns_example)
-  ##   for (example_i in 1:ns_example){
-  ##     cur_example = lapply(example, function(x)x[example_i])
-  ##     example_list =
-  ##       Example(ArraySlicer(power_array, slicer = slicer),
-  ##               example = cur_example,
-  ##               target = target, minimal_target = minimal_target,
-  ##               find_min = find_min, method = method)
-  ##     y_ex_value[example_i] = example_list$required_value
-  ##     x_ex_name[example_i] = names(cur_example)
-  ##     x_ex_value[example_i] = cur_example[[x_ex_name[example_i]]]
-  ##   }
-  ## }
   ## =======================================================
   ## take slice that should be plotted
   ## =======================================================
@@ -345,10 +324,10 @@ PowerPlot =
     ## have to be redefined only for this special case). Example is drawn with
     ## the same code as the normal case
     x_ex_value = FindTarget(array_toplot,
-                            target = target,
-                            minimal_target = minimal_target,
+                            target_value = target_value,
+                            target_at_least = target_at_least,
                             par_to_search = names(dimnames(array_toplot)),
-                            find_min = find_min,
+                            find_lowest = find_lowest,
                             method = method)
     y_ex_value = round(array_toplot[as.character(x_ex_value)], 3)
   } else {
@@ -381,12 +360,12 @@ PowerPlot =
     ## grid lines
     graphics::abline(h = margins_toplot[[1]], v = margins_toplot[[2]], col = 'white')
     ## power contour lines
-    if (!is.null(target)) # if a target is given
+    if (!is.null(target_value)) # if a target_value is given
     {
-      if (!(target %in% target_levels)){ # but not one of levels, attach.
-        target_levels = sort(unique(c(target_levels, target)))
+      if (!(target_value %in% target_levels)){ # but not one of levels, attach.
+        target_levels = sort(unique(c(target_levels, target_value)))
       }
-      power_lwds = ifelse(target_levels == target, 2, 1)
+      power_lwds = ifelse(target_levels == target_value, 2, 1)
     } else {
       power_lwds = 1
     }
@@ -422,9 +401,9 @@ PowerPlot =
     AddExample(x = x,
                slicer = slicer,
                example = example,
-               target = target,
-               find_min = find_min,
-               minimal_target = minimal_target,
+               target_value = target_value,
+               find_lowest = find_lowest,
+               target_at_least = target_at_least,
                col = col[1],
                example_text = example_text)
   }
@@ -473,8 +452,8 @@ PowerPlot =
 ##' Argument \code{example} may contain vectors with length longer than one to
 ##' draw multiple examples.
 ##' 
-##' @param x,target,minimal_target,find_min,method,example_text See help for
-##'   \code{PowerPlot}.
+##' @param x,target_value,target_at_least,find_lowest,method,example_text,summary_function
+##'   See help for \code{PowerPlot}.
 ##' @param slicer A list, internally passed on to \code{\link{ArraySlicer}} to
 ##'   cut out a (multidimensional) slice from x. You can achieve the same by
 ##'   appending the vector (s) in `slicer` to argument `example`. However, to
@@ -483,7 +462,7 @@ PowerPlot =
 ##'   and `example` given to those functions to AddExample.
 ##' @param example A list, defining at which value (list element value) of which
 ##'   parameter(s) (list element name(s)) the example is drawn for a power of
-##'   \code{target}. You may supply par vector(s) longer than 1 for multiple
+##'   \code{target_value}. You may supply par vector(s) longer than 1 for multiple
 ##'   examples. If `example` contains multiple parameters to define the example,
 ##'   all must contain a vector of the same length. Be aware that the first
 ##'   element of `example` defines the parameter x-axis, so this function is not
@@ -522,41 +501,46 @@ PowerPlot =
 ##' AddExample(power_array,
 ##'            slicer = list(sd = .7), # be sure to cut out the same plain as above
 ##'            example = list(delta = .9),
-##'            target = .9,
+##'            target_value = .9,
 ##'            col = 'blue')
 ##' AddExample(power_array,
 ##'            slicer = list(sd = .7),
 ##'            example = list(delta = c(.7, 1)), # multiple examples
-##'            target = .9,
+##'            target_value = .9,
 ##'            col = 'yellow')
 ##' ## Careful, you can move the slicer argument to example:
 ##' AddExample(power_array,
 ##'            example = list(delta = 1.2, sd = .7), # delta (x-axis) first
-##'            target = .9,
+##'            target_value = .9,
 ##'            col = 'green')
 ##' ## Careful, because you can put the wrong value on x-axis!
 ##' AddExample(power_array,
 ##'            example = list(sd = .7, delta = 1.2), # sd first?!
-##'            target = .9,
+##'            target_value = .9,
 ##'            col = 'red')
 ##' 
 ##' ## ======================
 ##' ## GridPlot
 ##' ## ======================
-##' GridPlot(power_array, target = .9)
+##' GridPlot(power_array, target_value = .9)
 ##' AddExample(power_array,
 ##'            example = list(delta = 1, sd = .7),
-##'            target = .9
+##'            target_value = .9
 ##'            )
 ##' ## two examples
 ##' AddExample(power_array,
 ##'            example = list(delta = c(.9, 1.2), sd = c(.5, 1.1)),
-##'            target = .9, col = 3
+##'            target_value = .9, col = 3
 ##'            )
 ##' @export
-AddExample = function(x, slicer = NULL, example = NULL, target = NULL,
-                      minimal_target = TRUE, find_min = TRUE,
+AddExample = function(x,
+                      slicer = NULL,
+                      example = NULL,
+                      find_lowest = TRUE,
+                      target_value = NULL,
+                      target_at_least = TRUE,
                       method = 'step',
+                      summary_function = mean,
                       col = grDevices::grey.colors(1, .2, .2),
                       example_text = TRUE, ...)
 {
@@ -589,7 +573,7 @@ AddExample = function(x, slicer = NULL, example = NULL, target = NULL,
       stop("When x (after slicer has been applied) has more than one dimension, 'example' must be supplied")
     }
     one_dim = TRUE # we're in the on-dimensional situation, where we plot the
-                   # value (power) on the y-axis
+                                        # value (power) on the y-axis
     ns_example = 1
   }
   ## =================================
@@ -603,8 +587,8 @@ AddExample = function(x, slicer = NULL, example = NULL, target = NULL,
     example_list =
       Example(sliced_x,
               example = cur_example, # append(slicer, cur_example),
-              target = target, minimal_target = minimal_target,
-              find_min = find_min, method = method)
+              target_value = target_value, target_at_least = target_at_least,
+              find_lowest = find_lowest, method = method, summary_function = summary_function)
     ## Prepare example for figure. Note that it is possible to have any
     ## parameter on x and y, whereas the default is to have 'n' on y.
     if (!one_dim){
@@ -612,7 +596,7 @@ AddExample = function(x, slicer = NULL, example = NULL, target = NULL,
       x_ex_value[example_i] = cur_example[[x_ex_name]]
     } else {
       x_ex_value[example_i] = example_list$required_value
-      y_ex_value[example_i] = example_list$target      
+      y_ex_value[example_i] = example_list$target_value      
     }
   }
   ## note that "y_ex_name" is not defined, this is par_to_search

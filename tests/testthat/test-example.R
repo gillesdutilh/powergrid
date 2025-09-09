@@ -17,7 +17,7 @@ test_that(
   "Error about defaults for method='lm' correctly thrown from Example()",
   {expect_error(Example(closed_power_array,
         example = list(delta = 0.6, sd = 1.0),
-        target = 0.5, minimal_target = FALSE,
+        target_value = 0.5, target_at_least = FALSE,
         method = "lm"))})
 
 ## =============================================================================
@@ -26,7 +26,7 @@ test_that(
 suppressWarnings(
 result1 <- Example(closed_power_array,
                    example = list(delta = 0.9, sd = 1.0),
-                   target = 0.8, method = "lm")
+                   target_value = 0.8, method = "lm")
 )
 comparison1 <- ceiling(power.t.test(delta = 0.9, sd=1.0, power=0.8)$n)
 test_that(
@@ -38,14 +38,14 @@ test_that(
 test_that(
   "Warns the user about rounding (lm)",
   {expect_warning(Example(closed_power_array, example = list(n = 35, sd = 1.0),
-                        target = 0.8, method="lm"))}
+                        target_value = 0.8, method="lm"))}
 )
 
 test_that(
   "Gives correct required value under defaults (step)",
   {expect_equal(Example(closed_power_array,
                         example = list(delta = 0.9, sd = 1.0),
-                        target = 0.8)$required_value, 25)}
+                        target_value = 0.8)$required_value, 25)}
 )
 
 ## =============================================================================
@@ -57,8 +57,8 @@ nm_power_array <- PowerGrid(pars = nm_closed_pars, fun = ClosedFun,
                             summarize = FALSE)
 
 
-result1 <- Example(closed_power_array, example = list(delta = 0.9, sd = 1), target = 0.8)
-comparison1 <- Example(nm_power_array, example=list(delta = 0.9, sd = 1), target = 0.8)
+result1 <- Example(closed_power_array, example = list(delta = 0.9, sd = 1), target_value = 0.8)
+comparison1 <- Example(nm_power_array, example=list(delta = 0.9, sd = 1), target_value = 0.8)
 test_that(
   "non-monotonic par attr in power_array still allows example calculation",
   {expect_equal(closed_power_array, nm_power_array, ignore_attr = TRUE)
@@ -72,7 +72,7 @@ test_that(
   "Can handle small variations in numeric specification",
   {expect_equal(Example(closed_power_array,
                         example = list(delta = 0.90, sd= 1.00),
-                        target = "0.8000")$required_value, 25)}
+                        target_value = "0.8000")$required_value, 25)}
 )
 ## =============================================================================
 #' Testing printed output of Example. print_comparison is generated from the
@@ -81,7 +81,7 @@ test_that(
 Example_test <-
   Example(closed_power_array,
         example = list(delta = 0.6, sd = 1.0),
-        target = 0.5)
+        target_value = 0.5)
 
 Example_output <- capture.output(Example_test)
 
