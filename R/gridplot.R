@@ -170,7 +170,7 @@ GridPlot = function(x,
                                         # summarize
       x = SummarizeSims(x, summary_function)
       warning(paste0(
-        "The object 'x' you supplied to PowerPlot contains individual ",
+        "The object 'x' you supplied to GridPlot contains individual ",
         "iterations. For sensible plotting, these were automatically ",
         "summarized across simulations using the function given in ",
         "argument `summary_function`."), call. = FALSE)
