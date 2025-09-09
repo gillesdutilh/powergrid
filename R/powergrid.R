@@ -50,7 +50,7 @@
 ##' parallel computing using t\code{future::future_replicate}.
 ##'
 ##' You may summarize the object with individual iterations across these
-##' iterations using function \code{\link{SummarizeIters}}. Note that both
+##' iterations using function \code{\link{SummarizeIterations}}. Note that both
 ##' summarized and non-summarized output of \code{PowerGrid} have class
 ##' `power_array`. The summary status is saved in the attributes. This allows
 ##' the `powergrid` utilities \code{\link{Example}}, \code{\link{PowerPlot}},
@@ -99,7 +99,7 @@
 ##'   \code{\link{PowerPlot}}, and \code{\link{GridPlot}}.
 ##' @author Gilles Dutilh
 ##' @seealso [Refine()] for adding iterations or parameter combinations to
-##'   exsiting `power_array` object, [SummarizeIters()] for summarizing a
+##'   exsiting `power_array` object, [SummarizeIterations()] for summarizing a
 ##'   `power_array` object containing individual iterations, [ArraySlicer()] and
 ##'   `[.power_array` for reducing the dimenstiona of a `power_array` object,
 ##'   correctly updating its attributes.
