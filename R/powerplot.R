@@ -40,6 +40,12 @@
 ##'   minimizes an assumption (e.g., minimal required n) to achieve the
 ##'   \code{target} or an example that maximizes this assumption (e.g.,
 ##'   maximally allowed SD).
+##' @param target The power (or whatever the target is) for which the example,
+##'   if requested, is drawn. Also defines which of the power lines is drawn
+##'   with a thicker line width, among or in addition to the power lines defined
+##'   by target_levels.
+##' @param minimal_target Logical. Should target be minimally achieved (e.g.,
+##'   power), or maximially allowed (e.g., estimation uncertainty).
 ##' @param example If not NULL, a list of length one, defining at which value
 ##'   (list element value) of which parameter (list element name) the example is
 ##'   drawn for a power of \code{target}. You may supply a vector longer than 1
@@ -50,16 +56,6 @@
 ##'   relation between \code{par_to_search} and \code{(qnorm(x) + qnorm(1 -
 ##'   0.05)) ^ 2}. The setting \code{lm} is inspired on the implementation in
 ##'   the \code{sse} package by Thomas Fabbro.
-##' @param target The power (or whatever the target is) for which the example,
-##'   if requested, is drawn. Also defines which of the power lines is drawn
-##'   with a thicker line width, among or in addition to the power lines defined
-##'   by target_levels.
-##' @param minimal_target Logical. Should target be minimally achieved (e.g.,
-##'   power), or maximially allowed (e.g., estimation uncertainty).
-##' @param summary_function If \code{x} is an object of class \code{power_array}
-##'   where attribute \code{summarized} is FALSE (and individual iterations are
-##'   stored in dimension \code{sim}, the iterations dimension is aggregated by
-##'   \code{summary_fun}. Otherwise ignored.
 ##' @param target_levels For which levels of power (or whichever variable is
 ##'   contained in x) lines are drawn.
 ##' @param col Color for the contour lines. Does not effect eventual example
@@ -81,8 +77,10 @@
 ##'   .35. Functionality implemented for consistency with \code{sse} package,
 ##'   but use is discouraged, since regressing the contour values flattens the
 ##'   contour plot, thereby *biasing* the contour lines.
-##' @param summary_function When x' attribute `summarized` is FALSE, x is
-##'   summarized across sims using this function.
+##' @param summary_function If \code{x} is an object of class \code{power_array}
+##'   where attribute \code{summarized} is FALSE (and individual iterations are
+##'   stored in dimension \code{sim}, the iterations dimension is aggregated by
+##'   \code{summary_fun}. Otherwise ignored.
 ##' @param ... Further arguments are passed on to function `image`
 ##'   internally. Most useful for zooming with xlim and ylim.
 ##' @seealso \code{\link{PowerGrid}}, \code{\link{AddExample}},
@@ -174,11 +172,11 @@ PowerPlot =
   function(x, # object of class `power_array` or powEx output (class `power`)
            slicer = NULL, # which plain of the grid
            par_to_search = 'n', # default, for what should we find the min/max
-           find_min = TRUE, # search for min or max in par_to_search
            example = NULL, # a list(<parameter> = <value>)
-           method = 'step',
+           find_min = TRUE, # search for min or max in par_to_search
            target = .9, # the minimum (or maximum, see below)
            minimal_target = TRUE,
+           method = 'step',
            summary_function = mean,
            target_levels = c(.8, .9, .95), # which power iso lines to draw
            col = grDevices::grey.colors(1, .2, .2),
