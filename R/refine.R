@@ -2,7 +2,7 @@
 ## objects:
 ##
 ## 1) to perform additional iterations (only for power_array where attr
-## keep_sims = TRUE)
+## keep_iters = TRUE)
 ##
 ## 2) to evaluate a function on additional locations of the parameter
 ## grid.
@@ -45,7 +45,7 @@
 ##'                      n_iter = 3,
 ##'                      summarize = FALSE)
 ##' refined = Refine(original, n_iter_add = 2, pars = list(x = 2:3))
-##' ## note that refined does not have each parameter sampled in each simulation
+##' ## note that refined does not have each parameter sampled in each iteration
 ##'
 ##' ## ============================================
 ##' ## a realistic example, simply increasing n_iter
@@ -115,7 +115,7 @@ Refine = function(old, n_iter_add = 1, pars = NULL, ...){
   ## number of zeros later needed for iter-dimension
   nzeros = max(ceiling(log(n_iter_add, 10)),
                ceiling(log(attr(old, 'n_iter'), 10)))
-  ## Perform simulation in grid, using, where relevant, the attributes
+  ## Perform iterations in grid, using, where relevant, the attributes
   ## of old.
   new = PowerGrid(pars = pars,
                   fun = copy_attr$sim_function,
@@ -134,15 +134,15 @@ Refine = function(old, n_iter_add = 1, pars = NULL, ...){
   ##
   ## Note that I reuse object name to save memory space, making code much
   ## less easy to read.
-  old = stats::ftable(old, col.vars = 'sim') # flat table
-  attr(old, 'col.vars')$sim = as.character(1:ncol(old))
-  old = as.data.frame(old) # expanded grid pars * sims
-  new = stats::ftable(new, col.vars = 'sim') # flat table
-  attr(new, 'col.vars')$sim = as.character(1:ncol(new))
-  new = as.data.frame(new)# expanded grid pars * sims
-  ## Labels for sims need unique names between sets
-  old$sim = paste0('old_', sprintf(paste0('%0', nzeros, '.0f'), old$sim))
-  new$sim = paste0('upd_', sprintf(paste0('%0', nzeros, '.0f'), new$sim))
+  old = stats::ftable(old, col.vars = 'iter') # flat table
+  attr(old, 'col.vars')$iter = as.character(1:ncol(old))
+  old = as.data.frame(old) # expanded grid pars * iterations
+  new = stats::ftable(new, col.vars = 'iter') # flat table
+  attr(new, 'col.vars')$iter = as.character(1:ncol(new))
+  new = as.data.frame(new)# expanded grid pars * iterations
+  ## Labels for iters need unique names between sets
+  old$iter = paste0('old_', sprintf(paste0('%0', nzeros, '.0f'), old$iter))
+  new$iter = paste0('upd_', sprintf(paste0('%0', nzeros, '.0f'), new$iter))
   new = rbind(old, new) # new now contains old as well!
   ##
   ## If pars (new) are different than pars (old) make a grid with all
