@@ -132,13 +132,13 @@
 ##'
 ##' ## get required sample size n, when delta is .7, sd = .5, for achieving a
 ##' ## power of 90%:
-##' Example(powarr, example = list(delta = .7, sd = .5), target = .9)
+##' Example(powarr, example = list(delta = .7, sd = .5), target_value = .9)
 ##'
 ##' ## Draw a figure illustrating how the required n depends on delta (given an
 ##' ## sd of .7):
 ##' PowerPlot(powarr,
 ##'           slicer = list(sd = .7), # slice out the plane with sd = .7
-##'           target = .9, # set target power to 90%, defining the thick line
+##'           target_value = .9, # set target power to 90%, defining the thick line
 ##'           example = list(delta = .7) # Highlight the example with arrow
 ##'           )
 ##' ## Slice out a sub-array (making sure attributes stay intact for further use in
@@ -210,11 +210,11 @@
 ##'
 ##' ## Note that Example and Powerplot detect when a `power_array` object is not
 ##' #summarized, and behave sensibly with a warning:
-##' Example(powarr_no_summary, example = list(delta = .7, sd = .5), target = .9)
+##' Example(powarr_no_summary, example = list(delta = .7, sd = .5), target_value = .9)
 ##'
 ##' PowerPlot(powarr_no_summary,
 ##'           slicer = list(sd = .7), # slice out the plane with sd = .7
-##'           target = .9, # set target power to 90%, defining the thick line
+##'           target_value = .9, # set target power to 90%, defining the thick line
 ##'           example = list(delta = .7) # Highlight the example with arrow
 ##'           )
 ##'
@@ -244,12 +244,12 @@
 ##' ## note that you need to tell Example and other powergrid functions, which
 ##' ## of the outputs you are interested in:
 ##' Example(powarr_two_returns, example = list(delta = .7, sd = .5, fun_out = 'p1'),
-##'         target = .9)
+##'         target_value = .9)
 ##'
 ##' PowerPlot(powarr_two_returns,
 ##'           slicer = list(sd = .7, fun_out = 'p1'), # slice out the plane with the
 ##'                                                   # output of interest
-##'           target = .9, # set target power to 90%, defining the thick line
+##'           target_value = .9, # set target power to 90%, defining the thick line
 ##'           example = list(delta = .7) # Highlight the example with arrow
 ##'           )
 ##' @export
