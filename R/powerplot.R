@@ -471,8 +471,8 @@ PowerPlot =
 ##' Argument \code{example} may contain vectors with length longer than one to
 ##' draw multiple examples.
 ##' 
-##' @param x,target,minimal_target,find_min,method,example_text See help for
-##'   \code{PowerPlot}.
+##' @param x,target,minimal_target,find_min,method,example_text,summary_function
+##'   See help for \code{PowerPlot}.
 ##' @param slicer A list, internally passed on to \code{\link{ArraySlicer}} to
 ##'   cut out a (multidimensional) slice from x. You can achieve the same by
 ##'   appending the vector (s) in `slicer` to argument `example`. However, to
@@ -552,9 +552,14 @@ PowerPlot =
 ##'            target = .9, col = 3
 ##'            )
 ##' @export
-AddExample = function(x, slicer = NULL, example = NULL, target = NULL,
-                      minimal_target = TRUE, find_min = TRUE,
+AddExample = function(x,
+                      slicer = NULL,
+                      example = NULL,
+                      find_min = TRUE,
+                      target = NULL,
+                      minimal_target = TRUE,
                       method = 'step',
+                      summary_function = mean,
                       col = grDevices::grey.colors(1, .2, .2),
                       example_text = TRUE, ...)
 {
@@ -587,7 +592,7 @@ AddExample = function(x, slicer = NULL, example = NULL, target = NULL,
       stop("When x (after slicer has been applied) has more than one dimension, 'example' must be supplied")
     }
     one_dim = TRUE # we're in the on-dimensional situation, where we plot the
-                   # value (power) on the y-axis
+                                        # value (power) on the y-axis
     ns_example = 1
   }
   ## =================================
@@ -602,7 +607,7 @@ AddExample = function(x, slicer = NULL, example = NULL, target = NULL,
       Example(sliced_x,
               example = cur_example, # append(slicer, cur_example),
               target = target, minimal_target = minimal_target,
-              find_min = find_min, method = method)
+              find_min = find_min, method = method, summary_function = summary_function)
     ## Prepare example for figure. Note that it is possible to have any
     ## parameter on x and y, whereas the default is to have 'n' on y.
     if (!one_dim){
