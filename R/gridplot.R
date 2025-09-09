@@ -157,10 +157,43 @@ GridPlot = function(x,
   ## process input
   ## =================================
   x = ArraySlicer(x, slicer)
-  ## When no dimensions defined, just guess
-  if(is.null(y_par)){y_par = names(dimnames(x))[1]}
-  if(is.null(x_par)){x_par = names(dimnames(x))[2]}
-  if(is.null(l_par)){l_par = names(dimnames(x))[3]}
+  ## check dimensionality and summarized status and give feedback
+  ## Summarized status
+  if (all(class(x) == 'power_array')) # made using powergrid functions
+  {
+    if(!attr(x, which = 'summarized')){ # if object contains iterations, first
+                                        # summarize
+      x = SummarizeSims(x, summary_function)
+      warning(paste0(
+        "The object 'x' you supplied to PowerPlot contains individual ",
+        "iterations. For sensible plotting, these were automatically ",
+        "summarized across simulations using the function given in ",
+        "argument `summary_function`."), call. = FALSE)
+      summarize_text = " (after summarizing)"
+    }
+    ## Dimensionality
+    if(length(dim(x)) != 3){
+      stop(paste0(
+        ifelse(is.null(slicer),
+               "'x' should be a 3-dimensional array", summarize_text,", but it is a ",
+               "After slicing, 'x' should be a 3-dimensional array", summarize_text, ", but it is a "),
+        left_dims, "-dimensional array instead."))
+    }
+  } else {
+    stop("The object 'x' should be of class 'power_array'. ", call. = FALSE)
+  } 
+
+  ## deal with dimensions: user may enter none, one, two, or all of x-, y, and
+  ## l-par. For processing, I put them in a vector and then fill the empty
+  ## elements from the remaining dimnames. By default, dim 1 on y, ddim 2 on x,
+  ## and dim 3 on l.
+  par_vec = character(3)
+  par_vec[1] = ifelse(is.null(y_par), NA, y_par)
+  par_vec[2] = ifelse(is.null(x_par), NA, x_par)
+  par_vec[3] = ifelse(is.null(l_par), NA, l_par)
+  dim_vec = names(dimnames(x))
+  par_vec[is.na(par_vec)] = dim_vec[!dim_vec %in% par_vec]
+  y_par = par_vec[1]; x_par = par_vec[2]; l_par = par_vec[3]
   ##
   ## define colors
   if (is.null(col)){
