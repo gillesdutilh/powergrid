@@ -81,6 +81,11 @@ title.}
 
 \item{smooth}{Logical. If TRUE, a 5th order polynomial is fitted though the
 points constituting each line for smoothing.}
+
+\item{summary_function}{If \code{x} is an object of class \code{power_array}
+where attribute \code{summarized} is FALSE (and individual iterations are
+stored in dimension \code{sim}, the iterations dimension is aggregated by
+\code{summary_fun}. Otherwise ignored.}
 }
 \value{
 A list with graphical information to use in further plotting.

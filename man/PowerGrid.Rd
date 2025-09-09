@@ -16,9 +16,10 @@ PowerGrid(
 )
 }
 \arguments{
-\item{pars}{A list where each element is a vector of values named as one of
-the arguments of \code{fun}. \code{fun} is applied to the full grid crossing
-the values of each of these parameters.}
+\item{pars}{A list where each element is a numeric vector of values named as
+one of the arguments of \code{fun}. \code{fun} is applied to the full grid
+crossing the values of each of these parameters. If you aim to study other
+than numeric parameters, see details.}
 
 \item{fun}{A function to be applied at each combination of
 \code{pars}. Arguments may contain all element names of \code{pars} and
@@ -81,6 +82,16 @@ than one, as long as it is a single vector. When \code{fun} returns a vector
 with length larger than one, the power_array will have an additional
 dimension \code{fun_out}, with levels named after the names of \code{fun}'s
 return vector (if given).
+}
+
+\subsection{Non-numeric parameters}{
+
+You may want to study the effect of non-numeric parameters. This option is
+not supported for the argument \code{pars}, since the essential powergrid
+functions \code{link{Example}}, \code{link{PowerPlot}}, and
+\code{link{GridPlot}} need a direction to search. Nonetheless, you can study
+non-numeric parameters by having function \code{fun} returning multiple values,
+as described above.
 }
 
 \subsection{Evaluating a function over iterations}{
