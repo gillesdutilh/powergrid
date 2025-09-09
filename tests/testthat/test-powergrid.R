@@ -1,6 +1,6 @@
 rm(list=ls())
 ## ===============================================================
-#' TODO: I think this should be in test-SummariseSims no?
+#' TODO: I think this should be in test-SummarizeIterations no?
 
 ## Test warning summarizing summarized object
 PowFun <- function(n, delta, sd){
@@ -19,7 +19,7 @@ power_array = PowerGrid(pars = sse_pars, fun = PowFun,
 test_that(
   "trying to summarize an object that is already summarized throws a warning",
   {expect_error(
-    SummarizeSims(power_array, summary_function = mean)
+    SummarizeIterations(power_array, summary_function = mean)
   )}
 )
 
