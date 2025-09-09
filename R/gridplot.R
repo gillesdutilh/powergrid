@@ -190,7 +190,15 @@ GridPlot = function(x,
                      find_min = find_min,
                      minimal_target = minimal_target,
                      method = method)
-
+  ## if there are only NAs in y_rec, there are no lines, explain in warning:
+  if (all(is.na(y_rec))){
+    warning("The target wasn't achieved at any of the parameter combinations in x. Therefore, no lines can be drawn.", call. = FALSE)
+  } else {
+  ## if there are some NAs in y_rec, explain what this means
+    if (any(is.na(y_rec))){
+      warning("At some combinations of `x_par` and `l_par`, no `y_par` was found that yielded the requirted target, which may result in lines ending abruptly. In most common use cases, you may want to increasing the range of n.", call. = FALSE)
+    }
+  }
   ## declare line coordinate containers
   xvals = as.numeric(dimnames(x)[[x_par]])
   yvals = as.numeric(dimnames(x)[[y_par]])
@@ -216,7 +224,7 @@ GridPlot = function(x,
     ys = y_rec[, i]
     xs = as.numeric(dimnames(y_rec)[[x_par]])
     if(smooth){
-        plm = stats::lm(ys ~ xs + I(xs^2) + I(xs^3) + I(xs^4) + I(xs^5))
+      plm = stats::lm(ys ~ xs + I(xs^2) + I(xs^3) + I(xs^4) + I(xs^5))
       ys = stats::predict(plm, newdata = data.frame(xs))
     }
     graphics::lines(xs, ys, col = col[i], lwd = 2)}
@@ -237,7 +245,7 @@ GridPlot = function(x,
     x0 = grDevices::extendrange(usr[1:2], f = -.02)[1]
     y0 = grDevices::extendrange(usr[3:4], f = -.02)[1]
     arrow_col = col[as.character(example[[l_par]])] # each arrow gets color of
-                                                    # the relevant line
+                                        # the relevant line
     graphics::segments(example[[x_par]], y0, example[[x_par]], y_ex, col = arrow_col)
     graphics::arrows(example[[x_par]], y_ex, x0, y_ex, length = .15, col = arrow_col)
     if (example_text){
