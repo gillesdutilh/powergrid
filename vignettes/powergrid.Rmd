@@ -43,7 +43,7 @@ planning recruitment of study participants under various scenarios.
 This vignette covers the following functions of `powergrid`
 
 - `PowerGrid` for evaluating the power across a grid, with and without
-  simualtion
+  iterations
 - `Example` for inspecting the relation between power and sample size in a
   specific scenario
 - `Powerplot` Graphical exploration of power under different scenarios
@@ -95,9 +95,9 @@ print(products)
 ## the product is at least 20?
 FindTarget(products,
            par_to_search = 'x',
-           find_min = TRUE,
-           minimal_target = TRUE,
-           target = 20)
+           find_lowest = TRUE,
+           target_at_least = TRUE,
+           target_value = 20)
 ## Note: when both y and z are 1, there is no x so that the product becomes 20.
 
 ```
@@ -168,7 +168,7 @@ as small as 1.1, and the best guess for SD = .7. We can calculate this example:
 ```{R, basic Example}
 Example(power,
         example = list(delta = 1.1, sd = .7),
-        target = .9) # power = 90%
+        target_value = .9) # power = 90%
 ```
 
 #### Draw a figure with example
@@ -177,7 +177,7 @@ Example(power,
 PowerPlot(power,
           slicer = list(sd = .7),
           example = list(delta = 1.1),
-          target = .9
+          target_value = .9
           )
 ```
 
@@ -200,7 +200,7 @@ Some things to note in the figure code:
   about in the help files.
 
 #### Why target, not power?
-The wording "target" in both the function argument and the printed result may be
+The wording "target_value" in both the function argument and the printed result may be
 a bit confusing at first. 'Why not "power"?', you may ask. The reason is, that
 there is nothing that keeps you from optimizing other things with the
 functionality of `powergrid`. Indeed, instead of finding a target power, you may
@@ -221,7 +221,7 @@ goals is the achieve 90% power.
 
 ```{r, GridPlot, fig.width=5.5, fig.height=5.5, fig.align='center'}
 GridPlot(power,
-         target = .9, # you need to choose one target level of power
+         target_value = .9, # you need to choose one target level of power
          example = list(delta = 1, sd = .7)) # defined by two parameters now.
 ```
 
@@ -272,9 +272,9 @@ A couple of notes:
 * The power in the example above is calculated by simulating TRUE's and FALSE's
   for significance. These were then automatically summarized by `mean` to yield
   the power. 
-* You may want to keep the simulated outcomes of your function. To do so, set
-  `summarize = FALSE`. In this situation, the resulting array will have one
-  additional dimension, "sim". 
+* You may want to keep the outcomes of individual iterations of your
+  function. To do so, set `summarize = FALSE`. In this situation, the resulting
+  array will have one additional dimension, "iter".
 * If you choose to keep the individual iterations, be aware that plotting
   functions and `Example` automatically summarize these taking the mean. You
   can, however, choose a different `summary_function`.
@@ -311,9 +311,9 @@ summary(CI_array)
 
 Example(CI_array,
         example = list(delta = .7, sd = .8),
-        target = .7,
-        minimal_target = FALSE,
-        find_min = TRUE)
+        target_value = .7,
+        target_at_least = FALSE,
+        find_lowest = TRUE)
 ## Show results
 PowerPlot(CI_array, slicer = list(delta = .7),
           target_levels = c(.6, .7, .8), # this defines the lines
@@ -323,12 +323,12 @@ PowerPlot(CI_array, slicer = list(delta = .7),
 AddExample(CI_array,
            slicer = list(delta = .7),
            example = list(sd = .8),
-           target = .7,
-           minimal_target = FALSE)
+           target_value = .7,
+           target_at_least = FALSE)
 ```
 
 A couple of things to observe: 
-* We set "minimal_target" to FALSE, since we are looking for a CI of *at most*
+* We set "target_at_least" to FALSE, since we are looking for a CI of *at most*
   .7
 * The lines in the figure now connect situations with the same CI-width (not
   power, as in the earlier examples)
@@ -344,7 +344,7 @@ desirable power.
 
 <summary in numbers here>
 * we look for the largest acceptable SD (not the smallest n) where we can
-  achieve the target value of .7. Therefore, we set `find_min = FALSE`.
+  achieve the target value of .7. Therefore, we set `find_lowest = FALSE`.
 
 ```{R, maximum SD, fig.width=5.5, fig.height=5.5, fig.align='center'}
 sse_pars = list(
@@ -359,11 +359,11 @@ PowFun <- function(n, delta, sd){
 power_array = PowerGrid(pars = sse_pars, fun = PowFun, n_iter = NA)
 Example(power_array,
         example = list(n = 30, delta = .8),
-        find_min = FALSE,
-        target = .9)
+        find_lowest = FALSE,
+        target_value = .9)
 ```
 
-We see that, by setting <code>find_min = FALSE</code> Example() shows us the
+We see that, by setting <code>find_lowest = FALSE</code> Example() shows us the
 "maximal permissible" value that sd may take in order to achieve the set target.
 
 Below, inspect the situation in graphic form. Note that the argument
@@ -373,8 +373,8 @@ PowerPlot(power_array,
           slicer = list(n = 30),
           par_to_search = 'sd',
           example = list(delta = .8),
-          find_min = FALSE,
-          target = .9)
+          find_lowest = FALSE,
+          target_value = .9)
 ```
 
 
