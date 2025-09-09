@@ -72,9 +72,10 @@ is for evaluating statistical power at a grid of assumed parameters.</p>
 
 
 <dl><dt id="arg-pars">pars<a class="anchor" aria-label="anchor" href="#arg-pars"></a></dt>
-<dd><p>A list where each element is a vector of values named as one of
-the arguments of <code>fun</code>. <code>fun</code> is applied to the full grid crossing
-the values of each of these parameters.</p></dd>
+<dd><p>A list where each element is a numeric vector of values named as
+one of the arguments of <code>fun</code>. <code>fun</code> is applied to the full grid
+crossing the values of each of these parameters. If you aim to study other
+than numeric parameters, see details.</p></dd>
 
 
 <dt id="arg-fun">fun<a class="anchor" aria-label="anchor" href="#arg-fun"></a></dt>
@@ -149,6 +150,18 @@ than one, as long as it is a single vector. When <code>fun</code> returns a vect
 with length larger than one, the power_array will have an additional
 dimension <code>fun_out</code>, with levels named after the names of <code>fun</code>'s
 return vector (if given).</p>
+</div>
+
+<div class="section">
+<h3 id="non-numeric-parameters">Non-numeric parameters<a class="anchor" aria-label="anchor" href="#non-numeric-parameters"></a></h3>
+
+
+<p>You may want to study the effect of non-numeric parameters. This option is
+not supported for the argument <code>pars</code>, since the essential powergrid
+functions <code>link{Example}</code>, <code>link{PowerPlot}</code>, and
+<code>link{GridPlot}</code> need a direction to search. Nonetheless, you can study
+non-numeric parameters by having function <code>fun</code> returning multiple values,
+as described above.</p>
 </div>
 
 <div class="section">
