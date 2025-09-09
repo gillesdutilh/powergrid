@@ -62,7 +62,12 @@ devtools::install_github("SwissClinicalTrialOrganisation/powergrid",
 
 ```
 
-# Raw functionality in powergrid
+## Outline
+In the next section, I start by showing a technical example that should
+illustrate the essence of PowerGrid and FindTarget. Then, in the third section,
+I show 4 actual use cases exploiting the flexibility of powergrid.
+
+# Technical example
 Before turning to a real-world example, I show an example illustrating general
 working of the core functions of powergrid: PowerGrid and FindTarget. Note that
 you will hardly ever explicitly call FindTarget.
@@ -72,18 +77,22 @@ PowerGrid is in essence similar to `tapply` (or `dplyr::group_by1` +
 `match` + `min` + `which.min`.
 
 ```{R, bare functionality}
-## create an array with the product of three numbers
+## I aim to create an array with the product of three numbers
+
+## A function taking the product of three numbers:
 Prod = function(x, y, z){
   x * y * z
 }
+## A grid of numbers I want to calculate the products of. Note that the names of
+## the list equal the argument names in Prod()
 par = list(x = 1:10,
 	       y = 1:3,
            z = c(1, 10))
 products = PowerGrid(par, Prod)
 print(products)
 
-## what is, for each combination of y and z, the lowest x where the product is
-## at least 20?
+## Now, I can ask: for each combination of y and z, what is the lowest x where
+## the product is at least 20?
 FindTarget(products,
            par_to_search = 'x',
            find_min = TRUE,
@@ -93,24 +102,25 @@ FindTarget(products,
 
 ```
 
+If you understand the R chunk above, you understand the essence of powergrid.
+
 ### Now, forget about FindTarget!
 
 In typical use cases, you will use Example(), PowerPlot(), and GridPlot() and
 AddExample(), which rely on FindTarget internally.
 
 # Four use cases
-I describe two basic use cases here, and two slightly more fancy once. The first
+I describe two basic use cases here, and two slightly more fancy ones. The first
 two concern the relation between power, sample size, and two further
-parameters. In the [first situation](#Power and sample size for a t-test), a
-function for calculating the power is available. In the [second
-situation](#Power evaluation using simulation and resampling), the power needs
-to be found through (re-)sampling. The [third example](#Target a maximum
-CI95-width) concerns a situation where the objective is not a minimal power, but
-a CI-width that must be at most a certain value. In the [fourth example](#Find
-the upper boundary), we do not search the *lowest required* sample size, but the
-*highest permissible* standard deviation to achieve a target power.
+parameters. In the [first situation](#ex1), a function for calculating the power
+is available. In the [second situation](#ex2), the power needs to be found
+through (re-)sampling. The [third example](#ex3) concerns a situation where the
+objective is not a minimal power, but a CI-width that must be at most a certain
+value. In the [fourth example](#ex4), we do not search the *lowest required*
+sample size, but the *highest permissible* standard deviation to achieve a
+target power.
 
-## Power and sample size for a t-test
+## Power and sample size for a t-test {#ex1}
 Assume we aim to collect data in a two-armed RCT and plan to perform a simple
 t-test. In this situation, the situation concerning power can be summarized in
 the following ingredients:
@@ -176,9 +186,9 @@ Some things to note in the figure code:
 * You need to "slice out" one plain from your power_array. In this case, this
   the slice where `sd = .9`. The slice has the form of the figure: delta
   by n.
-* Note that in the figure, that the example is a bit above the power = 90% line. This
-  is because of the resolution of parameter n: at the example value of delta,
-  the arrow points at the lowest n in pars, for which the power is at least 90%.
+* Note that the example is a bit above the power = 90% line. This is because of
+  the resolution of parameter n: at the example value of delta, the arrow points
+  at the lowest n in pars, for which the power is at least 90%.
 * You could also slice out a plain where `delta = .8` and show how the relation
   between power and n depends on the standard deviation. Or slice out a plain
   where `n = 50`, and see how power behaves as a function of delta and sd.
@@ -216,9 +226,10 @@ GridPlot(power,
 ```
 
 Note that there are many options in this plot. See the help file of `GridPlot`
-for more info.
+for more info. Importantly, any dimension of the the `power_array` in argument x
+may be mapped to the x- or y-axis, or to the different lines.
 
-## Power evaluation using simulation and resampling
+## Power evaluation using simulation and resampling {#ex2}
 Assume we have about the same situation as above, but we do not have a
 simple solution to calculate the power: we only have a limited pilot data set
 that looks as follows:
@@ -260,15 +271,17 @@ A couple of notes:
 
 * The power in the example above is calculated by simulating TRUE's and FALSE's
   for significance. These were then automatically summarized by `mean` to yield
-  the power. You may, however, want to keep the simulated outcomes of your
-  function. To do so, set `summarize = FALSE`. If you choose to keep the
-  individual iterations, be aware that plotting functions and `Example`
-  automatically summarize these taking the mean. You can, however, choose a
-  different `summary_function`.
+  the power. 
+* You may want to keep the simulated outcomes of your function. To do so, set
+  `summarize = FALSE`. In this situation, the resulting array will have one
+  additional dimension, "sim". 
+* If you choose to keep the individual iterations, be aware that plotting
+  functions and `Example` automatically summarize these taking the mean. You
+  can, however, choose a different `summary_function`.
 * As in PowerPlot, any dimension of the `power_array` may be represented by the
-  x-axis, y-axis, and lines.
+  x-axis, y-axis.
   
-## Target a maximum CI95-width
+## Target a maximum CI95-width {#ex3}
 The powergrid package allows to do more than finding a power of at least some
 value. Instead, we can target, for example, a 95% confidence interval that
 should have at most a certain width. Say, we have the following situation, where
@@ -321,7 +334,7 @@ A couple of things to observe:
   power, as in the earlier examples)
 * We changed the title accordingly.
 
-## Find the upper bound
+## Find the upper bound {#ex4}
 We have the same situation as in the first use case, where we plan a t-test and
 aim for a power of 90%. In the current situation, however, we have a very
 limited flexibility in the number of participants that we can recruit. We do
@@ -362,17 +375,6 @@ PowerPlot(power_array,
           example = list(delta = .8),
           find_min = FALSE,
           target = .9)
-
 ```
 
-```{R, maximum SD GridPlot, fig.width=5.5, fig.height=5.5, fig.align='center'}
-GridPlot(power_array,
-         y_par = 'sd',
-         x_par = 'delta',
-         l_par = 'n',
-         target = .9, find_min = FALSE,
-         ylim = c(.3, 1))
-
-
-```
 

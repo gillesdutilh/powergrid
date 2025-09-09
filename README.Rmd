@@ -14,7 +14,13 @@ knitr::opts_chunk$set(
 
 # powergrid
 
-Powergrid is a package developed by [Gilles Dutilh](https://www.gillesdutilh.com), partly funded by a [Statistical programming grant](https://www.sctoplatforms.ch/en/scto-platforms/statistics-methodology-5.html) from the SCTO. 
+Powergrid is a package developed mainly by [Gilles
+Dutilh](https://www.gillesdutilh.com), partly funded by a [Statistical
+programming
+grant](https://www.sctoplatforms.ch/en/scto-platforms/statistics-methodology-5.html)
+from the SCTO. Valuable contributions are made by [Richard
+Allen](https://github.com/allenr-CH), statistician at the Department of Clinical
+Research, University Hospital Basel.
 
 The package is intended to allow users to easily evaluate a
 function across a grid of input parameters. The package' utilities are
@@ -70,7 +76,7 @@ power <- PowerGrid(pars = sse_pars, fun = PowFun)
 
 Display the results:
 
-```{r readmeplot, fig.path="man/figures/"}
+```{r readmeplot, fig.path="man/figures/", fig.width=5.5, fig.height=5.5, fig.align='center'}
 PowerPlot(power)
 ```
 
