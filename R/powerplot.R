@@ -197,42 +197,39 @@ PowerPlot =
   {
     if(!attr(x, which = 'summarized')){ # if object contains iterations, first
                                         # summarize
-      power_array = SummarizeIterations(x, summary_function)
+      x = SummarizeIterations(x, summary_function)
       warning(paste0(
         "The object 'x' you supplied to PowerPlot contains individual ",
         "iterations. For sensible plotting, these were automatically ",
         "summarized across iterations using the function given in ",
         "argument `summary_function`."), call. = FALSE)
-    } else # power_array that is ready to use
-    {
-      power_array = x
     }
   } else {
     stop("The object 'x' should be of class 'power_array'. ", call. = FALSE)
-    power_array = x} # if just any array, give it a try
+  }
 
   ## =======================================================
   ## take slice that should be plotted
   ## =======================================================
   if(!is.null(slicer)){
-    array_toplot = ArraySlicer(x = power_array, slicer = slicer)
-  } else {array_toplot = power_array}
+    sliced_x = ArraySlicer(x = power_array, slicer = slicer)
+  } else {sliced_x = x}
   ##
   ## if there are multiple function returns saved in power_array, give a warning
   ## and take only the first, by setting slicing accordingly.
-  if (attr(array_toplot, 'sim_function_nval') > 1) # still multiple outputs
+  if (attr(sliced_x, 'sim_function_nval') > 1) # still multiple outputs
   {
     ## assume the user want the first
-    chosen_fun_out = attr(array_toplot, 'dimnames')$fun_out[1]
-    array_toplot = ArraySlicer(array_toplot, slicer = list(fun_out = chosen_fun_out))
+    chosen_fun_out = attr(sliced_x, 'dimnames')$fun_out[1]
+    sliced_x = ArraySlicer(sliced_x, slicer = list(fun_out = chosen_fun_out))
       warning(paste0("Argument 'x' contains multiple function outputs at each parameter combination (even after possible slicing with argument 'slicer'). \n*** Function output ",
                      chosen_fun_out,
                      " was automatically chosen to be plotted! ***\nTo explicitly choose a function output, do so using argument 'slicer', including 'fun_out = <output name> in that list."), call. = FALSE)
   }
   ## feedback if the number of dimension are not correct
-  left_dims = length(dim(array_toplot))
+  left_dims = length(dim(sliced_x))
   if (left_dims == 0){
-    left_dims = ifelse(length(array_toplot) > 0,
+    left_dims = ifelse(length(sliced_x) > 0,
                        1, 0)
   }
   if(!(left_dims %in% c(2, 1))){
@@ -243,7 +240,7 @@ PowerPlot =
         left_dims, "-dimensional array instead."))
   }
   ##
-  dimnms = names(dimnames(array_toplot)) # dimension names to plot
+  dimnms = names(dimnames(sliced_x)) # dimension names to plot
   first_dim = dimnms[1]
   if(par_to_search == 'n' & !(par_to_search %in% dimnms)){
     warning(paste0("Argument `par_to_search` was automatically changed from 'n' (the default) to '",
@@ -252,8 +249,7 @@ PowerPlot =
     par_to_search = first_dim
   }
   dimorder = c(par_to_search, dimnms[dimnms != par_to_search])
-  array_toplot = aperm(array_toplot, dimorder)
-  margins_toplot = dimnames(array_toplot) # what are the values on the axes
+
   ## =======================================================
   ## About example
   ## =======================================================
@@ -268,7 +264,10 @@ PowerPlot =
   ## Graphical preparation
   ## =======================================================
   ##
-  ##  old_par = par(no.readonly = TRUE) # to restore afterwards
+  array_toplot = aperm(sliced_x, dimorder) # note that array_toplot is only for
+                                           # graphical purposes, not a
+                                           # power_array opbject
+  margins_toplot = dimnames(array_toplot) # what are the values on the axes
   ## ============================================
   ## Calculate colors and legend values if shades_of_grey
   if(shades_of_grey){
@@ -400,8 +399,7 @@ PowerPlot =
   }
   ## Draw Example Arrow
   if (draw_example){
-    AddExample(x = x,
-               slicer = slicer,
+    AddExample(x = sliced_x,
                example = example,
                target_value = target_value,
                find_lowest = find_lowest,
@@ -549,13 +547,47 @@ AddExample = function(x,
   ## =======================================================
   ## process input
   ## =======================================================
+  ##
   ## further args
   args = list(...)
   ## I grasp lwd here to make text and circle lwd match arrows
   if('lwd' %in% names(args)){lwd = args$lwd}else{lwd = 1}
   ## slice
   sliced_x = ArraySlicer(x = x, slicer = slicer)
-  one_dim = FALSE # the default
+  one_dim = FALSE # the default situation where the plot has 2 par-dimenstions
+
+  ## =================================
+  ## check argument x (partly the same as in PowerPlot)
+  ## =================================
+  ##
+  ## powerplot object
+  if (!all(class(sliced_x) == 'power_array')){ # made using powergrid functions
+    stop("The object 'x' should be of class 'power_array'. ")
+  }
+  ## If there are multiple function returns saved in power_array, give a warning
+  ## and take only the first, by setting slicing accordingly.
+  if (attr(sliced_x, 'sim_function_nval') > 1) # still multiple outputs
+  {
+    ## assume the user want the first
+    chosen_fun_out = attr(sliced_x, 'dimnames')$fun_out[1]
+    sliced_x = ArraySlicer(sliced_x, slicer = list(fun_out = chosen_fun_out))
+    warning(paste0("Argument 'x' contains multiple function outputs at each parameter combination (even after possible slicing with argument 'slicer'). \n*** Function output ",
+                   chosen_fun_out,
+                   " was automatically chosen to be plotted! ***\nTo explicitly choose a function output, do so using argument 'slicer', including 'fun_out = <output name> in that list."))
+  }
+  ## feedback if the number of dimension are not correct
+  left_dims = length(dim(sliced_x))
+  if (left_dims == 0){
+    left_dims = ifelse(length(sliced_x) > 0,
+                       1, 0)
+  }
+  if(!(left_dims %in% c(2, 1))){
+    stop(paste0(
+      ifelse(is.null(slicer),
+             "Input 'x' should be a 2- or 1-dimensional array, but is a ",
+             "Slicing 'x' by 'slicer' did not yield the necessary 2- or 1-dimensional, but a "),
+      left_dims, "-dimensional array instead."))
+  }
   ## =================================
   ## Check example input
   ## =================================
@@ -565,7 +597,7 @@ AddExample = function(x,
     if(length(unique(sapply(example, function(x)length(x)))) != 1){
       ## if more than one example is requested, each parameter in example must have
       ## the same length
-      stop("If multiple pars are listed in argument 'example', all must contain a vector of the same length.", call. = FALSE)
+      stop("If multiple pars are listed in argument 'example', all must contain a vector of the same length.")
     }
     ns_example = sapply(example, function(x)length(x))[[1]]
     ## The first element of example always defines the par on the x-axis
