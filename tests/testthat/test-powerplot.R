@@ -1,8 +1,6 @@
 rm(list=ls())
 
-## ==================================================================
-## Tests on AddExample
-## ==================================================================
+## =============================================================================
 ## create some material to work with
 sse_pars = list(
   n = seq(from = 10, to = 100, by = 10),
@@ -15,6 +13,12 @@ PowFun <- function(n, delta, sd){
 }
 power_array = PowerGrid(pars = sse_pars, fun = PowFun, n_iter = NA)
 
+#' Note that AddExample would trigger an error because no plot called.
+PowerPlot(power_array, slicer = list(sd = c(.3)))
+
+## ==================================================================
+## Tests on AddExample
+## ==================================================================
 test_that(
   "Error when example list elements are not equally long",
   {expect_error(
