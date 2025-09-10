@@ -1,34 +1,34 @@
 
 <!-- README.md is generated from README.Rmd. Please edit that file -->
 
-# powergrid
+# powergrid <img src='man/figures/powergrid_color_floor.png' align="right" width="200">
 
-Powergrid is a package developed by [Gilles
-Dutilh](https://www.gillesdutilh.com), partly funded by a [Statistical
-programming
-grant](https://www.sctoplatforms.ch/en/scto-platforms/statistics-methodology-5.html)
-from the SCTO.
+The powergrid package is intended to allow users to easily evaluate a function
+across a grid of input parameters. The utilities in the package are aimed at
+performing analyses of *power and sample size*, allowing for easy search of
+minimum n (or min/max of any other parameter) to achieve a minimal level of
+power (or a maximum of any value). Also, plotting functions are included that
+present the dependency of n and power in relation to further parameters.
 
-The package is intended to allow users to easily evaluate a function
-across a grid of input parameters. The package’ utilities are aimed at
-performing analyses of *power and sample size*, allowing for easy search
-of minimum n (or min/max of any other parameter) to achieve a desired
-level of power (or any other objective). Also, plotting functions are
-included that present the dependency of n and power in relation to
-further parameters.
-
-Note that the package is currently in (a late stage of) development.
-Development may be followed at [Gilles’
-github](https://www.github.com/gillesdutilh/powergrid). You are
-encouraged to use the package released here on SCTO’s github, currently
-version v0.1.0. For replicability, make sure you explicitly refer to the
-current release when loading the package in your code:
+Note that the package is currently in a late stage of development.  You are
+encouraged to use the package released here on SCTO’s github, currently version
+v0.2.0. For replicability, make sure you explicitly refer to the current release
+when loading the package in your code:
 
 ``` r
 devtools::install_github("SwissClinicalTrialOrganisation/powergrid",
+                         ref = "v0.2.0",
                          build_vignette = TRUE)
 library(powergrid)
 ```
+
+Powergrid is a package mainly developed by [Gilles
+Dutilh](https://www.gillesdutilh.com/statistics), partly funded by a
+[Statistical programming
+grant](https://www.sctoplatforms.ch/en/scto-platforms/statistics-methodology-5.html)
+from the SCTO. Valuable contributions have been made by [Richard
+Allen](https://dkf.unibas.ch/de/team-data-analysis-statistik/) of the statistics
+team at DKF basel.
 
 ## Example usage
 
@@ -65,7 +65,7 @@ power <- PowerGrid(pars = sse_pars, fun = PowFun)
 
 Display the results:
 
-``` r
+``` {R, basic PowerPlot, fig.width=5.5, fig.height=5.5, fig.align='center'}
 PowerPlot(power)
 ```
 
