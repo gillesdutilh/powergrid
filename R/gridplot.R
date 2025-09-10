@@ -12,6 +12,10 @@
 ##' achieve at least a certain power. See help of `Example` to understand the
 ##' use of `target_at_least` and `fin_min`.
 ##'
+##' If the input to argument x (class `power_array`) contains iterations that
+##' are not summarized, it will be summarized by `summary_function` with default
+##' `mean`.
+##' 
 ##' Note that a line may stop in a corner of the plotting region, not reaching
 ##' the margin. This is often correct behavior, when the \code{target_value}
 ##' level is not reached anywhere in that corner of the parameter range. In case
@@ -19,18 +23,17 @@
 ##' to the grid (consider \code{Update}), and then adjusting the y-limit to only
 ##' include the values of interest.
 ##'
-##' @param x An object of class "power_array" (from `powergrid`), "power" (from
-##'   sse::powEx) or "powCalc" (from sse::powCalc).
+##' @param x An object of class "power_array" (from `powergrid`).
 ##' @param slicer If the parameter grid of `x` has more than 3 dimensions, a
 ##'   3-dimensional slice must be cut out using \code{slicer}, a list whose
 ##'   elements define at which values (the list element value) of which
 ##'   parameter (the list element name) the slice should be cut.
 ##' @param y_par Which parameter is searched for the minimum (or maximum if
-##'   find_lowest == FALSE) yielding the target value; and shown on the y-axis. If
-##'   NULL, \code{y_par} is set to the first, \code{x_par} to the second, and
-##'   \code{l_par} to the third dimension name of 3-dimensional array
-##'   \code{x}. If you want another than the first dimension as `y_par`, you
-##'   need to see `y_par`, `x_par`, and `l_par` explicitly.
+##'   find_lowest == FALSE) yielding the target value; and shown on the
+##'   y-axis. If NULL, \code{y_par} is set to the first, \code{x_par} to the
+##'   second, and \code{l_par} to the third dimension name of 3-dimensional
+##'   array \code{x}. If you want another than the first dimension as `y_par`,
+##'   you need to see `y_par`, `x_par`, and `l_par` explicitly.
 ##' @param x_par,l_par Which parameter is varied on the x-axis, and between
 ##'   lines, respectively. If none of `y_par`, `x_par` and `l_par` are given,
 ##'   the first, second, and third dimension of x are mapped to y_par, x_par,
@@ -48,14 +51,14 @@
 ##' @param target_at_least Logical. Should \code{target_value} be minimally
 ##'   achieved (e.g., power), or maximially allowed (e.g., estimation
 ##'   uncertainty).
-##' @param find_lowest Logical, indicating whether the example should be found that
-##'   minimizes an assumption (e.g., minimal required n) to achieve the
+##' @param find_lowest Logical, indicating whether the example should be found
+##'   that minimizes an assumption (e.g., minimal required n) to achieve the
 ##'   \code{target_value} or an example that maximizes this assumption (e.g.,
 ##'   maximally allowed SD).
 ##' @param summary_function If \code{x} is an object of class \code{power_array}
-##'   where attribute \code{summarized} is FALSE (and individual iterations are
-##'   stored in dimension \code{iter}, the iterations dimension is aggregated by
-##'   \code{summary_fun}. Otherwise ignored.
+##'   where attribute \code{summarized} is FALSE (indicating individual
+##'   iterations are stored in dimension \code{iter}, the iterations dimension
+##'   is aggregated by \code{summary_fun}. Otherwise ignored.
 ##' @param col A vector with the length of \code{l_par} defining the color(s) of
 ##'   the lines.
 ##' @param example_text When an example is drawn, should the the required par
@@ -164,10 +167,21 @@ GridPlot = function(x,
   ## process input
   ## =================================
   x = ArraySlicer(x, slicer)
-  ## check dimensionality and summarized status and give feedback
-  ## Summarized status
+  ## check number of function outputs, dimensionality and summarized status, and
+  ## give feedback in warnings
   if (all(class(x) == 'power_array')) # made using powergrid functions
   {
+    ## if there are multiple function returns saved in power_array, give a warning
+    ## and take only the first, by setting slicing accordingly.
+    if (attr(x, 'sim_function_nval') > 1) # still multiple outputs
+    {
+      ## assume the user want the first
+      chosen_fun_out = attr(x, 'dimnames')$fun_out[1]
+      x = ArraySlicer(x, slicer = list(fun_out = chosen_fun_out))
+      warning(paste0("Argument 'x' contains multiple function outputs at each parameter combination (even after possible slicing with argument 'slicer'). \n*** Function output ",
+                     chosen_fun_out,
+                     " was automatically chosen to be plotted! ***\nTo explicitly choose a function output, do so using argument 'slicer', including 'fun_out = <output name> in that list."), call. = FALSE)
+    }
     if(!attr(x, which = 'summarized')){ # if object contains iterations, first
                                         # summarize
       x = SummarizeIterations(x, summary_function)
