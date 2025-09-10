@@ -476,7 +476,7 @@ PowerPlot =
 ##' @param ... Further arguments are passed to the two calls of function
 ##'   \code{graphics::arrows} drawing the nicked arrow.
 ##' @seealso \code{\link{PowerPlot}}, \code{\link{GridPlot}}
-##' @return Nothing
+##' @return invisibly NULL
 ##' @author Gilles Dutilh
 ##' @examples
 ##'
@@ -660,4 +660,5 @@ AddExample = function(x,
     graphics::text(x = x0, y = y_ex_value, labels = y_ex_value,
                    adj = c(0, -1), col = col, lwd = lwd)
   }
+  invisible(NULL)
 }
