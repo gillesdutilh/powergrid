@@ -6,6 +6,7 @@
 ##' @param a The desired minimum
 ##' @param b The desired maximum
 ##' @return a vector with the desired minimum and maximum
+##' @noRd
 ##' @author Gilles Dutilh
 ScaleRange = function(x, a, b){
 
@@ -26,6 +27,7 @@ ScaleRange = function(x, a, b){
 ##' @param ... Further arguments passed to 'strwrap()'
 ##' @return a character string with returns placed such to achieve the desired
 ##'   width
+##' @noRd
 ##' @author Gilles Dutilh
 PrintWrap = function(x,
                      ## width = 0.5 * (getOption("width") - 3), ...){
@@ -45,6 +47,7 @@ PrintWrap = function(x,
 ##' @param width The desired width (number of symbols)
 ##' @param ... Further arguments passed to 'strwrap()'
 ##' @return a character string of nchar `width`
+##' @noRd
 ##' @author Gilles Dutilh
 PrintDashes = function(symbol = '=', width = 48, ...)
 {
