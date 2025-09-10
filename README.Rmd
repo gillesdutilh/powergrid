@@ -76,7 +76,7 @@ power <- PowerGrid(pars = sse_pars, fun = PowFun)
 
 Display the results:
 
-```{R, basic PowerPlot, fig.width=5.5, fig.height=5.5, fig.align='center'}
+```{R readmeplot, fig.path="man/figures/", fig.width=5.5, fig.height=5.5, fig.align='center'}
 PowerPlot(power)
 ```
 
