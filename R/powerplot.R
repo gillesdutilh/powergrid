@@ -225,7 +225,9 @@ PowerPlot =
     ## assume the user want the first
     chosen_fun_out = attr(array_toplot, 'dimnames')$fun_out[1]
     array_toplot = ArraySlicer(array_toplot, slicer = list(fun_out = chosen_fun_out))
-    warning(paste0("Argument 'x' contains multiple function outputs at each parameter combination (even after possible slicing with argument 'slicer'). PowerPlot automatically selected\n*** function output ", chosen_fun_out, " to be plotted! ***\nTo explicitly choose a function output, do so using argument 'slicer', including 'fun_out = <output name> in that list."))
+      warning(paste0("Argument 'x' contains multiple function outputs at each parameter combination (even after possible slicing with argument 'slicer'). \n*** Function output ",
+                     chosen_fun_out,
+                     " was automatically chosen to be plotted! ***\nTo explicitly choose a function output, do so using argument 'slicer', including 'fun_out = <output name> in that list."), call. = FALSE)
   }
   ## feedback if the number of dimension are not correct
   left_dims = length(dim(array_toplot))
