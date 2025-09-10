@@ -27,8 +27,7 @@ GridPlot(
 )
 }
 \arguments{
-\item{x}{An object of class "power_array" (from \code{powergrid}), "power" (from
-sse::powEx) or "powCalc" (from sse::powCalc).}
+\item{x}{An object of class "power_array" (from \code{powergrid}).}
 
 \item{slicer}{If the parameter grid of \code{x} has more than 3 dimensions, a
 3-dimensional slice must be cut out using \code{slicer}, a list whose
@@ -36,11 +35,11 @@ elements define at which values (the list element value) of which
 parameter (the list element name) the slice should be cut.}
 
 \item{y_par}{Which parameter is searched for the minimum (or maximum if
-find_lowest == FALSE) yielding the target value; and shown on the y-axis. If
-NULL, \code{y_par} is set to the first, \code{x_par} to the second, and
-\code{l_par} to the third dimension name of 3-dimensional array
-\code{x}. If you want another than the first dimension as \code{y_par}, you
-need to see \code{y_par}, \code{x_par}, and \code{l_par} explicitly.}
+find_lowest == FALSE) yielding the target value; and shown on the
+y-axis. If NULL, \code{y_par} is set to the first, \code{x_par} to the
+second, and \code{l_par} to the third dimension name of 3-dimensional
+array \code{x}. If you want another than the first dimension as \code{y_par},
+you need to see \code{y_par}, \code{x_par}, and \code{l_par} explicitly.}
 
 \item{x_par, l_par}{Which parameter is varied on the x-axis, and between
 lines, respectively. If none of \code{y_par}, \code{x_par} and \code{l_par} are given,
@@ -52,8 +51,8 @@ and l_par, respectively.}
 element names indicate the parameter, element value indicate the values at
 which the example is drawn.}
 
-\item{find_lowest}{Logical, indicating whether the example should be found that
-minimizes an assumption (e.g., minimal required n) to achieve the
+\item{find_lowest}{Logical, indicating whether the example should be found
+that minimizes an assumption (e.g., minimal required n) to achieve the
 \code{target_value} or an example that maximizes this assumption (e.g.,
 maximally allowed SD).}
 
@@ -68,9 +67,9 @@ uncertainty).}
 \code{Example} and \code{FindTarget}.}
 
 \item{summary_function}{If \code{x} is an object of class \code{power_array}
-where attribute \code{summarized} is FALSE (and individual iterations are
-stored in dimension \code{iter}, the iterations dimension is aggregated by
-\code{summary_fun}. Otherwise ignored.}
+where attribute \code{summarized} is FALSE (indicating individual
+iterations are stored in dimension \code{iter}, the iterations dimension
+is aggregated by \code{summary_fun}. Otherwise ignored.}
 
 \item{col}{A vector with the length of \code{l_par} defining the color(s) of
 the lines.}
@@ -106,6 +105,10 @@ parameter represented by each line.
 The use of this function is, however, not limited to finding a minimum n to
 achieve at least a certain power. See help of \code{Example} to understand the
 use of \code{target_at_least} and \code{fin_min}.
+
+If the input to argument x (class \code{power_array}) contains iterations that
+are not summarized, it will be summarized by \code{summary_function} with default
+\code{mean}.
 
 Note that a line may stop in a corner of the plotting region, not reaching
 the margin. This is often correct behavior, when the \code{target_value}

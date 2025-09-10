@@ -23,19 +23,19 @@ AddExample(
 
 \item{slicer}{A list, internally passed on to \code{\link{ArraySlicer}} to
 cut out a (multidimensional) slice from x. You can achieve the same by
-appending the vector (s) in \code{slicer} to argument \code{example}. However, to
-make sure the result of AddExample is consistent with a figure previously
-created using PowerPlot or GridPlot, you may copy the arguments \code{slicer}
-and \code{example} given to those functions to AddExample.}
+appending "slicing" inside argument \code{example}. However, to assure that the
+result of AddExample is consistent with the figure it draws on top of
+(PowerPlot or GridPlot), copy the arguments \code{x} and \code{slicer} given to
+PowerPlot or GridPlot to AddTarget.}
 
 \item{example}{A list, defining at which value (list element value) of which
 parameter(s) (list element name(s)) the example is drawn for a power of
-\code{target_value}. You may supply par vector(s) longer than 1 for multiple
-examples. If \code{example} contains multiple parameters to define the example,
-all must contain a vector of the same length. Be aware that the first
-element of \code{example} defines the parameter x-axis, so this function is not
-fool proof. See argument \code{slicer} above. If x has only one dimention, the
-example needs not be defined.}
+\code{target_value}. You may supply par vector(s) longer than 1 for
+multiple examples. If \code{example} contains multiple parameters to define the
+example, all must contain a vector of the same length. Be aware that the
+first element of \code{example} defines the parameter x-axis, so this function
+is not fool proof. See argument \code{slicer} above. If x has only one
+dimention, the example needs not be defined.}
 
 \item{col}{Color of arrow and text drawn.}
 
