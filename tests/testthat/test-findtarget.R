@@ -1,6 +1,7 @@
 rm(list=ls())
 ## ===============================================================
-#' Tests are very simple, but still sufficient.
+## Tests are very simple, but still sufficient.
+## For now more extensive testing is Example()
 
 slice <- setNames(seq(0.09,0.89, 0.1), nm = seq(1,9))
 

@@ -53,11 +53,36 @@ test_that(
 ## =============================================================================
 #' Test PowerGrid() with multiple outputs
 
-ClosedFunTwoReturn <-
+#' Arbitary function that only sometimes returns both values.
+ClosedFunBadReturn =
   function(n, delta, sd){
-    out <- power.t.test(n = n, delta = delta, sd = sd)$power
-    return(c(out, out*0.5))
+    t2side = power.t.test(n = n, delta = delta, sd = sd, alternative = "two")$power
+    t1side = power.t.test(n = n, delta = delta, sd = sd, alternative = "one")$power
+
+    out <- c("one-sided" = t1side)
+    if(sd%%0.5 == 0) out = c(out, "two.sided" = t2side)
+
+    return(out)
   }
 
-fwd_power_array <- PowerGrid(pars = fwd_closed_pars, fun = ClosedFunTwoReturn,
-                             summarize = FALSE)
+test_that(
+  "Error occurs when multiple returns are not equal",
+  {
+    expect_error(PowerGrid(pars = fwd_closed_pars, fun = ClosedFunBadReturn, n_iter = 3));
+    expect_error(PowerGrid(pars = fwd_closed_pars, fun = ClosedFunBadReturn))
+  })
+
+ClosedFunTwoReturn =
+  function(n, delta, sd){
+    t2side = power.t.test(n = n, delta = delta, sd = sd, alternative = "two")$power
+    t1side = power.t.test(n = n, delta = delta, sd = sd, alternative = "one")$power
+    return(c("one-sided" = t1side, "two.sided" = t2side))
+  }
+
+two_return_power_array = PowerGrid(pars = fwd_closed_pars, fun = ClosedFunTwoReturn)
+
+test_that("fun_out names returned correctly",
+          {expect_identical(dimnames(two_return_power_array)$fun_out,
+                           c("one-sided", "two.sided"))}
+)
+
