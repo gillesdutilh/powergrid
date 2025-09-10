@@ -417,6 +417,24 @@ PowerGrid = function(pars, fun, more_args = NULL, n_iter = NA,
 ##' \code{\link{PowerGrid}}
 ##' \code{\link{ArraySlicer}} for a different method of reducing the
 ##'   dimensions of an array of class power_array.
+##' @examples
+##' ## Define grid of assumptions to study:
+##' sse_pars = list(
+##'   n = seq(from = 10, to = 50, by = 20),         # sample size
+##'   delta = seq(from = 0.5, to = 1.5, by = 0.5), # effect size
+##'   sd = seq(.1, 1, .3))                        # standard deviation
+##'
+##' ## Define function that calculates power based on these assumptions:
+##' PowFun <- function(n, delta, sd){
+##'   ptt = power.t.test(n = n/2, delta = delta, sd = sd,
+##'                      sig.level = 0.05)
+##'   return(ptt$power)
+##' }
+##'
+##' ## Evaluate at each combination of assumptions: 
+##' powarr = PowerGrid(pars = sse_pars, fun = PowFun, n_iter = NA)
+##' powarr[2, 1, ] # gives the same as
+##' powarr['30', '0.5', ]
 ##' @export
 `[.power_array` = function(x, ..., drop = TRUE) {
   the_attributes = attributes(x)
@@ -480,6 +498,23 @@ PowerGrid = function(pars, fun, more_args = NULL, n_iter = NA,
 ##' @seealso
 ##' \code{\link{PowerGrid}}
 ##' @author Gilles Dutilh
+##' @examples
+##' ## Define grid of assumptions to study:
+##' sse_pars = list(
+##'   n = seq(from = 10, to = 50, by = 20),         # sample size
+##'   delta = seq(from = 0.5, to = 1.5, by = 0.5), # effect size
+##'   sd = seq(.1, 1, .3))                        # standard deviation
+##'
+##' ## Define function that calculates power based on these assumptions:
+##' PowFun <- function(n, delta, sd){
+##'   ptt = power.t.test(n = n/2, delta = delta, sd = sd,
+##'                      sig.level = 0.05)
+##'   return(ptt$power)
+##' }
+##'
+##' ## Evaluate at each combination of assumptions: 
+##' powarr = PowerGrid(pars = sse_pars, fun = PowFun, n_iter = NA)
+##' print(powarr)
 ##' @export
 print.power_array = function(x, ...){
   print.table(x)
@@ -544,6 +579,23 @@ print.power_array = function(x, ...){
 ##' @seealso
 ##' \code{\link{PowerGrid}}
 ##' @author Gilles Dutilh
+##' @examples
+##' ## Define grid of assumptions to study:
+##' sse_pars = list(
+##'   n = seq(from = 10, to = 50, by = 20),         # sample size
+##'   delta = seq(from = 0.5, to = 1.5, by = 0.5), # effect size
+##'   sd = seq(.1, 1, .3))                        # standard deviation
+##'
+##' ## Define function that calculates power based on these assumptions:
+##' PowFun <- function(n, delta, sd){
+##'   ptt = power.t.test(n = n/2, delta = delta, sd = sd,
+##'                      sig.level = 0.05)
+##'   return(ptt$power)
+##' }
+##'
+##' ## Evaluate at each combination of assumptions: 
+##' powarr = PowerGrid(pars = sse_pars, fun = PowFun, n_iter = NA)
+##' summary(powarr)
 ##' @export
 summary.power_array = function(object, ...){
   aa = attributes(object)
@@ -615,6 +667,31 @@ summary.power_array = function(object, ...){
 ##' @author Gilles Dutilh
 ##' @seealso
 ##' \code{\link{PowerGrid}}
+##' @examples
+##' ## iterative sse example
+##' sse_pars = list(
+##'   n = seq(from = 10, to = 60, by = 5),
+##'   delta = seq(from = 0.5, to = 1.5, by = 0.2),
+##'   sd = seq(.5, 1.5, .2))
+##' 
+##' ## Define a function that results in TRUE or FALSE for a successful or
+##' ## non-successful (5% significant) simulated trial:
+##' PowFun <- function(n, delta, sd){
+##'   x1 = rnorm(n = n/2, sd = sd)
+##'   x2 = rnorm(n = n/2, mean = delta, sd = sd)
+##'   t.test(x1, x2)$p.value < .05
+##' }
+##' 
+##' n_iter = 20
+##' powarr = PowerGrid(pars = sse_pars, fun = PowFun,
+##'                         n_iter = n_iter, summarize = FALSE)
+##'
+##' dimnames(powarr)
+##' summary(powarr) # indicates that iterations were not
+##' ## now summarize
+##' powarr_summarized = SummarizeIterations(powarr, summary_function = mean)
+##' dimnames(powarr_summarized)
+##' summary(powarr_summarized) # indicates that iterations are now summarized
 ##' @export
 SummarizeIterations = function(x, summary_function, ...){
   if(attr(x, which = 'summarized') | !inherits(x, 'power_array')){
@@ -666,6 +743,23 @@ SummarizeIterations = function(x, summary_function, ...){
 ##' @seealso
 ##' \code{\link{PowerGrid}}
 ##' @author Gilles Dutilh
+##' @examples
+##' ## Define grid of assumptions to study:
+##' sse_pars = list(
+##'   n = seq(from = 10, to = 50, by = 20),         # sample size
+##'   delta = seq(from = 0.5, to = 1.5, by = 0.5), # effect size
+##'   sd = seq(.1, 1, .3))                        # standard deviation
+##'
+##' ## Define function that calculates power based on these assumptions:
+##' PowFun <- function(n, delta, sd){
+##'   ptt = power.t.test(n = n/2, delta = delta, sd = sd,
+##'                      sig.level = 0.05)
+##'   return(ptt$power)
+##' }
+##'
+##' ## Evaluate at each combination of assumptions: 
+##' powarr = PowerGrid(pars = sse_pars, fun = PowFun, n_iter = NA)
+##' print(PowerDF(powarr))
 ##' @export
 PowerDF = function(x){
   flat = as.data.frame(stats::ftable(x, row.vars = seq_along(dim(x))))
