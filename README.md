@@ -70,7 +70,7 @@ Display the results:
 PowerPlot(power)
 ```
 
-<img src="README-basic PowerPlot-1.png" style="display: block; margin: auto;" />
+<img src="man/figures/readmeplot-1.png" style="display: block; margin: auto;" />
 
 See the vignette for more details on how to use the package and its
 functions.
