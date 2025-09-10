@@ -212,7 +212,7 @@ PowerPlot =
   ## take slice that should be plotted
   ## =======================================================
   if(!is.null(slicer)){
-    sliced_x = ArraySlicer(x = power_array, slicer = slicer)
+    sliced_x = ArraySlicer(x = x, slicer = slicer)
   } else {sliced_x = x}
   ##
   ## if there are multiple function returns saved in power_array, give a warning
