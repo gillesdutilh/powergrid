@@ -49,13 +49,13 @@
 ##'   uncertainty).
 ##' @param example If not NULL, a list of length one, defining at which value
 ##'   (list element value) of which parameter (list element name) the example is
-##'   drawn for a power of \code{target_value}. You may supply a vector longer than 1
-##'   for multiple examples.
+##'   drawn for a power of \code{target_value}. You may supply a vector longer
+##'   than 1 for multiple examples.
 ##' @param method Method used for finding the required \code{par_to_search}
-##'   needed to achieve \code{target_value}. Either \code{step}: walking in steps
-##'   along \code{par_to_search} or \code{lm}: Interpolating assuming a linear
-##'   relation between \code{par_to_search} and \code{(qnorm(x) + qnorm(1 -
-##'   0.05)) ^ 2}. The setting \code{lm} is inspired on the implementation in
+##'   needed to achieve \code{target_value}. Either \code{step}: walking in
+##'   steps along \code{par_to_search} or \code{lm}: Interpolating assuming a
+##'   linear relation between \code{par_to_search} and \code{(qnorm(x) + qnorm(1
+##'   - 0.05)) ^ 2}. The setting \code{lm} is inspired on the implementation in
 ##'   the \code{sse} package by Thomas Fabbro.
 ##' @param target_levels For which levels of power (or whichever variable is
 ##'   contained in x) lines are drawn.
@@ -87,7 +87,8 @@
 ##' @seealso \code{\link{PowerGrid}}, \code{\link{AddExample}},
 ##'   \code{\link{Example}}, \code{\link{GridPlot}} for plotting
 ##'   interdependencies of 3 parameters.
-##' @return Nothing
+##' @return A list containing the coordinate arguments x, y, and z, as passed to
+##'   `image()` internally.
 ##' @author Gilles Dutilh
 ##' @examples
 ##' ## ============================================
@@ -351,9 +352,10 @@ PowerPlot =
     ## Main plot.
     ## Image contains shades of grey or white, creating higher level plot
     graphics::par(las = 1, mar = c(5.1, 4.1, 4.1, 2.1))
-    graphics::image(as.numeric(margins_toplot[[2]]),
-                    as.numeric(margins_toplot[[1]]),
-                    t(array_toplot),
+    image_x = as.numeric(margins_toplot[[2]])
+    image_y = as.numeric(margins_toplot[[1]])
+    image_z = t(array_toplot)
+    graphics::image(image_x, image_y, image_z,
                     ylab = Trans(names(margins_toplot)[[1]]),
                     xlab = Trans(names(margins_toplot)[[2]]),
                     axes = FALSE, col = image_cols, main = title, ...)
@@ -407,6 +409,7 @@ PowerPlot =
                col = col[1],
                example_text = example_text)
   }
+  invisible(list('image_args' = list('x' = image_x, 'y' = image_y, 'z' = image_z)))
 }
 
 ## ======================================================= lower level function
