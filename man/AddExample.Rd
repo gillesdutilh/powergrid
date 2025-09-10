@@ -43,7 +43,7 @@ dimention, the example needs not be defined.}
 \code{graphics::arrows} drawing the nicked arrow.}
 }
 \value{
-Nothing
+invisibly NULL
 }
 \description{
 Add example arrow(s) to an existing figure created by PowerPlot

@@ -41,8 +41,8 @@ should be cut out.}
 
 \item{example}{If not NULL, a list of length one, defining at which value
 (list element value) of which parameter (list element name) the example is
-drawn for a power of \code{target_value}. You may supply a vector longer than 1
-for multiple examples.}
+drawn for a power of \code{target_value}. You may supply a vector longer
+than 1 for multiple examples.}
 
 \item{find_lowest}{Logical, indicating whether the example should be found
 that minimizes an assumption (e.g., minimal required n) to achieve the
@@ -59,10 +59,10 @@ achieved (e.g., power), or maximially allowed (e.g., estimation
 uncertainty).}
 
 \item{method}{Method used for finding the required \code{par_to_search}
-needed to achieve \code{target_value}. Either \code{step}: walking in steps
-along \code{par_to_search} or \code{lm}: Interpolating assuming a linear
-relation between \code{par_to_search} and \code{(qnorm(x) + qnorm(1 -
-  0.05)) ^ 2}. The setting \code{lm} is inspired on the implementation in
+needed to achieve \code{target_value}. Either \code{step}: walking in
+steps along \code{par_to_search} or \code{lm}: Interpolating assuming a
+linear relation between \code{par_to_search} and \code{(qnorm(x) + qnorm(1
+  - 0.05)) ^ 2}. The setting \code{lm} is inspired on the implementation in
 the \code{sse} package by Thomas Fabbro.}
 
 \item{summary_function}{If \code{x} is an object of class \code{power_array}
@@ -103,7 +103,8 @@ contour plot, thereby \emph{biasing} the contour lines.}
 internally. Most useful for zooming with xlim and ylim.}
 }
 \value{
-Nothing
+A list containing the coordinate arguments x, y, and z, as passed to
+\code{image()} internally.
 }
 \description{
 Plot (a slice of) an object of class \code{power_array}. Main

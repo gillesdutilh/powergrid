@@ -21,6 +21,32 @@ An object of class \code{power_array}, with attributes \code{summarized =
 Summarizes objects of class \code{power_array} that have individual
 iterations saved.
 }
+\examples{
+## iterative sse example
+sse_pars = list(
+  n = seq(from = 10, to = 60, by = 5),
+  delta = seq(from = 0.5, to = 1.5, by = 0.2),
+  sd = seq(.5, 1.5, .2))
+
+## Define a function that results in TRUE or FALSE for a successful or
+## non-successful (5\% significant) simulated trial:
+PowFun <- function(n, delta, sd){
+  x1 = rnorm(n = n/2, sd = sd)
+  x2 = rnorm(n = n/2, mean = delta, sd = sd)
+  t.test(x1, x2)$p.value < .05
+}
+
+n_iter = 20
+powarr = PowerGrid(pars = sse_pars, fun = PowFun,
+                        n_iter = n_iter, summarize = FALSE)
+
+dimnames(powarr)
+summary(powarr) # indicates that iterations were not
+## now summarize
+powarr_summarized = SummarizeIterations(powarr, summary_function = mean)
+dimnames(powarr_summarized)
+summary(powarr_summarized) # indicates that iterations are now summarized
+}
 \seealso{
 \code{\link{PowerGrid}}
 }

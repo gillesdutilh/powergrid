@@ -11,11 +11,32 @@
 
 \item{...}{passed on to \code{cat}}
 }
+\value{
+Nothing
+}
 \description{
 Method for printing objects of class power_array.
 ##'
 Prints a power_array as a default array with a short summary about
 its contents.
+}
+\examples{
+## Define grid of assumptions to study:
+sse_pars = list(
+  n = seq(from = 10, to = 50, by = 20),         # sample size
+  delta = seq(from = 0.5, to = 1.5, by = 0.5), # effect size
+  sd = seq(.1, 1, .3))                        # standard deviation
+
+## Define function that calculates power based on these assumptions:
+PowFun <- function(n, delta, sd){
+  ptt = power.t.test(n = n/2, delta = delta, sd = sd,
+                     sig.level = 0.05)
+  return(ptt$power)
+}
+
+## Evaluate at each combination of assumptions: 
+powarr = PowerGrid(pars = sse_pars, fun = PowFun, n_iter = NA)
+print(powarr)
 }
 \seealso{
 \code{\link{PowerGrid}}

@@ -11,11 +11,32 @@
 
 \item{...}{passed on to \code{cat}}
 }
+\value{
+nothing
+}
 \description{
 Offers a short summary of the power_array object, summarizing the
 range of observed values and the grid evaluated across.
 ##'
 See PowerGrid for details
+}
+\examples{
+## Define grid of assumptions to study:
+sse_pars = list(
+  n = seq(from = 10, to = 50, by = 20),         # sample size
+  delta = seq(from = 0.5, to = 1.5, by = 0.5), # effect size
+  sd = seq(.1, 1, .3))                        # standard deviation
+
+## Define function that calculates power based on these assumptions:
+PowFun <- function(n, delta, sd){
+  ptt = power.t.test(n = n/2, delta = delta, sd = sd,
+                     sig.level = 0.05)
+  return(ptt$power)
+}
+
+## Evaluate at each combination of assumptions: 
+powarr = PowerGrid(pars = sse_pars, fun = PowFun, n_iter = NA)
+summary(powarr)
 }
 \seealso{
 \code{\link{PowerGrid}}

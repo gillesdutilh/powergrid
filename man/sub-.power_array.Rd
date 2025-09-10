@@ -30,6 +30,25 @@ dimensions as the original array. The number of levels at each
 dimension may be reduced, however.
 ##'
 }
+\examples{
+## Define grid of assumptions to study:
+sse_pars = list(
+  n = seq(from = 10, to = 50, by = 20),         # sample size
+  delta = seq(from = 0.5, to = 1.5, by = 0.5), # effect size
+  sd = seq(.1, 1, .3))                        # standard deviation
+
+## Define function that calculates power based on these assumptions:
+PowFun <- function(n, delta, sd){
+  ptt = power.t.test(n = n/2, delta = delta, sd = sd,
+                     sig.level = 0.05)
+  return(ptt$power)
+}
+
+## Evaluate at each combination of assumptions: 
+powarr = PowerGrid(pars = sse_pars, fun = PowFun, n_iter = NA)
+powarr[2, 1, ] # gives the same as
+powarr['30', '0.5', ]
+}
 \seealso{
 \code{\link{PowerGrid}}
 \code{\link{ArraySlicer}} for a different method of reducing the
