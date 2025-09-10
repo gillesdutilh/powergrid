@@ -476,6 +476,7 @@ PowerGrid = function(pars, fun, more_args = NULL, n_iter = NA,
 ##' @title print
 ##' @param x object of class power_array
 ##' @param ... passed on to `cat`
+##' @return Nothing
 ##' @seealso
 ##' \code{\link{PowerGrid}}
 ##' @author Gilles Dutilh
@@ -539,6 +540,7 @@ print.power_array = function(x, ...){
 ##' @title Summary of power_grid object.
 ##' @param object array of class power_grid
 ##' @param ... passed on to `cat`
+##' @return nothing
 ##' @seealso
 ##' \code{\link{PowerGrid}}
 ##' @author Gilles Dutilh
