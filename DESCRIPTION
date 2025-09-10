@@ -20,3 +20,4 @@ Imports: stats, methods
 VignetteBuilder: knitr
 Config/testthat/edition: 3
 URL: https://github.com/SwissClinicalTrialOrganisation/powergrid, https://SwissClinicalTrialOrganisation.github.io//powergrid
+BugReports: https://github.com/SwissClinicalTrialOrganisation/powergrid/issues
