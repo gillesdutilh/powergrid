@@ -452,22 +452,23 @@ PowerPlot =
 ##' Argument \code{example} may contain vectors with length longer than one to
 ##' draw multiple examples.
 ##' 
-##' @param x,target_value,target_at_least,find_lowest,method,example_text,summary_function
+##' @param
+##'   x,target_value,target_at_least,find_lowest,method,example_text,summary_function
 ##'   See help for \code{PowerPlot}.
 ##' @param slicer A list, internally passed on to \code{\link{ArraySlicer}} to
 ##'   cut out a (multidimensional) slice from x. You can achieve the same by
-##'   appending the vector (s) in `slicer` to argument `example`. However, to
-##'   make sure the result of AddExample is consistent with a figure previously
-##'   created using PowerPlot or GridPlot, you may copy the arguments `slicer`
-##'   and `example` given to those functions to AddExample.
+##'   appending "slicing" inside argument `example`. However, to assure that the
+##'   result of AddExample is consistent with the figure it draws on top of
+##'   (PowerPlot or GridPlot), copy the arguments `x` and `slicer` given to
+##'   PowerPlot or GridPlot to AddTarget.
 ##' @param example A list, defining at which value (list element value) of which
 ##'   parameter(s) (list element name(s)) the example is drawn for a power of
-##'   \code{target_value}. You may supply par vector(s) longer than 1 for multiple
-##'   examples. If `example` contains multiple parameters to define the example,
-##'   all must contain a vector of the same length. Be aware that the first
-##'   element of `example` defines the parameter x-axis, so this function is not
-##'   fool proof. See argument `slicer` above. If x has only one dimention, the
-##'   example needs not be defined.
+##'   \code{target_value}. You may supply par vector(s) longer than 1 for
+##'   multiple examples. If `example` contains multiple parameters to define the
+##'   example, all must contain a vector of the same length. Be aware that the
+##'   first element of `example` defines the parameter x-axis, so this function
+##'   is not fool proof. See argument `slicer` above. If x has only one
+##'   dimention, the example needs not be defined.
 ##' @param col Color of arrow and text drawn.
 ##' @param ... Further arguments are passed to the two calls of function
 ##'   \code{graphics::arrows} drawing the nicked arrow.
@@ -581,12 +582,12 @@ AddExample = function(x,
     left_dims = ifelse(length(sliced_x) > 0,
                        1, 0)
   }
+  left_dims = left_dims - (length(example) - 1) # because a longer example will
+                                              # slice on the first dim
   if(!(left_dims %in% c(2, 1))){
-    stop(paste0(
-      ifelse(is.null(slicer),
-             "Input 'x' should be a 2- or 1-dimensional array, but is a ",
-             "Slicing 'x' by 'slicer' did not yield the necessary 2- or 1-dimensional, but a "),
-      left_dims, "-dimensional array instead."))
+    stop(paste0("The example ", ifelse(is.null(slicer), "", "(after slicing) "),
+                "does not define a one-dimensional vector in x, as it should")
+         )
   }
   ## =================================
   ## Check example input
