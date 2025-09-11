@@ -91,6 +91,7 @@ power_array = PowerGrid(pars = sse_pars,
 summary(power_array)
 PowerPlot(power_array)
 ## Based on figure above, let's look at n between 50 and 100, delta around .9
+\dontrun{
 sse_pars = list(
   n = seq(50, 100, 5),
   delta = seq(.7, 1.1, .05))
@@ -112,6 +113,7 @@ PowerPlot(power_array_up,
           summary_function = function(x)mean(x, na.rm = TRUE),
           title = 'Zoomed in')
 layout(1)
+}
 }
 \seealso{
 \code{\link{PowerGrid}}
