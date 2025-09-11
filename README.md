@@ -18,7 +18,7 @@ refer to the current release when loading the package in your code:
 
 ``` r
 devtools::install_github("SwissClinicalTrialOrganisation/powergrid",
-                         ref = "v0.2.0",
+                         ref = "v0.3.0",
                          build_vignette = TRUE)
 library(powergrid)
 ```
