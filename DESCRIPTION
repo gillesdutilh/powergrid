@@ -19,5 +19,5 @@ Suggests:
 Imports: stats, methods
 VignetteBuilder: knitr
 Config/testthat/edition: 3
-URL: https://github.com/SwissClinicalTrialOrganisation/powergrid, https://swissclinicaltrialorganisation.github.io/
+URL: https://github.com/SwissClinicalTrialOrganisation/powergrid
 BugReports: https://github.com/SwissClinicalTrialOrganisation/powergrid/issues
