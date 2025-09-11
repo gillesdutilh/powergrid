@@ -24,7 +24,7 @@ library(powergrid)
 ```
 
 Powergrid is a package mainly developed by [Gilles
-Dutilh](https://www.gillesdutilh.com/statistics), partly funded by a
+Dutilh](https://www.gillesdutilh.com/statistics/), partly funded by a
 [Statistical programming
 grant](https://www.sctoplatforms.ch/en/scto-platforms/statistics-methodology-5.html)
 from the SCTO. Valuable contributions have been made by [Richard
