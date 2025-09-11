@@ -1,5 +1,5 @@
 Package: powergrid
-Title: Power Analyis Across a Grid of Assumptions
+Title: Power Analysis Across a Grid of Assumptions
 Version: 0.2.0
 Authors@R: 
     person(given = "Gilles",
