@@ -63,9 +63,6 @@
 ##'   arrows. Therefore, use AddExample.
 ##' @param shades_of_grey Logical indicating whether greylevels are painted in
 ##'   addition to isolines to show power levels.
-##' @param shades_legend Logical indicating whether a legend for the shading is
-##'   added. Note that this legend is drawn in a separate plotting region, and
-##'   does effect setting \code{par(mfrow)} of the current plotting device.
 ##' @param example_text When an example is drawn, should the the required par
 ##'   value be printed alongside the arrow(s)
 ##' @param title Character string, if not \code{NULL}, replaces default figure
@@ -334,20 +331,6 @@ PowerPlot =
     y_ex_value = round(array_toplot[as.character(x_ex_value)], 3)
   } else {
     ## the most typical case:
-    ## ============================================
-    ## Legend plot if needed (shades of grey & shades legend are requested)
-    ## is a separate plotting region
-    if(shades_of_grey && shades_legend) {
-      graphics::layout(t(2:1), widths = c(5, 1)) # in this order, so that
-                                        # you can edit the main fig afterwards
-      graphics::par(mar = c(10, 1, 10, 3))
-      graphics::image(1, seq_along(legend_ats), t(rev(legend_ats)),
-                      axes = FALSE, xlab = '', ylab = '', col = rev(legend_cols))
-      graphics::text(1, seq_along(legend_ats),
-                     labels = sprintf('%1.1f', legend_ats),
-                     cex = 1.5, col = grDevices::grey.colors(1, .2, .2))
-      graphics::mtext(side = 3, line = 2, text = 'Power')
-    }
     ## ============================================
     ## Main plot.
     ## Image contains shades of grey or white, creating higher level plot
