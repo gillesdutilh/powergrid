@@ -334,14 +334,13 @@ PowerPlot =
     ## ============================================
     ## Main plot.
     ## Image contains shades of grey or white, creating higher level plot
-    graphics::par(las = 1, mar = c(5.1, 4.1, 4.1, 2.1))
     image_x = as.numeric(margins_toplot[[2]])
     image_y = as.numeric(margins_toplot[[1]])
     image_z = t(array_toplot)
     graphics::image(image_x, image_y, image_z,
                     ylab = Trans(names(margins_toplot)[[1]]),
                     xlab = Trans(names(margins_toplot)[[2]]),
-                    axes = FALSE, col = image_cols, main = title, ...)
+                    axes = FALSE, col = image_cols, main = title, las = 1,...)
     ##
     ## grid lines
     graphics::abline(h = margins_toplot[[1]], v = margins_toplot[[2]], col = 'white')
