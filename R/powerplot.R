@@ -63,9 +63,6 @@
 ##'   arrows. Therefore, use AddExample.
 ##' @param shades_of_grey Logical indicating whether greylevels are painted in
 ##'   addition to isolines to show power levels.
-##' @param shades_legend Logical indicating whether a legend for the shading is
-##'   added. Note that this legend is drawn in a separate plotting region, and
-##'   does effect setting \code{par(mfrow)} of the current plotting device.
 ##' @param example_text When an example is drawn, should the the required par
 ##'   value be printed alongside the arrow(s)
 ##' @param title Character string, if not \code{NULL}, replaces default figure
@@ -183,7 +180,6 @@ PowerPlot =
            target_levels = c(.8, .9, .95), # which power iso lines to draw
            col = grDevices::grey.colors(1, .2, .2),
            shades_of_grey = TRUE, # do you want shades of grey on background
-           shades_legend = FALSE, # do you want a legend for the shades
            example_text = TRUE, # do you want a text next to the Example arrow
            title = NULL,
            par_labels = NULL,
@@ -335,30 +331,15 @@ PowerPlot =
   } else {
     ## the most typical case:
     ## ============================================
-    ## Legend plot if needed (shades of grey & shades legend are requested)
-    ## is a separate plotting region
-    if(shades_of_grey && shades_legend) {
-      graphics::layout(t(2:1), widths = c(5, 1)) # in this order, so that
-                                        # you can edit the main fig afterwards
-      graphics::par(mar = c(10, 1, 10, 3))
-      graphics::image(1, seq_along(legend_ats), t(rev(legend_ats)),
-                      axes = FALSE, xlab = '', ylab = '', col = rev(legend_cols))
-      graphics::text(1, seq_along(legend_ats),
-                     labels = sprintf('%1.1f', legend_ats),
-                     cex = 1.5, col = grDevices::grey.colors(1, .2, .2))
-      graphics::mtext(side = 3, line = 2, text = 'Power')
-    }
-    ## ============================================
     ## Main plot.
     ## Image contains shades of grey or white, creating higher level plot
-    graphics::par(las = 1, mar = c(5.1, 4.1, 4.1, 2.1))
     image_x = as.numeric(margins_toplot[[2]])
     image_y = as.numeric(margins_toplot[[1]])
     image_z = t(array_toplot)
     graphics::image(image_x, image_y, image_z,
                     ylab = Trans(names(margins_toplot)[[1]]),
                     xlab = Trans(names(margins_toplot)[[2]]),
-                    axes = FALSE, col = image_cols, main = title, ...)
+                    axes = FALSE, col = image_cols, main = title, las = 1,...)
     ##
     ## grid lines
     graphics::abline(h = margins_toplot[[1]], v = margins_toplot[[2]], col = 'white')

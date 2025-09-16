@@ -1,3 +1,13 @@
+# powergrid 0.4.0
+- Omitted all settings of par(), including graphics::layout() (PowerPlot and GridPlot)
+- Argument shades_legend removed as argument to PowerPlot. The related function
+  to add a legend to the grey scale is omitted too. This legend is difficult to
+  position without setting par. Also, the use of such legend is very limited,
+  since the eye is notoriously bad in seeing the equality or difference between
+  shades when they do not share a border. (PowerPlot)
+- Omitted (conditional) set.seed() in PowerGrid. This seed was set for cases
+  where there happens to be no .Random.seed yet. Slightly tweaky circumvented by
+  always drawing one uniform number before doing anything.
 # powergrid 0.3.0
 - performed all checks as listed in issue #55 Release powergrid 0.3.0
 

@@ -271,8 +271,10 @@ PowerGrid = function(pars, fun, more_args = NULL, n_iter = NA,
     stop("`pars` contains parameters that do not match the arguments of `fun`")
   }
   ## ============================================
-  ## save seed
-  if (!exists(".Random.seed")){set.seed(1)} # need to have one so save
+  ##
+  ## if in the current session there has been no random generation done, there
+  ## is no .Random.seed. Therefore, create one random number (always)
+  (stats::runif(1))
   random_seed = .Random.seed
   ## ============================================
   ## fill grid
