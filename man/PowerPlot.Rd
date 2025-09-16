@@ -18,7 +18,6 @@ PowerPlot(
   target_levels = c(0.8, 0.9, 0.95),
   col = grDevices::grey.colors(1, 0.2, 0.2),
   shades_of_grey = TRUE,
-  shades_legend = FALSE,
   example_text = TRUE,
   title = NULL,
   par_labels = NULL,
@@ -78,10 +77,6 @@ arrows. Therefore, use AddExample.}
 
 \item{shades_of_grey}{Logical indicating whether greylevels are painted in
 addition to isolines to show power levels.}
-
-\item{shades_legend}{Logical indicating whether a legend for the shading is
-added. Note that this legend is drawn in a separate plotting region, and
-does effect setting \code{par(mfrow)} of the current plotting device.}
 
 \item{example_text}{When an example is drawn, should the the required par
 value be printed alongside the arrow(s)}

@@ -180,7 +180,6 @@ PowerPlot =
            target_levels = c(.8, .9, .95), # which power iso lines to draw
            col = grDevices::grey.colors(1, .2, .2),
            shades_of_grey = TRUE, # do you want shades of grey on background
-           shades_legend = FALSE, # do you want a legend for the shades
            example_text = TRUE, # do you want a text next to the Example arrow
            title = NULL,
            par_labels = NULL,

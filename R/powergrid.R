@@ -274,7 +274,7 @@ PowerGrid = function(pars, fun, more_args = NULL, n_iter = NA,
   ##
   ## if in the current session there has been no random generation done, there
   ## is no .Random.seed. Therefore, create one random number (always)
-  (runif(1))
+  (stats::runif(1))
   random_seed = .Random.seed
   ## ============================================
   ## fill grid
