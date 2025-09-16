@@ -12,13 +12,13 @@ plotting functions are included that present the dependency of n and
 power in relation to further parameters.
 
 Note that the package is currently in a late stage of development. You
-are encouraged to use the package released here on SCTO’s github,
-currently version v0.2.0. For replicability, make sure you explicitly
-refer to the current release when loading the package in your code:
+are encouraged to use the package released here on SCTO’s github. For
+replicability, make sure you explicitly refer to the current release
+when loading the package in your code, using argument `tag` to
+`install_github`.
 
 ``` r
 devtools::install_github("SwissClinicalTrialOrganisation/powergrid",
-                         ref = "v0.3.0",
                          build_vignette = TRUE)
 library(powergrid)
 ```
