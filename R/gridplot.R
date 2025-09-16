@@ -262,13 +262,13 @@ GridPlot = function(x,
   ## =================================
   ## draw graph
   ## =================================
-  graphics::par(las = 1)
+  ##
   at_x = pretty(xvals[xvals >= xlim[1] & xvals <= xlim[2]])
   at_y = pretty(yvals[yvals >= ylim[1] & yvals <= ylim[2]])
   plot(0,
        xlim = xlim,
        ylim = ylim,
-       xlab = Trans(x_par), ylab = Trans(y_par), type = 'n', axes = FALSE)
+       xlab = Trans(x_par), ylab = Trans(y_par), type = 'n', axes = FALSE, las = 1)
   graphics::axis(1, at = at_x)
   graphics::axis(2, at = at_y)
   graphics::abline(v = at_x,
