@@ -1,3 +1,5 @@
+# powergrid 0.4.0
+
 # powergrid 0.3.0
 - performed all checks as listed in issue #55 Release powergrid 0.3.0
 
