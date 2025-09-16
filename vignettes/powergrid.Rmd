@@ -57,10 +57,10 @@ To install the current version from github, evaluate the following line
 of R code:
 ```{r, eval = FALSE}
 devtools::install_github("SwissClinicalTrialOrganisation/powergrid",
-                         ref = "v0.1.0", # the current beta
                          build_vignette = TRUE)
 
 ```
+
 
 ## Outline
 In the next section, I start by showing a technical example that should
