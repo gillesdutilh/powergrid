@@ -1,3 +1,5 @@
+# powergrid 0.5.0
+
 # powergrid 0.4.0
 - Omitted all settings of par(), including graphics::layout() (PowerPlot and GridPlot)
 - Argument shades_legend removed as argument to PowerPlot. The related function
