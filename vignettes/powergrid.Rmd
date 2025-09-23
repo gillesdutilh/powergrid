@@ -52,16 +52,6 @@ This vignette covers the following functions of `powergrid`
 - `FindTarget` For a range of parameters, searching along one other parameter
   for a setting yielding a target power (or other value)
 
-# Installing the current version from Github
-To install the current version from github, evaluate the following line
-of R code:
-```{r, eval = FALSE}
-devtools::install_github("SwissClinicalTrialOrganisation/powergrid",
-                         build_vignette = TRUE)
-
-```
-
-
 ## Outline
 In the next section, I start by showing a technical example that should
 illustrate the essence of PowerGrid and FindTarget. Then, in the third section,
