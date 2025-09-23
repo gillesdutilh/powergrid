@@ -1,4 +1,6 @@
 # powergrid 0.5.0
+- Added Richard Charles Allen as contributor and maintainer.
+- Fixed one typo in description.
 
 # powergrid 0.4.0
 - Omitted all settings of par(), including graphics::layout() (PowerPlot and GridPlot)
