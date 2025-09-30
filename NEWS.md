@@ -1,5 +1,5 @@
 # powergrid 0.5.1
-
+Small update, making readme in line with CRAN status package.
 # powergrid 0.5.0
 - Added Richard Charles Allen as contributor and maintainer.
 - Fixed one typo in description.
