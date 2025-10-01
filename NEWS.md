@@ -1,3 +1,5 @@
+# powergrid (development version)
+
 # powergrid 0.5.1
 Small update, making readme in line with CRAN status package.
 # powergrid 0.5.0
