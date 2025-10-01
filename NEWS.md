@@ -1,5 +1,5 @@
 # powergrid 0.5.2
-
+Corrected listing in readme and vignette.
 # powergrid 0.5.1
 Small update, making readme in line with CRAN status package.
 # powergrid 0.5.0
