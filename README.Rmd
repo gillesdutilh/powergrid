@@ -49,6 +49,7 @@ team at DKF basel.
 
 ## Package highlights
 The strengths of the `powergrid` package are:
+
 * any number of input parameters to search along may be included easily
 * any number of output parameters are handled intuitively
 * whether performing simulation-based or closed-form power-analyses, the
