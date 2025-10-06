@@ -265,12 +265,13 @@ GridPlot = function(x,
   ##
   at_x = pretty(xvals[xvals >= xlim[1] & xvals <= xlim[2]])
   at_y = pretty(yvals[yvals >= ylim[1] & yvals <= ylim[2]])
+  browser()
   plot(0,
        xlim = xlim,
        ylim = ylim,
-       xlab = Trans(x_par), ylab = Trans(y_par), type = 'n', axes = FALSE, las = 1)
+       xlab = Trans(x_par), ylab = Trans(y_par), type = 'n', axes = FALSE)
   graphics::axis(1, at = at_x)
-  graphics::axis(2, at = at_y)
+  graphics::axis(2, at = at_y, las = 1)
   graphics::abline(v = at_x,
                    h = at_y,
                    col = grDevices::grey.colors(1, .95, .95))
