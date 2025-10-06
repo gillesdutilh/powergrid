@@ -265,7 +265,6 @@ GridPlot = function(x,
   ##
   at_x = pretty(xvals[xvals >= xlim[1] & xvals <= xlim[2]])
   at_y = pretty(yvals[yvals >= ylim[1] & yvals <= ylim[2]])
-  browser()
   plot(0,
        xlim = xlim,
        ylim = ylim,
