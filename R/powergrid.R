@@ -260,7 +260,7 @@ PowerGrid = function(pars, fun, more_args = NULL, n_iter = NA,
                      progress_bar = FALSE) {
 
   if(progress_bar) {
-    simpleWarning(paste0(
+    warning(paste0(
       "Progress bar is an expreimental feature which requires a surpising amount",
       "of changes")
     )
