@@ -310,7 +310,7 @@ PowerPlot =
   ## if input is a 1-dimensional array, create simple line plot
   if (left_dims == 1){
     plot(as.numeric(names(array_toplot)), array_toplot, type = 'n', axes = FALSE,
-         xlab = names(dimnames(array_toplot)), ylab = 'Power')
+         xlab = names(dimnames(array_toplot)), ylab = 'Power', las = 1)
     graphics::abline(v = as.numeric(names(array_toplot)), col = 'lightgrey')
     graphics::lines(as.numeric(names(array_toplot)), array_toplot, col = col)
     graphics::axis(1, at = as.numeric(names(array_toplot)))
@@ -339,7 +339,7 @@ PowerPlot =
     graphics::image(image_x, image_y, image_z,
                     ylab = Trans(names(margins_toplot)[[1]]),
                     xlab = Trans(names(margins_toplot)[[2]]),
-                    axes = FALSE, col = image_cols, main = title, las = 1,...)
+                    axes = FALSE, col = image_cols, main = title,...)
     ##
     ## grid lines
     graphics::abline(h = margins_toplot[[1]], v = margins_toplot[[2]], col = 'white')
@@ -377,7 +377,7 @@ PowerPlot =
                         levels = target_levels, lwd = power_lwds,
                         col = grDevices::grey.colors(1, .2, .2))
     }
-    graphics::axis(1);graphics::axis(2);graphics::box(bty = 'l')
+    graphics::axis(1);graphics::axis(2, las = 1);graphics::box(bty = 'l')
     ## ============================================
   }
   ## Draw Example Arrow

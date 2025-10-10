@@ -42,25 +42,15 @@ planning recruitment of study participants under various scenarios.
 ## Functions covered
 This vignette covers the following functions of `powergrid`
 
-- `PowerGrid` for evaluating the power across a grid, with and without
+* `PowerGrid` for evaluating the power across a grid, with and without
   iterations
-- `Example` for inspecting the relation between power and sample size in a
+* `Example` for inspecting the relation between power and sample size in a
   specific scenario
-- `Powerplot` Graphical exploration of power under different scenarios
-- `GridPlot` Graphical exploration of power under even more scenarios
-- `AddExample` Add an example to an existing PowerPlot or GridPlot
-- `FindTarget` For a range of parameters, searching along one other parameter
+* `Powerplot` Graphical exploration of power under different scenarios
+* `GridPlot` Graphical exploration of power under even more scenarios
+* `AddExample` Add an example to an existing PowerPlot or GridPlot
+* `FindTarget` For a range of parameters, searching along one other parameter
   for a setting yielding a target power (or other value)
-
-# Installing the current version from Github
-To install the current version from github, evaluate the following line
-of R code:
-```{r, eval = FALSE}
-devtools::install_github("SwissClinicalTrialOrganisation/powergrid",
-                         build_vignette = TRUE)
-
-```
-
 
 ## Outline
 In the next section, I start by showing a technical example that should

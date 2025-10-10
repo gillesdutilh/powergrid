@@ -268,9 +268,9 @@ GridPlot = function(x,
   plot(0,
        xlim = xlim,
        ylim = ylim,
-       xlab = Trans(x_par), ylab = Trans(y_par), type = 'n', axes = FALSE, las = 1)
+       xlab = Trans(x_par), ylab = Trans(y_par), type = 'n', axes = FALSE)
   graphics::axis(1, at = at_x)
-  graphics::axis(2, at = at_y)
+  graphics::axis(2, at = at_y, las = 1)
   graphics::abline(v = at_x,
                    h = at_y,
                    col = grDevices::grey.colors(1, .95, .95))

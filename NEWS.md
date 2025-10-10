@@ -1,3 +1,11 @@
+# powergrid 0.5.2
+Corrected listing in readme and vignette.
+# powergrid 0.5.1
+Small update, making readme in line with CRAN status package.
+# powergrid 0.5.0
+- Added Richard Charles Allen as contributor and maintainer.
+- Fixed one typo in description.
+
 # powergrid 0.4.0
 - Omitted all settings of par(), including graphics::layout() (PowerPlot and GridPlot)
 - Argument shades_legend removed as argument to PowerPlot. The related function

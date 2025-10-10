@@ -1,11 +1,15 @@
 Package: powergrid
 Title: Power Analysis Across a Grid of Assumptions
-Version: 0.4.0
-Authors@R: 
+Version: 0.5.2
+Authors@R: c(
     person(given = "Gilles",
-    family = "Dutilh", email = "info@gillesdutilh.com", role = c("aut", "cre", "cph"),
-           comment = c(ORCID = "0000-0002-6719-2508"))
-Description: Evaluate a function across a grid of parameters. The function may be evaluated once, or many times for simulation. Parallel computing is facilitated. Utilities aim at performing analyses of power and sample size, allowing for easy search of minimum n (or min/max of any other parameter) to achieve a desired a minimal level of power (or maximum of any other objective). Plotting functions are included that present the dependency of n and power in relation to further parameters.
+      family = "Dutilh", email = "info@gillesdutilh.com", role = c("aut", "cre"),
+      comment = c(ORCID = "0000-0002-6719-2508")),
+    person(given = "Richard Charles",
+      family = "Allen", email = "richardcharles.allen@usb.ch", role = c("aut"),
+      comment = c(ORCID = "0000-0001-6012-7888"))
+      )	 
+Description: Evaluate a function across a grid of parameters. The function may be evaluated once, or many times for simulation. Parallel computing is facilitated. Utilities aim at performing analyses of power and sample size, allowing for easy search of minimum n (or min/max of any other parameter) to achieve a desired minimal level of power (or maximum of any other objective). Plotting functions are included that present the dependency of n and power in relation to further assumptions.
 License: GPL-3
 Encoding: UTF-8
 Roxygen: list(markdown = TRUE)
