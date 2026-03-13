@@ -260,6 +260,12 @@ PowerGrid = function(pars, fun, more_args = NULL, n_iter = NA,
                      progress_bar = FALSE) {
 
   if(progress_bar) {
+
+    if (!requireNamespace("progressr", quietly = TRUE)) {
+      stop("Setting argument `progress_bar' to TRUE requires installation of progressr", call. = FALSE)
+    }
+    progressr::handlers(global = TRUE)
+
     warning("Progress bar is an experimental feature.")
   }
 
@@ -303,31 +309,23 @@ PowerGrid = function(pars, fun, more_args = NULL, n_iter = NA,
   if (!is.na(n_iter) && !parallel) {
 
     iter <- seq_len(n_iter)
+    if(progress_bar) p <- progressr::progressor(steps = n_iter)
 
-    if(!progress_bar) {
-      e1d42fl5z7b6 =
-        drop(sapply(
-          X = iter, function(i) {
-            out <- sapply( # reshape mapply result
-              .mapply(fun, pars_grid, MoreArgs = more_args), unlist)
-            if(i %% 50 == 0) cat(i, "\n")
-            return(out)
-          })
-          )
-    } else {
-      if (!requireNamespace("progressr", quietly = TRUE)) {
-        stop("Setting argument `progress_bar' to TRUE requires installation of progressr", call. = FALSE)
-      }
-      p <- progressor(steps = n_iter)
-      e1d42fl5z7b6 =
-        drop(sapply(
-          X = iter, function(i) {
-            out <- sapply( # reshape mapply result
-              .mapply(fun, pars_grid, MoreArgs = more_args), unlist)
+    e1d42fl5z7b6 =
+      drop(sapply(
+        X = iter, function(i) {
+          out <- sapply( # reshape mapply result
+            .mapply(fun, pars_grid, MoreArgs = more_args), unlist)
+
+          if(progress_bar) {
             p(sprintf("x=%g", i))
-            return(out)
-          }))
-    }
+          } else if(i %% 50 == 0) {
+            cat("Iteration ", i, " complete\n")
+          }
+
+          return(out)
+        })
+      )
   }
   ## =================================
   ## Route A3) Parallel iteration using future_replicate
@@ -339,32 +337,22 @@ PowerGrid = function(pars, fun, more_args = NULL, n_iter = NA,
     future::plan("future::multisession", workers = n_cores)
 
     iter <- seq_len(n_iter)
+    if(progress_bar) p <- progressr::progressor(steps = n_iter)
 
-    if (!progress_bar) {
-      e1d42fl5z7b6 = drop(future.apply::future_sapply(
-        X = iter, function(i) {
-          out <- sapply( # reshape mapply result
+    e1d42fl5z7b6 = drop(future.apply::future_sapply(
+      X = iter, function(i) {
+        out <- sapply( # reshape mapply result
           .mapply(fun, pars_grid, MoreArgs = more_args), unlist)
-          if(i %% 50 == 0) cat(i, "\n")
-          return(out)
-        }, future.seed = TRUE) # Default future chunk size of Null means each chunk is 1 future
-      )
-    } else {
-      if (!requireNamespace("progressr", quietly = TRUE)) {
-        stop("Setting argument `progress_bar' to TRUE requires installation of progressr", call. = FALSE)
-      }
-      p <- progressor(steps = n_iter)
-        e1d42fl5z7b6 <- drop(future.apply::future_sapply(
-          X = iter, FUN = function(i) {
-            out <- sapply(
-              .mapply(fun, pars_grid, MoreArgs = more_args),
-              function(x)unlist(x)
-            )
-            p(sprintf("x=%g", i))
-            return(out)
-          }, future.seed = TRUE)
-        )
-    }
+
+        if(progress_bar) {
+          p(sprintf("x=%g", i))
+        } else if(i %% 50 == 0) {
+          cat("Iteration ", i, " complete\n")
+        }
+
+        return(out)
+      }, future.seed = TRUE) # Default future chunk size of Null means each chunk is 1 future
+    )
   }
   ## =================================
   ## A1-A3 briefly converge and then diverge into B1-B2 depending on whether
