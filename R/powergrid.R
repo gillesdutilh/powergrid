@@ -259,12 +259,12 @@ PowerGrid = function(pars, fun, more_args = NULL, n_iter = NA,
                      n_cores = future::availableCores()-1,
                      progress_bar = FALSE) {
 
-  if(progress_bar) {
-    warning(paste0(
-      "Progress bar is an expreimental feature which requires a surpising amount",
-      "of changes")
-    )
-  }
+  # if(progress_bar) {
+  #   warning(paste0(
+  #     "Progress bar is an experimental feature which requires a surpising amount ",
+  #     "of changes")
+  #   )
+  # }
 
   ##
   ## ============================================
@@ -304,11 +304,16 @@ PowerGrid = function(pars, fun, more_args = NULL, n_iter = NA,
   ## =================================
   ## Route A2) Series iteration ('n_iter' supplied)
   if (!is.na(n_iter) && !parallel) {
+    p <- progressor(steps = n_iter)
     e1d42fl5z7b6 =
       drop(replicate(
-        n_iter, sapply( # reshape mapply result
+        n_iter, {
+          out <- sapply( # reshape mapply result
           .mapply(fun, pars_grid, MoreArgs = more_args),
-          function(x)unlist(x))))
+          function(x)unlist(x))
+          p()
+          return(out)
+          }))
   }
   ## =================================
   ## Route A3) Parallel iteration using future_replicate
@@ -329,17 +334,19 @@ PowerGrid = function(pars, fun, more_args = NULL, n_iter = NA,
         stop("Setting argument `progress_bar' to TRUE requires installation of progressr", call. = FALSE)
       }
       iter <- seq_len(n_iter)
-      p <- progressor(along = iter)
-      with_progress(e1d42fl5z7b6 <- drop(future.apply::future_sapply(
-        X= iter, FUN = function(i) {
-          p(sprintf("x=%g", i))
-          sapply(
-            .mapply(fun, pars_grid, MoreArgs = more_args),
-            function(x)unlist(x)
-          )
-        })
-      )
-      )
+      with_progress({
+        p <- progressor(steps = n_iter)
+        e1d42fl5z7b6 <- drop(future.apply::future_sapply(
+          X= iter, FUN = function(i) {
+            out <- sapply(
+              .mapply(fun, pars_grid, MoreArgs = more_args),
+              function(x)unlist(x)
+            )
+            p(sprintf("x=%g", i))
+            return(out)
+          }, future.seed = TRUE)
+        )
+      })
     }
   }
   ## =================================
