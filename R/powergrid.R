@@ -66,7 +66,7 @@
 ##' .Random.seed at the moment of updating is appended to the random.seed
 ##' attribute. So, to reconstruct a refined power_array, run the original call
 ##' to `PowerGrid` after \code{.Random.seed = attr(<your_power_array>, which =
-##' 'random.seed')[[1]]}, and the the call to Refine after \code{.Random.seed =
+##' 'random.seed')[[1]]}, and the the call to Refine after \code{.Random_seed =
 ##' attr(<your_power_array>, which = 'random.seed')[[2]]}, etc.
 ##'
 ##' @title Evaluate function (iteratively) at a grid of input arguments
@@ -280,7 +280,7 @@ PowerGrid = function(pars, fun, more_args = NULL, n_iter = NA,
   ##
   ## if in the current session there has been no random generation done, there
   ## is no .Random.seed. Therefore, create one random number (always)
-  (stats::runif(1))
+  if(!exists(".Random.seed")) stats::runif(1)
   random_seed = .Random.seed
   ## ============================================
   ## fill grid
