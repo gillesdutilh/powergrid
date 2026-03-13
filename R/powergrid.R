@@ -324,8 +324,9 @@ PowerGrid = function(pars, fun, more_args = NULL, n_iter = NA,
           }
 
           return(out)
-        })
-      )
+        }, simplify=FALSE)
+      ) |>
+      simplify2array()
   }
   ## =================================
   ## Route A3) Parallel iteration using future_replicate
@@ -351,8 +352,9 @@ PowerGrid = function(pars, fun, more_args = NULL, n_iter = NA,
         }
 
         return(out)
-      }, future.seed = TRUE) # Default future chunk size of Null means each chunk is 1 future
-    )
+      }, future.seed = TRUE, # Default future chunk size of Null means each chunk is 1 future
+    simplify=FALSE)
+    ) |> simplify2array()
   }
   ## =================================
   ## A1-A3 briefly converge and then diverge into B1-B2 depending on whether
@@ -378,8 +380,9 @@ PowerGrid = function(pars, fun, more_args = NULL, n_iter = NA,
     ## first take care that pars names and funout names are not confused
     if(any(dimnames(e1d42fl5z7b6)[[1]] %in% names(pars))){
       dimnames(e1d42fl5z7b6)[[1]] =
-        paste0('funout_', dimnames(e1d42fl5z7b6)[[1]])}
-    ## if, else to control the wrangling based on if multiple iterations present
+        paste0('funout_', dimnames(e1d42fl5z7b6)[[1]])
+      }
+    ## if, else to control the wrangling based on whether multiple iterations present
     ## nitt is a dummy version of n_iteration which is 1 if there is no interations.
     if(!is.na(n_iter)) {
       var_order =  c(2, 1, 3)
