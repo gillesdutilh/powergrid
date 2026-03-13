@@ -16,7 +16,7 @@
 ##' \code{pars}. For this to work, the element names of \code{pars} must match
 ##' the argument names of \code{fun}.
 ##'
-##' 
+##'
 ##' ## Further arguments to \code{fun}
 ##'
 ##' If input parameters to \code{fun} are not
@@ -33,7 +33,7 @@
 ##' return vector (if given).
 ##'
 ##' ## Non-numeric parameters
-##' 
+##'
 ##' You may want to study the effect of non-numeric parameters. This option is
 ##' not supported for the argument `pars`, since the essential powergrid
 ##' functions \code{link{Example}}, \code{link{PowerPlot}}, and
@@ -42,7 +42,7 @@
 ##' as described above.
 ##'
 ##' ## Evaluating a function over iterations
-##' 
+##'
 ##' If \code{n_iter} is not NA (the default) but an integer, function \code{fun}
 ##' is evaluated n_iter times. This will add an additional dimension 'iter' to
 ##' the resulting array of class `power_array`. If your simulation is heavy, you
@@ -66,7 +66,7 @@
 ##' .Random.seed at the moment of updating is appended to the random.seed
 ##' attribute. So, to reconstruct a refined power_array, run the original call
 ##' to `PowerGrid` after \code{.Random.seed = attr(<your_power_array>, which =
-##' 'random.seed')[[1]]}, and the the call to Refine after \code{.Random.seed =
+##' 'random.seed')[[1]]}, and the the call to Refine after \code{.Random_seed =
 ##' attr(<your_power_array>, which = 'random.seed')[[2]]}, etc.
 ##'
 ##' @title Evaluate function (iteratively) at a grid of input arguments
@@ -108,7 +108,7 @@
 ##' ## most basic use case, calculating power when
 ##' ## power function is available:
 ##' ## =======================================================
-##' 
+##'
 ##' ## Define grid of assumptions to study:
 ##' sse_pars = list(
 ##'   n = seq(from = 10, to = 60, by = 2),         # sample size
@@ -122,7 +122,7 @@
 ##'   return(ptt$power)
 ##' }
 ##'
-##' ## Evaluate at each combination of assumptions: 
+##' ## Evaluate at each combination of assumptions:
 ##' powarr = PowerGrid(pars = sse_pars, fun = PowFun, n_iter = NA)
 ##' summary(powarr)
 ##'
@@ -143,13 +143,13 @@
 ##'           )
 ##' ## Slice out a sub-array (making sure attributes stay intact for further use in
 ##' ## powergrid):
-##' 
+##'
 ##' only_n20_delta1.1 =
 ##'   ArraySlicer(powarr, slicer = list(
 ##'                         n = 20,
 ##'                         delta = 1.1))
 ##' summary(only_n20_delta1.1)
-##' 
+##'
 ##' ## Indexing may also be used, but note that the name of the remaining dimension
 ##' ## is lost. Therefore, use ArraySlicer when you want to keep working with the
 ##' ## object in powergrid.
@@ -166,7 +166,7 @@
 ##'   n = seq(from = 10, to = 60, by = 5),
 ##'   delta = seq(from = 0.5, to = 1.5, by = 0.2),
 ##'   sd = seq(.5, 1.5, .2))
-##' 
+##'
 ##' ## Define a function that results in TRUE or FALSE for a successful or
 ##' ## non-successful (5% significant) simulated trial:
 ##' PowFun <- function(n, delta, sd){
@@ -174,7 +174,7 @@
 ##'   x2 = rnorm(n = n/2, mean = delta, sd = sd)
 ##'   t.test(x1, x2)$p.value < .05
 ##' }
-##' 
+##'
 ##' ## In call to PowerGrid, setting n_iter prompts PowerGrid to evaluate
 ##' ## the function iteratively at each combination of assumptions:
 ##' n_iter = 20
@@ -188,14 +188,14 @@
 ##' ## =================================
 ##' ## keeping individual iterations
 ##' ## =================================
-##' 
+##'
 ##' ## To keep individual iterations, set summarize to FALSE:
 ##'
 ##' powarr_no_summary = PowerGrid(pars = sse_pars, fun = PowFun,
 ##'                                     n_iter = n_iter , summarize = FALSE)
 ##' dimnames(powarr_no_summary) # additional dimension "iter"
 ##' summary(powarr_no_summary)
-##' 
+##'
 ##' ## To summarize this object containing iterations, use the SummarizeIterations
 ##' ## function. Among other things, this assures that attributes relevant for
 ##' ## further use in powergrid's functionality are kept intact.
@@ -227,16 +227,16 @@
 ##'   n = seq(from = 10, to = 60, by = 2),
 ##'   delta = seq(from = 0.5, to = 1.5, by = 0.2),
 ##'   sd = seq(.5, 1.5, .2))
-##' 
+##'
 ##' ## A function with two outputs (the power at two significance levels)
 ##' TwoValuesFun <- function(n, delta, sd){
 ##'   p5 = power.t.test(n = n, delta = delta, sd = sd, sig.level = .05)$power
 ##'   p1 = power.t.test(n = n, delta = delta, sd = sd, sig.level = .01)$power
 ##'   return(c('p5' = p5, 'p1' = p1))
 ##' }
-##' 
+##'
 ##' powarr_two_returns = PowerGrid(sse_pars, TwoValuesFun)
-##' 
+##'
 ##' ## multiple outputs result in an additional dimension:
 ##' dimnames(powarr_two_returns)
 ##' summary(powarr_two_returns)
@@ -256,7 +256,19 @@
 PowerGrid = function(pars, fun, more_args = NULL, n_iter = NA,
                      summarize = TRUE, summary_function = mean,
                      parallel = FALSE,
-                     n_cores = future::availableCores()-1) {
+                     n_cores = future::availableCores()-1,
+                     progress_bar = FALSE) {
+
+  if(progress_bar) {
+
+    if (!requireNamespace("progressr", quietly = TRUE)) {
+      stop("Setting argument `progress_bar' to TRUE requires installation of progressr", call. = FALSE)
+    }
+    progressr::handlers(global = TRUE)
+
+    warning("Progress bar is an experimental feature.")
+  }
+
   ##
   ## ============================================
   ## Process arguments
@@ -274,7 +286,7 @@ PowerGrid = function(pars, fun, more_args = NULL, n_iter = NA,
   ##
   ## if in the current session there has been no random generation done, there
   ## is no .Random.seed. Therefore, create one random number (always)
-  (stats::runif(1))
+  if(!exists(".Random.seed")) stats::runif(1)
   random_seed = .Random.seed
   ## ============================================
   ## fill grid
@@ -295,11 +307,26 @@ PowerGrid = function(pars, fun, more_args = NULL, n_iter = NA,
   ## =================================
   ## Route A2) Series iteration ('n_iter' supplied)
   if (!is.na(n_iter) && !parallel) {
+
+    iter <- seq_len(n_iter)
+    if(progress_bar) p <- progressr::progressor(steps = n_iter)
+
     e1d42fl5z7b6 =
-      drop(replicate(
-        n_iter, sapply( # reshape mapply result
-          .mapply(fun, pars_grid, MoreArgs = more_args),
-          function(x)unlist(x))))
+      drop(sapply(
+        X = iter, function(i) {
+          out <- sapply( # reshape mapply result
+            .mapply(fun, pars_grid, MoreArgs = more_args), unlist)
+
+          if(progress_bar) {
+            p(sprintf("x=%g", i))
+          } else if(i %% 50 == 0) {
+            cat("Iteration ", i, " complete\n")
+          }
+
+          return(out)
+        }, simplify=FALSE)
+      ) |>
+      simplify2array()
   }
   ## =================================
   ## Route A3) Parallel iteration using future_replicate
@@ -309,12 +336,25 @@ PowerGrid = function(pars, fun, more_args = NULL, n_iter = NA,
     ## plan(strategy = future_args$plan$strategy, # 'multisession'
     ##      workers = future_args$plan$workers) # future::availableCores() - 1)
     future::plan("future::multisession", workers = n_cores)
-    e1d42fl5z7b6 =
-      drop(future.apply::future_replicate(
-        n_iter, sapply( # reshape mapply result
-          .mapply(fun, pars_grid, MoreArgs = more_args),
-          function(x)unlist(x))
-      ))
+
+    iter <- seq_len(n_iter)
+    if(progress_bar) p <- progressr::progressor(steps = n_iter)
+
+    e1d42fl5z7b6 = drop(future.apply::future_sapply(
+      X = iter, function(i) {
+        out <- sapply( # reshape mapply result
+          .mapply(fun, pars_grid, MoreArgs = more_args), unlist)
+
+        if(progress_bar) {
+          p(sprintf("x=%g", i))
+        } else if(i %% 50 == 0) {
+          cat("Iteration ", i, " complete\n")
+        }
+
+        return(out)
+      }, future.seed = TRUE, # Default future chunk size of Null means each chunk is 1 future
+    simplify=FALSE)
+    ) |> simplify2array()
   }
   ## =================================
   ## A1-A3 briefly converge and then diverge into B1-B2 depending on whether
@@ -340,8 +380,9 @@ PowerGrid = function(pars, fun, more_args = NULL, n_iter = NA,
     ## first take care that pars names and funout names are not confused
     if(any(dimnames(e1d42fl5z7b6)[[1]] %in% names(pars))){
       dimnames(e1d42fl5z7b6)[[1]] =
-        paste0('funout_', dimnames(e1d42fl5z7b6)[[1]])}
-    ## if, else to control the wrangling based on if multiple iterations present
+        paste0('funout_', dimnames(e1d42fl5z7b6)[[1]])
+      }
+    ## if, else to control the wrangling based on whether multiple iterations present
     ## nitt is a dummy version of n_iteration which is 1 if there is no interations.
     if(!is.na(n_iter)) {
       var_order =  c(2, 1, 3)
@@ -381,7 +422,7 @@ PowerGrid = function(pars, fun, more_args = NULL, n_iter = NA,
   attr(out_array, which = 'summarized') = FALSE
   attr(out_array, which = 'n_iter') = n_iter
   attr(out_array, which = 'random_seed') = list("original" = random_seed)
-  
+
   ## If the array has iterations, and needs summarising, summarize it
   if((!is.na(n_iter) && summarize)) {
     out_array = SummarizeIterations(out_array, summary_function = summary_function)
@@ -433,7 +474,7 @@ PowerGrid = function(pars, fun, more_args = NULL, n_iter = NA,
 ##'   return(ptt$power)
 ##' }
 ##'
-##' ## Evaluate at each combination of assumptions: 
+##' ## Evaluate at each combination of assumptions:
 ##' powarr = PowerGrid(pars = sse_pars, fun = PowFun, n_iter = NA)
 ##' powarr[2, 1, ] # gives the same as
 ##' powarr['30', '0.5', ]
@@ -514,7 +555,7 @@ PowerGrid = function(pars, fun, more_args = NULL, n_iter = NA,
 ##'   return(ptt$power)
 ##' }
 ##'
-##' ## Evaluate at each combination of assumptions: 
+##' ## Evaluate at each combination of assumptions:
 ##' powarr = PowerGrid(pars = sse_pars, fun = PowFun, n_iter = NA)
 ##' print(powarr)
 ##' @export
@@ -595,7 +636,7 @@ print.power_array = function(x, ...){
 ##'   return(ptt$power)
 ##' }
 ##'
-##' ## Evaluate at each combination of assumptions: 
+##' ## Evaluate at each combination of assumptions:
 ##' powarr = PowerGrid(pars = sse_pars, fun = PowFun, n_iter = NA)
 ##' summary(powarr)
 ##' @export
@@ -675,7 +716,7 @@ summary.power_array = function(object, ...){
 ##'   n = seq(from = 10, to = 60, by = 5),
 ##'   delta = seq(from = 0.5, to = 1.5, by = 0.2),
 ##'   sd = seq(.5, 1.5, .2))
-##' 
+##'
 ##' ## Define a function that results in TRUE or FALSE for a successful or
 ##' ## non-successful (5% significant) simulated trial:
 ##' PowFun <- function(n, delta, sd){
@@ -683,7 +724,7 @@ summary.power_array = function(object, ...){
 ##'   x2 = rnorm(n = n/2, mean = delta, sd = sd)
 ##'   t.test(x1, x2)$p.value < .05
 ##' }
-##' 
+##'
 ##' n_iter = 20
 ##' powarr = PowerGrid(pars = sse_pars, fun = PowFun,
 ##'                         n_iter = n_iter, summarize = FALSE)
@@ -759,7 +800,7 @@ SummarizeIterations = function(x, summary_function, ...){
 ##'   return(ptt$power)
 ##' }
 ##'
-##' ## Evaluate at each combination of assumptions: 
+##' ## Evaluate at each combination of assumptions:
 ##' powarr = PowerGrid(pars = sse_pars, fun = PowFun, n_iter = NA)
 ##' print(PowerDF(powarr))
 ##' @export
