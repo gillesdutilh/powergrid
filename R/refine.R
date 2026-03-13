@@ -161,6 +161,7 @@ Refine = function(old, n_iter_add = 1, pars = NULL, ...){
     new[, names(new) != 'Freq'], unique)),
     new, all.x = TRUE)
   ## change back grid values to numeric:
+  #' allenr: with multi-function out this does not take into account fun_out
   old[, seq_along(length(pars))] = sapply(old[, seq_along(length(pars))],
                                  function(x)as.numeric(as.character(x)))
   ## sort (in a rather complicated way, since we do not know the number
