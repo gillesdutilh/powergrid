@@ -12,7 +12,7 @@ test_that(
   {expect_equal(result1, 6)}
 )
 
-#' Minimum target below 0.5 => 0.09
+## Minimum target below 0.5 => 0.09
 result2 <- FindTarget(x = slice, target_value = 0.5,
                       target_at_least = FALSE)
 test_that(
@@ -20,7 +20,7 @@ test_that(
   {expect_equal(result2, 1)}
 )
 
-#' Maximal target above 0.5 => 0.89
+## Maximal target above 0.5 => 0.89
 result3 <- FindTarget(x = slice, target_value=0.5,
                       find_lowest = FALSE)
 test_that(
@@ -28,7 +28,7 @@ test_that(
   {expect_equal(result3, 9)}
 )
 
-#' Maximal target below 0.5 => 0.49
+## Maximal target below 0.5 => 0.49
 result4 <- FindTarget(x = slice, target_value = 0.5,
                       target_at_least = FALSE, find_lowest = FALSE)
 test_that(
@@ -37,8 +37,8 @@ test_that(
 )
 ## ===============================================================
 
-#' The values of target_at_least and find_lowest are ignored if method
-#' equals "lm", thus tests are failed.
+## The values of target_at_least and find_lowest are ignored if method
+## equals "lm", thus tests are failed.
 
 set.seed(123)
 slice <- setNames(seq(0.09,0.89, 0.1), nm = seq(0.1,0.9, 0.1)*10)
@@ -65,8 +65,8 @@ test_that(
 )
 ## ===============================================================
 
-#' Test for the artificial case where names are a string that
-#' and only some values can convert to numeric
+## Test for the artificial case where names are a string that
+## and only some values can convert to numeric
 
 # badname_slice <- setNames(seq(0.09,0.89, 0.1), nm=LETTERS[1:9])
 # names(badname_slice)[6] <- "6"

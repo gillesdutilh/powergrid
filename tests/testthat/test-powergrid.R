@@ -1,7 +1,7 @@
 rm(list=ls())
 
 ## =============================================================================
-#' Similar to the non-monotonic test in FindTarget()
+## Similar to the non-monotonic test in FindTarget()
 
 fwd_closed_pars <-
   list(n = seq(20,60, 10),
@@ -18,9 +18,9 @@ fwd_power_array <- PowerGrid(pars = fwd_closed_pars, fun = ClosedFun,
 rev_power_array <- PowerGrid(pars = rev_closed_pars, fun = ClosedFun,
                              summarize = FALSE)
 
-#' The main thing is that contents are the same. The pars attribute is different
-#' I would say it is preference whether it should match the input or the dimnames
-#' but it should be intentional. Output with example also tested.
+## The main thing is that contents are the same. The pars attribute is different
+## I would say it is preference whether it should match the input or the dimnames
+## but it should be intentional. Output with example also tested.
 test_that(
   "Reverse parameter specification leads to same array contents (attr not tested)",
   {expect_equal(fwd_power_array, rev_power_array, ignore_attr = TRUE)}
@@ -28,9 +28,9 @@ test_that(
 
 
 ## =============================================================================
-#' Test PowerGrid() with multiple outputs
+## Test PowerGrid() with multiple outputs
 
-#' Arbitary function that only sometimes returns both values.
+## Arbitary function that only sometimes returns both values.
 ClosedFunBadReturn =
   function(n, delta, sd){
     t2side = power.t.test(n = n, delta = delta, sd = sd, alternative = "two")$power
@@ -64,7 +64,7 @@ test_that("fun_out names returned correctly",
 )
 
 ## =============================================================================
-#' Test reproducibility of powergrid
+## Test reproducibility of powergrid
 
 rnd_pars <- list(
   mean = seq(from = 0, to = 1, by = 0.2),
@@ -94,8 +94,8 @@ test_that("random_seed is correctly stored and accessed",
                             fixed_seed_list)
           })
 
-#' TODO: This test passes interactively, but fails with automated testing
-#' It seems to be due to the way testthat handles Random number generation
+## TODO: This test passes interactively, but fails with automated testing
+## It seems to be due to the way testthat handles Random number generation
 # test_that("Output is the same with the same .Random.seed",
 #           {expect_identical(rnd_grid1,
 #                             rnd_grid2)
