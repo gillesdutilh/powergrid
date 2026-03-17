@@ -312,7 +312,7 @@ PowerGrid = function(pars, fun, more_args = NULL, n_iter = NA,
     if(progress_bar) p <- progressr::progressor(steps = n_iter)
 
     e1d42fl5z7b6 =
-      drop(sapply(
+      simplify2array(drop(sapply(
         X = iter, function(i) {
           out <- sapply( # reshape mapply result
             .mapply(fun, pars_grid, MoreArgs = more_args), unlist)
@@ -325,8 +325,7 @@ PowerGrid = function(pars, fun, more_args = NULL, n_iter = NA,
 
           return(out)
         }, simplify=FALSE)
-      ) |>
-      simplify2array()
+      ))
   }
   ## =================================
   ## Route A3) Parallel iteration using future_replicate
@@ -340,7 +339,7 @@ PowerGrid = function(pars, fun, more_args = NULL, n_iter = NA,
     iter <- seq_len(n_iter)
     if(progress_bar) p <- progressr::progressor(steps = n_iter)
 
-    e1d42fl5z7b6 = drop(future.apply::future_sapply(
+    e1d42fl5z7b6 = simplify2array(drop(future.apply::future_sapply(
       X = iter, function(i) {
         out <- sapply( # reshape mapply result
           .mapply(fun, pars_grid, MoreArgs = more_args), unlist)
@@ -354,7 +353,7 @@ PowerGrid = function(pars, fun, more_args = NULL, n_iter = NA,
         return(out)
       }, future.seed = TRUE, # Default future chunk size of Null means each chunk is 1 future
     simplify=FALSE)
-    ) |> simplify2array()
+    ))
   }
   ## =================================
   ## A1-A3 briefly converge and then diverge into B1-B2 depending on whether
@@ -401,11 +400,9 @@ PowerGrid = function(pars, fun, more_args = NULL, n_iter = NA,
     ## Sort such that the first dimensions are the pars
     L = names(dimnames(out_array)) %in% c('fun_out', 'iter')
     out_array = aperm(out_array, c(which(!L), which(L)))
-    ##'
-    ##'
   }
 
-  ## allenr: Ensure the iteration dimension is correctly labelled (regardless of
+  ## Ensure the iteration dimension is correctly labelled (regardless of
   ## which route it took)
   if(!is.na(n_iter)) {
     names(dimnames(out_array))[length(dimnames(out_array))] = "iter"
