@@ -46,6 +46,9 @@ TRUE or when \code{is.na(n_iter)}.}
 applied. If TRUE, future::future_replicate is used internally.}
 
 \item{n_cores}{Passed on to future_replicate}
+
+\item{progress_bar}{Logical argument to request output of iterations using
+a progress bar. This requires the progressr package.}
 }
 \value{
 An array of class "power_array", with attributes containing

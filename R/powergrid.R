@@ -92,6 +92,8 @@
 ##' @param parallel Logical indicating whether parallel computing should be
 ##'   applied. If TRUE, future::future_replicate is used internally.
 ##' @param n_cores Passed on to future_replicate
+##' @param progress_bar Logical argument to request output of iterations using
+##'   a progress bar. This requires the progressr package.
 ##' @return An array of class "power_array", with attributes containing
 ##'   informations about input arguments, summary status, the presence of
 ##'   multiple function outputs and more. This object class is handled sensibly
