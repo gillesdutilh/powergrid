@@ -12,7 +12,8 @@ PowerGrid(
   summarize = TRUE,
   summary_function = mean,
   parallel = FALSE,
-  n_cores = future::availableCores() - 1
+  n_cores = future::availableCores() - 1,
+  progress_bar = FALSE
 )
 }
 \arguments{
@@ -120,7 +121,7 @@ which = 'random.seed')[[1]]}. Note that if you Refine() your power_array, the
 .Random.seed at the moment of updating is appended to the random.seed
 attribute. So, to reconstruct a refined power_array, run the original call
 to \code{PowerGrid} after \code{.Random.seed = attr(<your_power_array>, which =
-'random.seed')[[1]]}, and the the call to Refine after \code{.Random.seed =
+'random.seed')[[1]]}, and the the call to Refine after \code{.Random_seed =
 attr(<your_power_array>, which = 'random.seed')[[2]]}, etc.
 }
 }
@@ -143,7 +144,7 @@ PowFun <- function(n, delta, sd){
   return(ptt$power)
 }
 
-## Evaluate at each combination of assumptions: 
+## Evaluate at each combination of assumptions:
 powarr = PowerGrid(pars = sse_pars, fun = PowFun, n_iter = NA)
 summary(powarr)
 
