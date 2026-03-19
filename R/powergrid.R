@@ -267,8 +267,7 @@ PowerGrid = function(pars, fun, more_args = NULL, n_iter = NA,
       stop("Setting argument `progress_bar' to TRUE requires installation of progressr", call. = FALSE)
     }
     progressr::handlers(global = TRUE)
-
-    warning("Progress bar is an experimental feature.")
+    progressr::handlers(progressr::handler_progress(clear = FALSE))
   }
 
   ##
@@ -320,11 +319,8 @@ PowerGrid = function(pars, fun, more_args = NULL, n_iter = NA,
             .mapply(fun, pars_grid, MoreArgs = more_args), unlist)
 
           if(progress_bar) {
-            p(sprintf("x=%g", i))
-          } else if(i %% 50 == 0) {
-            cat("Iteration ", i, " complete\n")
+            p()
           }
-
           return(out)
         }, simplify=FALSE)
       ))
@@ -336,25 +332,27 @@ PowerGrid = function(pars, fun, more_args = NULL, n_iter = NA,
       stop("Setting argument `parallel' to TRUE requires installation of future.apply", call. = FALSE)}
     ## plan(strategy = future_args$plan$strategy, # 'multisession'
     ##      workers = future_args$plan$workers) # future::availableCores() - 1)
-    future::plan("future::multisession", workers = n_cores)
+    future::plan("future::multisession", workers = n_cores,
+                 earlySignal = TRUE, split=TRUE)
 
+    ## Convert n_iter to a vector of iterations to iterate over
     iter <- seq_len(n_iter)
+
+    ## If progress requested initiate a progressbar
     if(progress_bar) p <- progressr::progressor(steps = n_iter)
 
+    # Three level sapply(iter, sapply(mapply( PowFun, pars)))
     e1d42fl5z7b6 = simplify2array(drop(future.apply::future_sapply(
       X = iter, function(i) {
         out <- sapply( # reshape mapply result
           .mapply(fun, pars_grid, MoreArgs = more_args), unlist)
 
         if(progress_bar) {
-          p(sprintf("x=%g", i))
-        } else if(i %% 50 == 0) {
-          cat("Iteration ", i, " complete\n")
+          p()
         }
-
         return(out)
-      }, future.seed = TRUE, # Default future chunk size of Null means each chunk is 1 future
-    simplify=FALSE)
+      }, future.seed = TRUE,
+      simplify=FALSE)
     ))
   }
   ## =================================
