@@ -292,16 +292,29 @@ PowerGrid = function(pars, fun, more_args = NULL, n_iter = NA,
   ## ============================================
   ## fill grid
   pars_grid = expand.grid(pars)
+
+  ## Check length of the returned output (per parameter set & iteration)
+  n_funouts = length(.mapply(fun, pars_grid[1, ], MoreArgs = more_args)[[1]])
+
+  ## Based on n_funouts make paradigms, the structure expected to be returned
+  if(n_funouts >1) {
+    funout_paradigm <- numeric(n_funouts)
+    iter_paradigm <- matrix(numeric(1L), nrow = n_funouts, ncol = nrow(pars_grid))
+  } else {
+    funout_paradigm <- numeric(n_funouts)
+    iter_paradigm <- numeric(nrow(pars_grid))
+  }
+
   ## The next block of code goes through 3 routes (A1-A3) depending on whether iterations
   ## are needed, and whether parallel computation is requested.
   ## =================================
   ## Route A1) No iteration ('n_iter' not supplied)
   if(is.na(n_iter)) {
-    e1d42fl5z7b6 = sapply( # the long name is to make it very unlikely
+    e1d42fl5z7b6 = vapply( # the long name is to make it very unlikely
       # to get the same name in the grid, which
       # would break the xtab below.
-      .mapply(fun, pars_grid, MoreArgs = more_args), function(x)x,
-      simplify = "array")
+      .mapply(fun, pars_grid, MoreArgs = more_args), I,
+      FUN.VALUE = funout_paradigm)
     ## out = cbind(pars_grid, e1d42fl5z7b6)
     ## result is a n_result_vars by nrow(pars_grid) matrix
   }
@@ -313,17 +326,18 @@ PowerGrid = function(pars, fun, more_args = NULL, n_iter = NA,
     if(progress_bar) p <- progressr::progressor(steps = n_iter)
 
     e1d42fl5z7b6 =
-      simplify2array(drop(sapply(
+      drop(vapply(
         X = iter, function(i) {
-          out <- sapply( # reshape mapply result
-            .mapply(fun, pars_grid, MoreArgs = more_args), unlist)
+          out <- vapply( # reshape mapply result
+            .mapply(fun, pars_grid, MoreArgs = more_args), unlist,
+            FUN.VALUE = funout_paradigm)
 
           if(progress_bar) {
             p()
           }
           return(out)
-        }, simplify=FALSE)
-      ))
+        }, FUN.VALUE = iter_paradigm)
+      )
   }
   ## =================================
   ## Route A3) Parallel iteration using future_replicate
@@ -342,25 +356,23 @@ PowerGrid = function(pars, fun, more_args = NULL, n_iter = NA,
     if(progress_bar) p <- progressr::progressor(steps = n_iter)
 
     # Three level sapply(iter, sapply(mapply( PowFun, pars)))
-    e1d42fl5z7b6 = simplify2array(drop(future.apply::future_sapply(
+    e1d42fl5z7b6 = drop(future.apply::future_vapply(
       X = iter, function(i) {
-        out <- sapply( # reshape mapply result
-          .mapply(fun, pars_grid, MoreArgs = more_args), unlist)
+        out <- vapply( # reshape mapply result
+          .mapply(fun, pars_grid, MoreArgs = more_args), unlist,
+          FUN.VALUE = funout_paradigm)
 
         if(progress_bar) {
           p()
         }
         return(out)
       }, future.seed = TRUE,
-      simplify=FALSE)
-    ))
+      FUN.VALUE = iter_paradigm)
+    )
   }
   ## =================================
   ## A1-A3 briefly converge and then diverge into B1-B2 depending on whether
   ## multiple outputs are returned.
-  ## Check length of the returned output (per parameter set & iteration)
-  n_funouts = length(.mapply(fun, pars_grid[1, ], MoreArgs = more_args)[[1]])
-  ##
 
   ## Route B1) One variable
   if (n_funouts == 1) {
