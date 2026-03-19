@@ -38,11 +38,9 @@ that minimizes a parameter (typically: minimal required n) to achieve the
 \item{method}{Character string, indicating how the location of the example
 is found, passed on internally to \code{FindTarget}. Either "step": walking in
 steps along the parameter of interest or "lm": Interpolating assuming a
-linear relation between the parameter of interest and (qnorm(x) + qnorm(1
-\itemize{
-\item 0.05)) ^ 2. This method "lm" is inspired on the implementation in the
-sse package by Thomas Fabbro.
-}}
+linear relation between the parameter of interest and
+(qnorm(x) + qnorm(1 - 0.05)) ^ 2. This method "lm" is inspired on the
+implementation in the sse package by Thomas Fabbro.}
 
 \item{summary_function}{When x' attribute \code{summarized} is FALSE, x is
 summarized across iterations using this function before searching the
