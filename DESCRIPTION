@@ -20,7 +20,7 @@ Suggests:
     knitr,
     rmarkdown,
     testthat (>= 3.0.0),
-    progressr
+    progressr,
     progress
 Imports: stats, methods
 VignetteBuilder: knitr

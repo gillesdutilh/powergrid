@@ -272,8 +272,8 @@ PowerGrid = function(pars, fun, more_args = NULL, n_iter = NA,
     }
 
     ## Store the old handlers, so they can be reverted when the function is done.
-    old_handlers <- handlers(c("beepr", "progress"))
-    on.exit(handlers(old_handlers), add = TRUE)
+    old_handlers <- progressr::handlers(c("beepr", "progress"))
+    on.exit(progressr::handlers(old_handlers), add = TRUE)
 
     progressr::handlers(global = TRUE)
     progressr::handlers(progressr::handler_progress(clear = FALSE))
