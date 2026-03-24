@@ -266,6 +266,15 @@ PowerGrid = function(pars, fun, more_args = NULL, n_iter = NA,
     if (!requireNamespace("progressr", quietly = TRUE)) {
       stop("Setting argument `progress_bar' to TRUE requires installation of progressr", call. = FALSE)
     }
+
+    if (!requireNamespace("progress", quietly = TRUE)) {
+      stop("Setting argument `progress_bar' to TRUE requires installation of progress (no r suffix)", call. = FALSE)
+    }
+
+    ## Store the old handlers, so they can be reverted when the function is done.
+    old_handlers <- handlers(c("beepr", "progress"))
+    on.exit(handlers(old_handlers), add = TRUE)
+
     progressr::handlers(global = TRUE)
     progressr::handlers(progressr::handler_progress(clear = FALSE))
   }
@@ -344,10 +353,7 @@ PowerGrid = function(pars, fun, more_args = NULL, n_iter = NA,
   if (!is.na(n_iter) && parallel) {
     if (!requireNamespace("future.apply", quietly = TRUE)) {
       stop("Setting argument `parallel' to TRUE requires installation of future.apply", call. = FALSE)}
-    ## plan(strategy = future_args$plan$strategy, # 'multisession'
-    ##      workers = future_args$plan$workers) # future::availableCores() - 1)
-    future::plan("future::multisession", workers = n_cores,
-                 earlySignal = TRUE, split=TRUE)
+    future::plan("future::multisession", workers = n_cores)
 
     ## Convert n_iter to a vector of iterations to iterate over
     iter <- seq_len(n_iter)
