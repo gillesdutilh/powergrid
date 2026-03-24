@@ -92,8 +92,8 @@ return vector (if given).
 
 You may want to study the effect of non-numeric parameters. This option is
 not supported for the argument \code{pars}, since the essential powergrid
-functions \code{link{Example}}, \code{link{PowerPlot}}, and
-\code{link{GridPlot}} need a direction to search. Nonetheless, you can study
+functions \code{\link{Example}}, \code{\link{PowerPlot}}, and
+\code{\link{GridPlot}} need a direction to search. Nonetheless, you can study
 non-numeric parameters by having function \code{fun} returning multiple values,
 as described above.
 }
