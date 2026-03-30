@@ -69,6 +69,19 @@
 ##' 'random.seed')[[1]]}, and the the call to Refine after \code{.Random_seed =
 ##' attr(<your_power_array>, which = 'random.seed')[[2]]}, etc.
 ##'
+##' ## Progress bar
+##'
+##' By default PowerGrid does not report progress. However for simulationg over
+##' multiple iterations it can be asked to report a progress bar for both series
+##' and parallel computations. This requires that the user installs the
+##' \code{progressr} package. In addition th user must run the command
+##' \code{progressr::handlers(global = TRUE)} (due to \code{progressr} design
+##' choice that the end user should control such things. When working with quarto
+##' the user will frequently get the error
+##' \code{Error in globalCallingHandlers...should not be called with handlers on the stack}.
+##' In this case the command
+##' should be entered directly into the console (not sent to the console from quarto).
+##'
 ##' @title Evaluate function (iteratively) at a grid of input arguments
 ##' @param pars A list where each element is a numeric vector of values named as
 ##'   one of the arguments of \code{fun}. `fun` is applied to the full grid
@@ -93,7 +106,7 @@
 ##'   applied. If TRUE, future::future_replicate is used internally.
 ##' @param n_cores Passed on to future_replicate
 ##' @param progress_bar Logical argument to request output of iterations using
-##'   a progress bar. This requires the progressr package.
+##'   a progress bar. See details section.
 ##' @return An array of class "power_array", with attributes containing
 ##'   informations about input arguments, summary status, the presence of
 ##'   multiple function outputs and more. This object class is handled sensibly
@@ -267,16 +280,17 @@ PowerGrid = function(pars, fun, more_args = NULL, n_iter = NA,
       stop("Setting argument `progress_bar' to TRUE requires installation of progressr", call. = FALSE)
     }
 
-    if (!requireNamespace("progress", quietly = TRUE)) {
-      stop("Setting argument `progress_bar' to TRUE requires installation of progress (no r suffix)", call. = FALSE)
+    if (!any(names(globalCallingHandlers()) %in% "condition")) {
+      warning("Global handlers are not set, so progress will not be printed. See details section of help file.")
     }
 
-    ## Store the old handlers, so they can be reverted when the function is done.
-    old_handlers <- progressr::handlers(c("beepr", "progress"))
-    on.exit(progressr::handlers(old_handlers), add = TRUE)
+    ## Store the old handlers
+    old_handlers <- progressr::handlers("txtprogressbar")
 
-    progressr::handlers(global = TRUE)
-    progressr::handlers(progressr::handler_progress(clear = FALSE))
+    ## On exit revert them
+    on.exit({progressr::handlers(old_handlers)}, add = TRUE)
+
+    progressr::handlers(progressr::handler_txtprogressbar(clear = FALSE))
   }
 
   ##
