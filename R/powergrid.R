@@ -71,16 +71,11 @@
 ##'
 ##' ## Progress bar
 ##'
-##' By default PowerGrid does not report progress. However for simulationg over
-##' multiple iterations it can be asked to report a progress bar for both series
-##' and parallel computations. This requires that the user installs the
-##' \code{progressr} package. In addition th user must run the command
-##' \code{progressr::handlers(global = TRUE)} (due to \code{progressr} design
-##' choice that the end user should control such things. When working with quarto
-##' the user will frequently get the error
-##' \code{Error in globalCallingHandlers...should not be called with handlers on the stack}.
-##' In this case the command
-##' should be entered directly into the console (not sent to the console from quarto).
+##' By default PowerGrid does not report progress. To return the optional progress bar (`progress_bar = TRUE`), the
+##' `progressr` package must be installed. As required by the design of that
+##' package, the progress handler must be explicitly activated before running
+##' your simulation. For that, run `progressr::handlers(global = TRUE)` in the
+##' current R console (not sent to the console from quarto for example).
 ##'
 ##' @title Evaluate function (iteratively) at a grid of input arguments
 ##' @param pars A list where each element is a numeric vector of values named as
@@ -281,7 +276,7 @@ PowerGrid = function(pars, fun, more_args = NULL, n_iter = NA,
     }
 
     if (!any(names(globalCallingHandlers()) %in% "condition")) {
-      warning("Global handlers are not set, so progress will not be printed. See details section of help file.")
+      warning("Global handlers are not set, so progress will not be printed. See details section of help file.", immediate. = TRUE)
     }
 
     ## Store the old handlers

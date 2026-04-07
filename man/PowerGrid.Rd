@@ -130,16 +130,11 @@ attr(<your_power_array>, which = 'random.seed')[[2]]}, etc.
 
 \subsection{Progress bar}{
 
-By default PowerGrid does not report progress. However for simulationg over
-multiple iterations it can be asked to report a progress bar for both series
-and parallel computations. This requires that the user installs the
-\code{progressr} package. In addition th user must run the command
-\code{progressr::handlers(global = TRUE)} (due to \code{progressr} design
-choice that the end user should control such things. When working with quarto
-the user will frequently get the error
-\code{Error in globalCallingHandlers...should not be called with handlers on the stack}.
-In this case the command
-should be entered directly into the console (not sent to the console from quarto).
+By default PowerGrid does not report progress. To return the optional progress bar (\code{progress_bar = TRUE}), the
+\code{progressr} package must be installed. As required by the design of that
+package, the progress handler must be explicitly activated before running
+your simulation. For that, run \code{progressr::handlers(global = TRUE)} in the
+current R console (not sent to the console from quarto for example).
 }
 }
 \examples{
