@@ -54,9 +54,9 @@
 ##' @param method Character string, indicating how the location of the example
 ##'   is found, passed on internally to `FindTarget`. Either "step": walking in
 ##'   steps along the parameter of interest or "lm": Interpolating assuming a
-##'   linear relation between the parameter of interest and (qnorm(x) + qnorm(1
-##'   - 0.05)) ^ 2. This method "lm" is inspired on the implementation in the
-##'   sse package by Thomas Fabbro.
+##'   linear relation between the parameter of interest and
+##'   (qnorm(x) + qnorm(1 - 0.05)) ^ 2. This method "lm" is inspired on the
+##'   implementation in the sse package by Thomas Fabbro.
 ##' @param summary_function When x' attribute `summarized` is FALSE, x is
 ##'   summarized across iterations using this function before searching the
 ##'   example.
@@ -191,7 +191,7 @@ Example = function(x,
     ## just throw an error (may be implemented later)
     stop("The object 'x' should be of class 'power_array'.")
   }
-  
+
   ## =======================================================
   ## If the input is not rejected, adjust atypical input.
   ##
@@ -279,7 +279,7 @@ print.power_example = function(x, ...){
   cat_print = paste0(paste(c(
     PrintDashes(),
     content,
-    PrintDashes()), collapse = '\n'), '\n') 
+    PrintDashes()), collapse = '\n'), '\n')
   cat(cat_print, ...)
 }
 

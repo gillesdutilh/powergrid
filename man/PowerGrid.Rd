@@ -12,7 +12,8 @@ PowerGrid(
   summarize = TRUE,
   summary_function = mean,
   parallel = FALSE,
-  n_cores = future::availableCores() - 1
+  n_cores = future::availableCores() - 1,
+  progress_bar = FALSE
 )
 }
 \arguments{
@@ -45,6 +46,9 @@ TRUE or when \code{is.na(n_iter)}.}
 applied. If TRUE, future::future_replicate is used internally.}
 
 \item{n_cores}{Passed on to future_replicate}
+
+\item{progress_bar}{Logical argument to request output of iterations using
+a progress bar. See details section.}
 }
 \value{
 An array of class "power_array", with attributes containing
@@ -88,8 +92,8 @@ return vector (if given).
 
 You may want to study the effect of non-numeric parameters. This option is
 not supported for the argument \code{pars}, since the essential powergrid
-functions \code{link{Example}}, \code{link{PowerPlot}}, and
-\code{link{GridPlot}} need a direction to search. Nonetheless, you can study
+functions \code{\link{Example}}, \code{\link{PowerPlot}}, and
+\code{\link{GridPlot}} need a direction to search. Nonetheless, you can study
 non-numeric parameters by having function \code{fun} returning multiple values,
 as described above.
 }
@@ -120,8 +124,17 @@ which = 'random.seed')[[1]]}. Note that if you Refine() your power_array, the
 .Random.seed at the moment of updating is appended to the random.seed
 attribute. So, to reconstruct a refined power_array, run the original call
 to \code{PowerGrid} after \code{.Random.seed = attr(<your_power_array>, which =
-'random.seed')[[1]]}, and the the call to Refine after \code{.Random.seed =
+'random.seed')[[1]]}, and the the call to Refine after \code{.Random_seed =
 attr(<your_power_array>, which = 'random.seed')[[2]]}, etc.
+}
+
+\subsection{Progress bar}{
+
+By default PowerGrid does not report progress. To return the optional progress bar (\code{progress_bar = TRUE}), the
+\code{progressr} package must be installed. As required by the design of that
+package, the progress handler must be explicitly activated before running
+your simulation. For that, run \code{progressr::handlers(global = TRUE)} in the
+current R console (not sent to the console from quarto for example).
 }
 }
 \examples{
@@ -143,7 +156,7 @@ PowFun <- function(n, delta, sd){
   return(ptt$power)
 }
 
-## Evaluate at each combination of assumptions: 
+## Evaluate at each combination of assumptions:
 powarr = PowerGrid(pars = sse_pars, fun = PowFun, n_iter = NA)
 summary(powarr)
 

@@ -1,30 +1,7 @@
 rm(list=ls())
-## ===============================================================
-#' TODO: I think this should be in test-SummarizeIterations no?
-
-## Test warning summarizing summarized object
-PowFun <- function(n, delta, sd){
-  x1 = rnorm(n = n/2, sd = sd)
-  x2 = rnorm(n = n/2, mean = delta, sd = sd)
-  t.test(x1, x2)$p.value < 0.05
-}
-sse_pars = list(
-  n = seq(from = 20, to = 60, by = 10),
-  delta = seq(from = 0.5, to = 1.5, by = 0.25),
-  sd = seq(.5, 1.5, .25))
-##
-n_iter = 20
-power_array = PowerGrid(pars = sse_pars, fun = PowFun,
-                        n_iter = n_iter, summarize = TRUE)
-test_that(
-  "trying to summarize an object that is already summarized throws a warning",
-  {expect_error(
-    SummarizeIterations(power_array, summary_function = mean)
-  )}
-)
 
 ## =============================================================================
-#' Similar to the non-monotonic test in FindTarget()
+## Similar to the non-monotonic test in FindTarget()
 
 fwd_closed_pars <-
   list(n = seq(20,60, 10),
@@ -41,9 +18,9 @@ fwd_power_array <- PowerGrid(pars = fwd_closed_pars, fun = ClosedFun,
 rev_power_array <- PowerGrid(pars = rev_closed_pars, fun = ClosedFun,
                              summarize = FALSE)
 
-#' The main thing is that contents are the same. The pars attribute is different
-#' I would say it is preference whether it should match the input or the dimnames
-#' but it should be intentional. Output with example also tested.
+## The main thing is that contents are the same. The pars attribute is different
+## I would say it is preference whether it should match the input or the dimnames
+## but it should be intentional. Output with example also tested.
 test_that(
   "Reverse parameter specification leads to same array contents (attr not tested)",
   {expect_equal(fwd_power_array, rev_power_array, ignore_attr = TRUE)}
@@ -51,9 +28,9 @@ test_that(
 
 
 ## =============================================================================
-#' Test PowerGrid() with multiple outputs
+## Test PowerGrid() with multiple outputs
 
-#' Arbitary function that only sometimes returns both values.
+## Arbitary function that only sometimes returns both values.
 ClosedFunBadReturn =
   function(n, delta, sd){
     t2side = power.t.test(n = n, delta = delta, sd = sd, alternative = "two")$power
@@ -85,4 +62,42 @@ test_that("fun_out names returned correctly",
           {expect_identical(dimnames(two_return_power_array)$fun_out,
                            c("one-sided", "two.sided"))}
 )
+
+## =============================================================================
+## Test reproducibility of powergrid
+
+rnd_pars <- list(
+  mean = seq(from = 0, to = 1, by = 0.2),
+  sd = seq(.5, 1.5, .2)
+)
+
+RndFun <- function(mean, sd, n=10) {
+
+  out <- rnorm(mean=mean, sd=sd, n=n) |> mean()
+  return(out)
+}
+
+set.seed(123)
+runif(1)
+fixed_seed_list <- .Random.seed
+rnd_grid1 <-
+  PowerGrid(pars = rnd_pars, fun = RndFun, more_args = list(n=50),
+            n_iter=100, summarize = FALSE, parallel = FALSE)
+
+.Random.seed <- fixed_seed_list
+rnd_grid2 <-
+  PowerGrid(pars = rnd_pars, fun = RndFun, more_args = list(n=50),
+            n_iter=100, summarize = FALSE, parallel = FALSE)
+
+test_that("random_seed is correctly stored and accessed",
+          {expect_identical(attr(rnd_grid1, which = 'random_seed')[[1]],
+                            fixed_seed_list)
+          })
+
+## TODO: This test passes interactively, but fails with automated testing
+## It seems to be due to the way testthat handles Random number generation
+# test_that("Output is the same with the same .Random.seed",
+#           {expect_identical(rnd_grid1,
+#                             rnd_grid2)
+#           })
 

@@ -1,6 +1,6 @@
 rm(list=ls())
 
-#' TODO:Some of these are tests for FindTarget() or for Example().
+## TODO:Some of these are tests for FindTarget() or for Example().
 
 ## ===============================================================
 sse_pars = list(
@@ -69,7 +69,7 @@ test_that(
 )
 
 ## =============================================================================
-#' power arrays with non-monotonic pars attributed are handled correctly
+## power arrays with non-monotonic pars attributed are handled correctly
 
 set.seed(123)
 nm_closed_pars <- lapply(sse_pars, sample)
@@ -87,7 +87,7 @@ test_that(
 
 
 ## =============================================================================
-#' Conversion of the target is maybe a bit extreme.
+## Conversion of the target is maybe a bit extreme.
 test_that(
   "Can handle small variations in numeric specification",
   {expect_equal(Example(closed_power_array,
@@ -96,7 +96,7 @@ test_that(
 )
 ## =============================================================================
 #' Testing printed output of Example. print_comparison is generated from the
-#' same summary function. So more of a test for future issues.
+## same summary function. So more of a test for future issues.
 
 Example_test <-
   Example(closed_power_array,
@@ -117,10 +117,10 @@ test_that(
     }
 )
 ## =============================================================================
-#' Simple test that multiple returns are handled correctly.
-#'   - Names are correct (really powergrid)
-#'   - error if fun_out not specified
-#'   - correct value
+## Simple test that multiple returns are handled correctly.
+##   - Names are correct (really powergrid)
+##   - error if fun_out not specified
+##   - correct value
 
 test_that(
   "Example handles multiple returns",
