@@ -20,6 +20,8 @@ PowerPlot(
   shades_of_grey = TRUE,
   example_text = TRUE,
   title = NULL,
+  labcex = 1.2,
+  axes = TRUE,
   par_labels = NULL,
   smooth = NA,
   ...
@@ -84,6 +86,11 @@ value be printed alongside the arrow(s)}
 \item{title}{Character string, if not \code{NULL}, replaces default figure
 title.}
 
+\item{labcex}{Numeric value passed to `contour, specifying the size of the
+contour labels.}
+
+\item{axes}{Logical, should axes be plotted.}
+
 \item{par_labels}{Named vector with elements named as the parameters
 plotted, with as values the desired labels.}
 
@@ -94,8 +101,8 @@ regressing the contour values on the x and y-axis. Suggested value is
 but use is discouraged, since regressing the contour values flattens the
 contour plot, thereby \emph{biasing} the contour lines.}
 
-\item{...}{Further arguments are passed on to function the relevant
-components of the plotting functions internall, see details.}
+\item{...}{Further arguments to \code{\link{par}}, \code{\link{axes}} and
+\code{\link{image}}. A few exceptions (e.g. \code{y}) are ignored with a warning.}
 }
 \value{
 A list containing the coordinate arguments x, y, and z, as passed to
@@ -140,15 +147,13 @@ to \code{FALSE}. See Example for more details about \code{find_lowest} and
 \code{target_at_least}.
 }
 
-\subsection{Plot aesthetics}{
+\subsection{Graphical parameters}{
 
-The powerplot is made up of multiple plotting steps, so flexibility in all
-aspects of plotting is not possible. However additional arguments are
-attempted to be sent to the calls generating axes, titles, plotting.
-Notable exceptions are that \code{lty} is only passed to the contours, and
-gridlines do not take arguments, so that arguments can be used to specify
-the behaviours of the focus of the plot. Arguments named x, y, z, axes,
-type, col and at, cannot be passed to
+The plot takes the \code{\link{graphical parameters}} from \code{par}. If graphical
+parameters are given as arguments to the function they will be passed to
+the calls generating axes, titles and plotting. Grid lines are not modified
+by graphical parameters to PowerPlot. \code{lty} is only passed to the plotted
+contours (e.g. to prevent dashed axes).
 }
 
 }

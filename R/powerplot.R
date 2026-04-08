@@ -30,13 +30,12 @@
 ##'   to \code{FALSE}. See Example for more details about `find_lowest` and
 ##'   `target_at_least`.
 ##'
-##'   ### Plot aesthetics
-##'   The power plot is made up of multiple plotting steps, so flexibility in all
-##'   aspects of plotting is not possible. However the function attempts to send
-##'   additional arguments are to the calls generating axes, titles and plotting.
-##'   Notable exceptions are that `lty` is only passed to the contours and
-##'   gridlines do not take arguments, so that arguments can be used to specify
-##'   the behaviours of the focus of the plot.
+##'   ### Graphical parameters
+##'   The plot takes the \code{\link{graphical parameters}} from `par`. If graphical
+##'   parameters are given as arguments to the function they will be passed to
+##'   the calls generating axes, titles and plotting. Grid lines are not modified
+##'   by graphical parameters to PowerPlot. `lty` is only passed to the plotted
+##'   contours (e.g. to prevent dashed axes).
 ##'
 ##' @param x An object of class `power_array` (from powergrid).
 ##' @param slicer If the parameter grid for which `x' was constructed has more
@@ -78,6 +77,9 @@
 ##'   value be printed alongside the arrow(s)
 ##' @param title Character string, if not \code{NULL}, replaces default figure
 ##'   title.
+##' @param labcex Numeric value passed to `contour, specifying the size of the
+##'   contour labels.
+##' @param axes Logical, should axes be plotted.
 ##' @param par_labels Named vector with elements named as the parameters
 ##'   plotted, with as values the desired labels.
 ##' @param smooth Numeric, defaults to NA, meaning no smoothing. Non NA value is
@@ -90,8 +92,8 @@
 ##'   where attribute \code{summarized} is FALSE (and individual iterations are
 ##'   stored in dimension \code{iter}, the iterations dimension is aggregated by
 ##'   \code{summary_fun}. Otherwise ignored.
-##' @param ... Further arguments are passed on to the relevant
-##'   components of the plotting functions internally, see details.
+##' @param ... Further arguments to \code{\link{par}}, \code{\link{axes}} and
+##'   \code{\link{image}}. A few exceptions (e.g. `y`) are ignored with a warning.
 ##' @seealso \code{\link{PowerGrid}}, \code{\link{AddExample}},
 ##'   \code{\link{Example}}, \code{\link{GridPlot}} for plotting
 ##'   interdependencies of 3 parameters.
@@ -189,14 +191,17 @@ PowerPlot =
            method = 'step',
            summary_function = mean,
            target_levels = c(.8, .9, .95), # which power iso lines to draw
-           col = grDevices::grey.colors(1, .2, .2),
+           col = grDevices::grey.colors(1, .2, .2), # TODO: why these specifically
            shades_of_grey = TRUE, # do you want shades of grey on background
            example_text = TRUE, # do you want a text next to the Example arrow
            title = NULL,
+           labcex = 1.2, # cex specifically for the labels on the contours
+           axes = TRUE, # Should axes be plotted
            par_labels = NULL,
            smooth = NA,
            ...) # Ellipsis passed to various internal calls
   {
+
     ## =======================================================
     ## process input
     ## =======================================================
@@ -259,11 +264,6 @@ PowerPlot =
     dimorder = c(par_to_search, dimnms[dimnms != par_to_search])
 
     ## =======================================================
-    ## About example
-    ## =======================================================
-    draw_example = !is.null(example) | left_dims == 1
-
-    ## =======================================================
     ## Graphical preparation
     ## =======================================================
     array_toplot = aperm(sliced_x, dimorder)
@@ -297,6 +297,29 @@ PowerPlot =
     ## Allow flexible parameter specification via ellipsis
     dots <- list(...)
 
+    good_args <- c(names(par()),
+                   names(formals(graphics::axis)),
+                   names(formals(graphics:::image.default)))
+    good_args <- setdiff(good_args, "...")
+
+
+    non_par_args <- setdiff(names(dots), good_args)
+    if (length(non_par_args) > 0) {
+      warning("Only arguments to par(), axis() and image() can be supplied through `...` the following are ignored: ",
+              paste(non_par_args, collapse = ", "), call. = FALSE)
+      dots[non_par_args] <- NULL
+    }
+
+    # ## do not allow dots to override core internals
+    bad_dots <- intersect(names(dots), c("y", "z", "type", "at"))
+    if (length(bad_dots) > 0) {
+      warning("These arguments cannot be supplied through `...` and are ignored: ",
+              paste(bad_dots, collapse = ", "), call. = FALSE)
+      dots[bad_dots] <- NULL
+    }
+
+
+
     ## Get the plot title priority is title arg > main arg > internal
     if ("main" %in% names(dots)) {
       if (is.null(title)) title <- dots$main
@@ -312,23 +335,17 @@ PowerPlot =
       )
     }
 
-    ## Get bty and las from dots if specified, otherwise use sensible values
-    dots$las <- if ("las" %in% names(dots)) dots$las else 1
-    dots$bty <- if ("bty" %in% names(dots)) dots$bty else "l"
+    ## Get bty and las from dots if specified, otherwise use par values
+    dots$las <- if ("las" %in% names(dots)) dots$las else par()$las
+    dots$bty <- if ("bty" %in% names(dots)) dots$bty else par()$bty
 
-    ## If
+    ## If lwd is specified use that, otherwise take lwd from par().
+    ## Later it has to be omitted from the dots passed to the contour
+    dots$lwd <- if ("lwd" %in% names(dots)) dots$lwd else par()$lwd
 
     ## Only let lty affect certain plot characteristics, so remove from dots
     user_lty <- if ("lty" %in% names(dots)) dots$lty else NULL
     dots$lty <- NULL
-
-    ## do not allow dots to override core internals
-    bad_dots <- intersect(names(dots), c("x", "y", "z", "axes", "type", "col", "at"))
-    if (length(bad_dots) > 0) {
-      warning("These arguments cannot be supplied through `...` and are ignored: ",
-              paste(bad_dots, collapse = ", "), call. = FALSE)
-      dots[c("x", "y", "z", "axes", "type", "col", "at")] <- NULL
-    }
 
     ## =======================================================
     ## Draw 1d figure
@@ -352,17 +369,25 @@ PowerPlot =
              axes = FALSE),
         dots
       )
+      ## make empty plot, add vertical gridlines
       do.call(graphics::plot, plot_args)
-
       graphics::abline(v = x_vals, col = 'lightgrey')
 
+      ## Add contour
       do.call(graphics::lines, append(list(x_vals, array_toplot, col = col,
                                            lty=user_lty), dots))
-      do.call(graphics::axis, append(list(side=1, at = x_vals), dots))
-      do.call(graphics::axis, append(list(side=2), dots))
+
+      ## Add axes
+      if(axes) {
+        do.call(graphics::axis, append(list(side=1, at = x_vals), dots))
+        do.call(graphics::axis, append(list(side=2), dots))
+      }
+
+      ## Border and title
       do.call(graphics::box, dots)
       do.call(graphics::title, append(list(main = plot_main), dots))
 
+      ## Add an example y_ex_value does not seem to be used.
       x_ex_value = FindTarget(array_toplot,
                               target_value = target_value,
                               target_at_least = target_at_least,
@@ -373,7 +398,8 @@ PowerPlot =
 
       image_x <- image_y <- image_z <- NULL
 
-    } else ## =======================================================
+    } else
+      ## =======================================================
     ## Draw 2d figure
     ## =======================================================
     {
@@ -381,15 +407,13 @@ PowerPlot =
       image_y = as.numeric(margins_toplot[[1]])
       image_z = t(array_toplot)
 
-      plot_xlab <- if (is.null(dots$xlab)) Trans(names(margins_toplot)[[2]]) else dots$xlab
-      plot_ylab <- if (is.null(dots$ylab)) Trans(names(margins_toplot)[[1]]) else dots$ylab
+      dots$xlab <- if (is.null(dots$xlab)) Trans(names(margins_toplot)[[2]]) else dots$xlab
+      dots$ylab <- if (is.null(dots$ylab)) Trans(names(margins_toplot)[[1]]) else dots$ylab
 
       image_args <- c(
         list(x = image_x,
              y = image_y,
              z = image_z,
-             ylab = plot_ylab,
-             xlab = plot_xlab,
              axes = FALSE,
              col = image_cols,
              main = title),
@@ -397,25 +421,32 @@ PowerPlot =
       )
       do.call(graphics::image, image_args)
 
-      graphics::abline(h = margins_toplot[[1]], v = margins_toplot[[2]], col = 'white')
+      ## Draw gridlines
+      do.call(graphics::abline,
+              append(list(h = margins_toplot[[1]], v = margins_toplot[[2]],
+                          col = 'white'), dots))
 
-      ## STARTHERE: Need to get the lwd specified so I can use it for a variable here.
+      ## If a target power is specified double the lwd on the target.
       if (!is.null(target_value)) {
         if (!(target_value %in% target_levels)) {
           target_levels = sort(unique(c(target_levels, target_value)))
         }
-        power_lwds = ifelse(target_levels == target_value, 2, 1)
+        power_lwds = ifelse(target_levels == target_value, 2, 1) * dots$lwd
       } else {
-        power_lwds = 1
+        power_lwds = dots$lwd
       }
 
-      if (is.na(smooth)) {
-        graphics::contour(as.numeric(margins_toplot[[2]]),
-                          as.numeric(margins_toplot[[1]]),
-                          t(array_toplot), add = TRUE, labcex = 1.2,
-                          levels = target_levels, lwd = power_lwds,
-                          col = col)
-      } else {
+      ## Contour is a bit funny in it arguments.
+      contour_args =
+        append(list(x = as.numeric(margins_toplot[[2]]),
+                    y = as.numeric(margins_toplot[[1]]),
+                    z = t(array_toplot), add = TRUE, labcex = labcex,
+                    levels = target_levels, lwd = power_lwds, lty=dots$lty,
+                    col = col),
+               dots[!names(dots) %in% c("lwd", "lty", "xlim", "ylim")])
+
+      ## For smoothed plotting the only the z calculation differs now
+      if (!is.na(smooth)) {
         smooth_pred_grid = as.matrix(expand.grid(as.numeric(margins_toplot[[2]]),
                                                  as.numeric(margins_toplot[[1]])))
         smooth_z =
@@ -425,18 +456,19 @@ PowerPlot =
               span = smooth, degree = 2))
         smooth_z_m =
           stats::xtabs(smooth_z ~ smooth_pred_grid[, 1] + smooth_pred_grid[, 2])
-        graphics::contour(as.numeric(margins_toplot[[2]]),
-                          as.numeric(margins_toplot[[1]]),
-                          z = smooth_z_m, add = TRUE, labcex = 1.2,
-                          levels = target_levels, lwd = power_lwds,
-                          col = grDevices::grey.colors(1, .2, .2))
+        contour_args$z = smooth_z_m
       }
-
+      do.call(graphics::contour, contour_args)
       do.call(graphics::axis, append(list(side=1), dots))
       do.call(graphics::axis, append(list(side=2), dots))
-      graphics::box(bty = user_bty)
+      do.call(graphics::box, args = dots)
     }
 
+    ## =======================================================
+    ## About example
+    ## =======================================================
+    ## TODO: this function also needs overhaul to take parameters.
+    draw_example = !is.null(example) | left_dims == 1
     if (draw_example){
       do.call(AddExample, append(list(x = sliced_x,
                                       example = example,
