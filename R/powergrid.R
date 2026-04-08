@@ -36,8 +36,8 @@
 ##'
 ##' You may want to study the effect of non-numeric parameters. This option is
 ##' not supported for the argument `pars`, since the essential powergrid
-##' functions \code{link{Example}}, \code{link{PowerPlot}}, and
-##' \code{link{GridPlot}} need a direction to search. Nonetheless, you can study
+##' functions \code{\link{Example}}, \code{\link{PowerPlot}}, and
+##' \code{\link{GridPlot}} need a direction to search. Nonetheless, you can study
 ##' non-numeric parameters by having function `fun` returning multiple values,
 ##' as described above.
 ##'
@@ -69,6 +69,14 @@
 ##' 'random.seed')[[1]]}, and the the call to Refine after \code{.Random_seed =
 ##' attr(<your_power_array>, which = 'random.seed')[[2]]}, etc.
 ##'
+##' ## Progress bar
+##'
+##' By default PowerGrid does not report progress. To return the optional progress bar (`progress_bar = TRUE`), the
+##' `progressr` package must be installed. As required by the design of that
+##' package, the progress handler must be explicitly activated before running
+##' your simulation. For that, run `progressr::handlers(global = TRUE)` in the
+##' current R console (not sent to the console from quarto for example).
+##'
 ##' @title Evaluate function (iteratively) at a grid of input arguments
 ##' @param pars A list where each element is a numeric vector of values named as
 ##'   one of the arguments of \code{fun}. `fun` is applied to the full grid
@@ -93,7 +101,7 @@
 ##'   applied. If TRUE, future::future_replicate is used internally.
 ##' @param n_cores Passed on to future_replicate
 ##' @param progress_bar Logical argument to request output of iterations using
-##'   a progress bar. This requires the progressr package.
+##'   a progress bar. See details section.
 ##' @return An array of class "power_array", with attributes containing
 ##'   informations about input arguments, summary status, the presence of
 ##'   multiple function outputs and more. This object class is handled sensibly
@@ -266,9 +274,18 @@ PowerGrid = function(pars, fun, more_args = NULL, n_iter = NA,
     if (!requireNamespace("progressr", quietly = TRUE)) {
       stop("Setting argument `progress_bar' to TRUE requires installation of progressr", call. = FALSE)
     }
-    progressr::handlers(global = TRUE)
 
-    warning("Progress bar is an experimental feature.")
+    if (!any(names(globalCallingHandlers()) %in% "condition")) {
+      warning("Global handlers are not set, so progress will not be printed. See details section of help file.", immediate. = TRUE)
+    }
+
+    ## Store the old handlers
+    old_handlers <- progressr::handlers("txtprogressbar")
+
+    ## On exit revert them
+    on.exit({progressr::handlers(old_handlers)}, add = TRUE)
+
+    progressr::handlers(progressr::handler_txtprogressbar(clear = FALSE))
   }
 
   ##
@@ -293,16 +310,29 @@ PowerGrid = function(pars, fun, more_args = NULL, n_iter = NA,
   ## ============================================
   ## fill grid
   pars_grid = expand.grid(pars)
+
+  ## Check length of the returned output (per parameter set & iteration)
+  n_funouts = length(.mapply(fun, pars_grid[1, ], MoreArgs = more_args)[[1]])
+
+  ## Based on n_funouts make paradigms, the structure expected to be returned
+  if(n_funouts >1) {
+    funout_paradigm <- numeric(n_funouts)
+    iter_paradigm <- matrix(numeric(1L), nrow = n_funouts, ncol = nrow(pars_grid))
+  } else {
+    funout_paradigm <- numeric(n_funouts)
+    iter_paradigm <- numeric(nrow(pars_grid))
+  }
+
   ## The next block of code goes through 3 routes (A1-A3) depending on whether iterations
   ## are needed, and whether parallel computation is requested.
   ## =================================
   ## Route A1) No iteration ('n_iter' not supplied)
   if(is.na(n_iter)) {
-    e1d42fl5z7b6 = sapply( # the long name is to make it very unlikely
+    e1d42fl5z7b6 = vapply( # the long name is to make it very unlikely
       # to get the same name in the grid, which
       # would break the xtab below.
-      .mapply(fun, pars_grid, MoreArgs = more_args), function(x)x,
-      simplify = "array")
+      .mapply(fun, pars_grid, MoreArgs = more_args), I,
+      FUN.VALUE = funout_paradigm)
     ## out = cbind(pars_grid, e1d42fl5z7b6)
     ## result is a n_result_vars by nrow(pars_grid) matrix
   }
@@ -314,55 +344,50 @@ PowerGrid = function(pars, fun, more_args = NULL, n_iter = NA,
     if(progress_bar) p <- progressr::progressor(steps = n_iter)
 
     e1d42fl5z7b6 =
-      simplify2array(drop(sapply(
+      drop(vapply(
         X = iter, function(i) {
-          out <- sapply( # reshape mapply result
-            .mapply(fun, pars_grid, MoreArgs = more_args), unlist)
+          out <- vapply( # reshape mapply result
+            .mapply(fun, pars_grid, MoreArgs = more_args), unlist,
+            FUN.VALUE = funout_paradigm)
 
           if(progress_bar) {
-            p(sprintf("x=%g", i))
-          } else if(i %% 50 == 0) {
-            cat("Iteration ", i, " complete\n")
+            p()
           }
-
           return(out)
-        }, simplify=FALSE)
-      ))
+        }, FUN.VALUE = iter_paradigm)
+      )
   }
   ## =================================
   ## Route A3) Parallel iteration using future_replicate
   if (!is.na(n_iter) && parallel) {
     if (!requireNamespace("future.apply", quietly = TRUE)) {
       stop("Setting argument `parallel' to TRUE requires installation of future.apply", call. = FALSE)}
-    ## plan(strategy = future_args$plan$strategy, # 'multisession'
-    ##      workers = future_args$plan$workers) # future::availableCores() - 1)
     future::plan("future::multisession", workers = n_cores)
 
+    ## Convert n_iter to a vector of iterations to iterate over
     iter <- seq_len(n_iter)
+
+    ## If progress requested initiate a progressbar
     if(progress_bar) p <- progressr::progressor(steps = n_iter)
 
-    e1d42fl5z7b6 = simplify2array(drop(future.apply::future_sapply(
+    # Three level sapply(iter, sapply(mapply( PowFun, pars)))
+    e1d42fl5z7b6 = drop(future.apply::future_vapply(
       X = iter, function(i) {
-        out <- sapply( # reshape mapply result
-          .mapply(fun, pars_grid, MoreArgs = more_args), unlist)
+        out <- vapply( # reshape mapply result
+          .mapply(fun, pars_grid, MoreArgs = more_args), unlist,
+          FUN.VALUE = funout_paradigm)
 
         if(progress_bar) {
-          p(sprintf("x=%g", i))
-        } else if(i %% 50 == 0) {
-          cat("Iteration ", i, " complete\n")
+          p()
         }
-
         return(out)
-      }, future.seed = TRUE, # Default future chunk size of Null means each chunk is 1 future
-    simplify=FALSE)
-    ))
+      }, future.seed = TRUE,
+      FUN.VALUE = iter_paradigm)
+    )
   }
   ## =================================
   ## A1-A3 briefly converge and then diverge into B1-B2 depending on whether
   ## multiple outputs are returned.
-  ## Check length of the returned output (per parameter set & iteration)
-  n_funouts = length(.mapply(fun, pars_grid[1, ], MoreArgs = more_args)[[1]])
-  ##
 
   ## Route B1) One variable
   if (n_funouts == 1) {
