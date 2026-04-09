@@ -171,7 +171,7 @@ sse_pars = list(
   sd = seq(.1, 1.1, .2)) # Standard deviation
 
 ## Define a power function using these parameters:
-PowFun <- function(n, delta, sd){ # power for a t-test at alpha = .05
+PowFun = function(n, delta, sd){ # power for a t-test at alpha = .05
   ptt = power.t.test(n = n/2, delta = delta, sd = sd,
                      sig.level = 0.05)
   return(ptt$power)

@@ -205,19 +205,9 @@ PowerPlot =
     ## =======================================================
     ## process power array
     ## =======================================================
-    if (all(class(x) == 'power_array'))
-    {
-      if(!attr(x, which = 'summarized')){
-        x = SummarizeIterations(x, summary_function)
-        warning(paste0(
-          "The object 'x' you supplied to PowerPlot contains individual ",
-          "iterations. For sensible plotting, these were automatically ",
-          "summarized across iterations using the function given in ",
-          "argument `summary_function`."), call. = FALSE)
-      }
-    } else {
-      stop("The object 'x' should be of class 'power_array'. ", call. = FALSE)
-    }
+    if (all(class(x) != 'power_array')) stop("The object 'x' should be of class 'power_array'. ", call. = FALSE)
+
+    x = EnsureSummarized(x)
 
     ## =======================================================
     ## take slice that should be plotted
@@ -226,31 +216,13 @@ PowerPlot =
       sliced_x = ArraySlicer(x = x, slicer = slicer)
     } else {sliced_x = x}
 
-    if (attr(sliced_x, 'sim_function_nval') > 1)
-    {
-      chosen_fun_out = attr(sliced_x, 'dimnames')$fun_out[1]
-      sliced_x = ArraySlicer(sliced_x, slicer = list(fun_out = chosen_fun_out))
-      warning(paste0(
-        "Argument 'x' contains multiple function outputs at each parameter combination ",
-        "(even after possible slicing with argument 'slicer'). \n*** Function output ",
-        chosen_fun_out,
-        " was automatically chosen to be plotted! ***\nTo explicitly choose a function ",
-        "output, do so using argument 'slicer', including 'fun_out = <output name> in that list."
-      ), call. = FALSE)
-    }
+    sliced_x = EnsureSingleFunOut(sliced_x)
 
-    left_dims = length(dim(sliced_x))
-    if (left_dims == 0){
-      left_dims = ifelse(length(sliced_x) > 0, 1, 0)
-    }
-    if(!(left_dims %in% c(2, 1))){
-      stop(paste0(
-        ifelse(is.null(slicer),
-               "Input 'x' should be a 2- or 1-dimensional array, but is a ",
-               "Slicing 'x' by 'slicer' did not yield the necessary 2- or 1-dimensional, but a "),
-        left_dims, "-dimensional array instead."))
-    }
+    left_dims = CheckArrayDim(sliced_x, required_dim = c(1,2))
 
+    ## =======================================================
+    ## Get the name of the parameter to search (typically n)
+    ## =======================================================
     dimnms = names(dimnames(sliced_x))
     first_dim = dimnms[1]
     if(par_to_search == 'n' & !(par_to_search %in% dimnms)){
@@ -298,8 +270,8 @@ PowerPlot =
     dots = list(...)
 
     good_args = c(names(par()),
-                   names(formals(graphics::axis)),
-                   names(formals(graphics:::image.default)))
+                  names(formals(graphics::axis)),
+                  names(formals(graphics:::image.default)))
     good_args = setdiff(good_args, "...")
 
 
@@ -310,7 +282,7 @@ PowerPlot =
       dots[bad_args] = NULL
     }
 
-    # ## do not allow dots to override core internals
+    ## do not allow dots to override core internals
     exeption_bad_args = intersect(names(dots), c("y", "z", "type", "at"))
     if (length(exeption_bad_args) > 0) {
       warning("These arguments cannot be supplied through `...` and are ignored: ",
@@ -399,7 +371,7 @@ PowerPlot =
       image_x = image_y = image_z = NULL
 
     } else
-      ## =======================================================
+    ## =======================================================
     ## Draw 2d figure
     ## =======================================================
     {
@@ -467,7 +439,6 @@ PowerPlot =
     ## =======================================================
     ## About example
     ## =======================================================
-    ## TODO: this function also needs overhaul to take parameters.
     draw_example = !is.null(example) | left_dims == 1
     if (draw_example){
       do.call(AddExample, append(list(x = sliced_x,
@@ -619,102 +590,114 @@ AddExample = function(x,
                       col = grDevices::grey.colors(1, .2, .2),
                       example_text = TRUE, ...)
 {
-  ## =======================================================
-  ## process input
-  ## =======================================================
-  ##
-  ## further args
-  args = list(...)
-  ## I grasp lwd here to make text and circle lwd match arrows
-  if('lwd' %in% names(args)){lwd = args$lwd}else{lwd = 1}
-  ## slice
-  sliced_x = ArraySlicer(x = x, slicer = slicer)
-  one_dim = FALSE # the default situation where the plot has 2 par-dimenstions
+  ## Initially assume the default situation where the plot has 2 par-dimensions
+  one_dim = FALSE
 
-  ## =================================
-  ## check argument x (partly the same as in PowerPlot)
-  ## =================================
-  ##
-  ## powerplot object
-  if (!all(class(sliced_x) == 'power_array')){ # made using powergrid functions
-    stop("The object 'x' should be of class 'power_array'. ")
-  }
-  ## If there are multiple function returns saved in power_array, give a warning
-  ## and take only the first, by setting slicing accordingly.
-  if (attr(sliced_x, 'sim_function_nval') > 1) # still multiple outputs
-  {
-    ## assume the user want the first
-    chosen_fun_out = attr(sliced_x, 'dimnames')$fun_out[1]
-    sliced_x = ArraySlicer(sliced_x, slicer = list(fun_out = chosen_fun_out))
-    warning(paste0("Argument 'x' contains multiple function outputs at each parameter combination (even after possible slicing with argument 'slicer'). \n*** Function output ",
-                   chosen_fun_out,
-                   " was automatically chosen to be plotted! ***\nTo explicitly choose a function output, do so using argument 'slicer', including 'fun_out = <output name> in that list."))
-  }
-  ## feedback if the number of dimension are not correct
-  left_dims = length(dim(sliced_x))
-  if (left_dims == 0){
-    left_dims = ifelse(length(sliced_x) > 0,
-                       1, 0)
-  }
-  left_dims = left_dims - (length(example) - 1) # because a longer example will
-                                              # slice on the first dim
-  if(!(left_dims %in% c(2, 1))){
-    stop(paste0("The example ", ifelse(is.null(slicer), "", "(after slicing) "),
-                "does not define a one-dimensional vector in x, as it should")
-         )
-  }
-  ## =================================
-  ## Check example input
-  ## =================================
-  ## User may define multiple requested examples. Are they correctly defined and
-  ## How many are there?
-  if(!is.null(example)){
-    if(length(unique(sapply(example, function(x)length(x)))) != 1){
-      ## if more than one example is requested, each parameter in example must have
-      ## the same length
-      stop("If multiple pars are listed in argument 'example', all must contain a vector of the same length.")
+  ## =======================================================
+  ## process graphics input
+  ## =======================================================
+  dots = list(...)
+
+  ## I grasp lwd here to make text and circle lwd match arrows
+  if('lwd' %in% names(dots)){lwd = dots$lwd} else {lwd = par()$lwd}
+
+  ## =======================================================
+  ## Check type of input
+  ## =======================================================
+  if(class(x) == "power_array") {
+
+    x = EnsureSummarized(x)
+
+    sliced_x = ArraySlicer(x = x, slicer = slicer)
+
+    sliced_x = EnsureSingleFunOut(sliced_x)
+
+    ## This is translated from Gilles, I don't quite get the -1 for the exampl
+    left_dims = CheckArrayDim(sliced_x,
+                              required_dim = c(1,2) + (length(example) - 1)
+    )
+
+    ## =======================================================
+    ## Check example input
+    ## =======================================================
+    ## User may define multiple requested examples. Are they correctly defined and
+    ## How many are there?
+    if(!is.null(example)){
+      if(length(unique(sapply(example, function(x)length(x)))) != 1){
+        ## if more than one example is requested, each parameter in example must have
+        ## the same length
+        stop("If multiple pars are listed in argument 'example', all must contain a vector of the same length.")
+      }
+      ns_example = sapply(example, function(x)length(x))[[1]]
+      ## The first element of example always defines the par on the x-axis
+      x_ex_name = names(example)[1] # (also if only one parameret in example)
+    } else { # if example NULL
+      if (length(dim(sliced_x)) > 1){
+        stop("When x (after slicer has been applied) has more than one dimension, 'example' must be supplied")
+      }
+      one_dim = TRUE # we're in the on-dimensional situation, where we plot the
+      # value (power) on the y-axis
+      ns_example = 1
     }
-    ns_example = sapply(example, function(x)length(x))[[1]]
-    ## The first element of example always defines the par on the x-axis
-    x_ex_name = names(example)[1] # (also if only one parameret in example)
-  } else { # if example NULL
-    if (length(dim(sliced_x)) > 1){
-      stop("When x (after slicer has been applied) has more than one dimension, 'example' must be supplied")
+
+    ## =================================
+    ## Prepare example(s) for plotting
+    ## =================================
+    ## essentially loop over each individual example
+    y_ex_value = numeric(ns_example)
+    x_ex_value = numeric(ns_example)
+    for (example_i in 1:ns_example){
+      ## run over examples and calculate and store coordinates
+      cur_example = lapply(example, function(x)x[example_i])
+      example_list =
+        Example(sliced_x,
+                example = cur_example, # append(slicer, cur_example),
+                target_value = target_value, target_at_least = target_at_least,
+                find_lowest = find_lowest, method = method, summary_function = summary_function)
+      ## Prepare example for figure. Note that it is possible to have any
+      ## parameter on x and y, whereas the default is to have 'n' on y.
+      if (!one_dim){
+        y_ex_value[example_i] = example_list$required_value
+        x_ex_value[example_i] = cur_example[[x_ex_name]]
+      } else {
+        x_ex_value[example_i] = example_list$required_value
+        y_ex_value[example_i] = example_list$target_value
+      }
     }
-    one_dim = TRUE # we're in the on-dimensional situation, where we plot the
-                                        # value (power) on the y-axis
-    ns_example = 1
-  }
-  ## =================================
-  ## Prepare example(s) for plotting
-  ## =================================
-  y_ex_value = numeric(ns_example)
-  x_ex_value = numeric(ns_example)
-  for (example_i in 1:ns_example){
-    ## run over examples and calculate and store coordinates
-    cur_example = lapply(example, function(x)x[example_i])
-    example_list =
-      Example(sliced_x,
-              example = cur_example, # append(slicer, cur_example),
-              target_value = target_value, target_at_least = target_at_least,
-              find_lowest = find_lowest, method = method, summary_function = summary_function)
-    ## Prepare example for figure. Note that it is possible to have any
-    ## parameter on x and y, whereas the default is to have 'n' on y.
+
+  } else if(class(x) == "power_example") {
+
+    input_example = x
+
+    if(is.null(slicer)) one_dim = TRUE
+
+
     if (!one_dim){
-      y_ex_value[example_i] = example_list$required_value
-      x_ex_value[example_i] = cur_example[[x_ex_name]]
+
+      left_par <- setdiff(names(input_example$requested_example), names(slicer))
+
+      if(length(left_par) != 1) stop("slicer argument incompatable with provided x")
+
+      x_ex_value <- input_example$requested_example[[left_par]]
+      y_ex_value <- input_example$required_value
+
     } else {
-      x_ex_value[example_i] = example_list$required_value
-      y_ex_value[example_i] = example_list$target_value
+      x_ex_value = input_example$required_value
+      y_ex_value = input_example$target_value
     }
+  } else {
+    stop("x must either be a power_array or a power_example")
+
   }
+  ## =================================
+  ## Draw
+  ## =================================
+
   ## note that "y_ex_name" is not defined, this is par_to_search
   ## Draw Example Arrow
   x0 = grDevices::extendrange(graphics::par()$usr[1:2], f = -.02)[1]
   y0 = grDevices::extendrange(graphics::par()$usr[3:4], f = -.02)[1]
-  ## =================================
-  ## Draw
-  ## =================================
+
   graphics::arrows(x0 = x_ex_value, y0 = y0,
                    x1 = x_ex_value, y1 = y_ex_value, length = .15,
                    code = 0, col = col, ...)
@@ -733,3 +716,4 @@ AddExample = function(x,
   }
   invisible(NULL)
 }
+
