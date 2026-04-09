@@ -113,7 +113,7 @@
 ##'   sd = seq(.1, 1.1, .2)) # Standard deviation
 ##'
 ##' ## Define a power function using these parameters:
-##' PowFun <- function(n, delta, sd){ # power for a t-test at alpha = .05
+##' PowFun = function(n, delta, sd){ # power for a t-test at alpha = .05
 ##'   ptt = power.t.test(n = n/2, delta = delta, sd = sd,
 ##'                      sig.level = 0.05)
 ##'   return(ptt$power)
@@ -203,7 +203,7 @@ PowerPlot =
   {
 
     ## =======================================================
-    ## process input
+    ## process power array
     ## =======================================================
     if (all(class(x) == 'power_array'))
     {
@@ -295,35 +295,35 @@ PowerPlot =
     ## User graphical arguments
     ## =======================================================
     ## Allow flexible parameter specification via ellipsis
-    dots <- list(...)
+    dots = list(...)
 
-    good_args <- c(names(par()),
+    good_args = c(names(par()),
                    names(formals(graphics::axis)),
                    names(formals(graphics:::image.default)))
-    good_args <- setdiff(good_args, "...")
+    good_args = setdiff(good_args, "...")
 
 
-    non_par_args <- setdiff(names(dots), good_args)
-    if (length(non_par_args) > 0) {
+    bad_args = setdiff(names(dots), good_args)
+    if (length(bad_args) > 0) {
       warning("Only arguments to par(), axis() and image() can be supplied through `...` the following are ignored: ",
-              paste(non_par_args, collapse = ", "), call. = FALSE)
-      dots[non_par_args] <- NULL
+              paste(bad_args, collapse = ", "), call. = FALSE)
+      dots[bad_args] = NULL
     }
 
     # ## do not allow dots to override core internals
-    bad_dots <- intersect(names(dots), c("y", "z", "type", "at"))
-    if (length(bad_dots) > 0) {
+    exeption_bad_args = intersect(names(dots), c("y", "z", "type", "at"))
+    if (length(exeption_bad_args) > 0) {
       warning("These arguments cannot be supplied through `...` and are ignored: ",
-              paste(bad_dots, collapse = ", "), call. = FALSE)
-      dots[bad_dots] <- NULL
+              paste(exeption_bad_args, collapse = ", "), call. = FALSE)
+      dots[exeption_bad_args] = NULL
     }
 
 
 
     ## Get the plot title priority is title arg > main arg > internal
     if ("main" %in% names(dots)) {
-      if (is.null(title)) title <- dots$main
-      dots$main <- NULL
+      if (is.null(title)) title = dots$main
+      dots$main = NULL
     }
 
     if (is.null(title)){
@@ -336,33 +336,33 @@ PowerPlot =
     }
 
     ## Get bty and las from dots if specified, otherwise use par values
-    dots$las <- if ("las" %in% names(dots)) dots$las else par()$las
-    dots$bty <- if ("bty" %in% names(dots)) dots$bty else par()$bty
+    dots$las = if ("las" %in% names(dots)) dots$las else par()$las
+    dots$bty = if ("bty" %in% names(dots)) dots$bty else par()$bty
 
     ## If lwd is specified use that, otherwise take lwd from par().
     ## Later it has to be omitted from the dots passed to the contour
-    dots$lwd <- if ("lwd" %in% names(dots)) dots$lwd else par()$lwd
+    dots$lwd = if ("lwd" %in% names(dots)) dots$lwd else par()$lwd
 
     ## Only let lty affect certain plot characteristics, so remove from dots
-    user_lty <- if ("lty" %in% names(dots)) dots$lty else NULL
-    dots$lty <- NULL
+    user_lty = if ("lty" %in% names(dots)) dots$lty else NULL
+    dots$lty = NULL
 
     ## =======================================================
     ## Draw 1d figure
     ## =======================================================
     if (left_dims == 1){
 
-      x_vals <- as.numeric(names(array_toplot))
+      x_vals = as.numeric(names(array_toplot))
 
-      dots$xlab <- if (is.null(dots$xlab)) Trans(names(dimnames(array_toplot))) else dots$xlab
-      dots$ylab <- if (is.null(dots$ylab)) "Power" else dots$ylab
-      plot_main <- if (!is.null(title)) {
+      dots$xlab = if (is.null(dots$xlab)) Trans(names(dimnames(array_toplot))) else dots$xlab
+      dots$ylab = if (is.null(dots$ylab)) "Power" else dots$ylab
+      plot_main = if (!is.null(title)) {
         title
       } else {
         paste('Power as a function of', Trans(names(margins_toplot)[[1]]))
       }
 
-      plot_args <- c(
+      plot_args = c(
         list(x = x_vals,
              y = array_toplot,
              type = 'n',
@@ -396,7 +396,7 @@ PowerPlot =
                               method = method)
       y_ex_value = round(array_toplot[as.character(x_ex_value)], 3)
 
-      image_x <- image_y <- image_z <- NULL
+      image_x = image_y = image_z = NULL
 
     } else
       ## =======================================================
@@ -407,10 +407,10 @@ PowerPlot =
       image_y = as.numeric(margins_toplot[[1]])
       image_z = t(array_toplot)
 
-      dots$xlab <- if (is.null(dots$xlab)) Trans(names(margins_toplot)[[2]]) else dots$xlab
-      dots$ylab <- if (is.null(dots$ylab)) Trans(names(margins_toplot)[[1]]) else dots$ylab
+      dots$xlab = if (is.null(dots$xlab)) Trans(names(margins_toplot)[[2]]) else dots$xlab
+      dots$ylab = if (is.null(dots$ylab)) Trans(names(margins_toplot)[[1]]) else dots$ylab
 
-      image_args <- c(
+      image_args = c(
         list(x = image_x,
              y = image_y,
              z = image_z,
@@ -559,7 +559,7 @@ PowerPlot =
 ##'   delta = seq(from = 0.5, to = 1.5, by = 0.1), # effect size
 ##'   sd = seq(.1, 1.1, .2)) # Standard deviation
 ##' ## Define a power function using these parameters:
-##' PowFun <- function(n, delta, sd){ # power for a t-test at alpha = .05
+##' PowFun = function(n, delta, sd){ # power for a t-test at alpha = .05
 ##'   ptt = power.t.test(n = n/2, delta = delta, sd = sd,
 ##'                      sig.level = 0.05)
 ##'   return(ptt$power)
