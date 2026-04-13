@@ -207,7 +207,7 @@ PowerPlot =
     ## =======================================================
     if (all(class(x) != 'power_array')) stop("The object 'x' should be of class 'power_array'. ", call. = FALSE)
 
-    x = EnsureSummarized(x)
+    x = EnsureSummarized(x, summary_function = summary_function)
 
     ## =======================================================
     ## take slice that should be plotted
@@ -359,7 +359,8 @@ PowerPlot =
       do.call(graphics::box, dots)
       do.call(graphics::title, append(list(main = plot_main), dots))
 
-      ## Add an example y_ex_value does not seem to be used.
+      ## Add an example
+      ## TODO: y_ex_value does not seem to be used.
       x_ex_value = FindTarget(array_toplot,
                               target_value = target_value,
                               target_at_least = target_at_least,
@@ -439,7 +440,8 @@ PowerPlot =
     ## =======================================================
     ## About example
     ## =======================================================
-    draw_example = !is.null(example) | left_dims == 1
+    draw_example = !is.null(target_value) &&
+      (!is.null(example) | left_dims == 1)
     if (draw_example){
       do.call(AddExample, append(list(x = sliced_x,
                                       example = example,
@@ -606,7 +608,7 @@ AddExample = function(x,
   ## =======================================================
   if(class(x) == "power_array") {
 
-    x = EnsureSummarized(x)
+    x = EnsureSummarized(x, summary_function = summary_function)
 
     sliced_x = ArraySlicer(x = x, slicer = slicer)
 
@@ -630,7 +632,7 @@ AddExample = function(x,
       }
       ns_example = sapply(example, function(x)length(x))[[1]]
       ## The first element of example always defines the par on the x-axis
-      x_ex_name = names(example)[1] # (also if only one parameret in example)
+      x_ex_name = names(example)[1] # (also if only one parameter in example)
     } else { # if example NULL
       if (length(dim(sliced_x)) > 1){
         stop("When x (after slicer has been applied) has more than one dimension, 'example' must be supplied")
@@ -644,6 +646,7 @@ AddExample = function(x,
     ## Prepare example(s) for plotting
     ## =================================
     ## essentially loop over each individual example
+    ## TODO: This would be cleaner to do with FindTarget
     y_ex_value = numeric(ns_example)
     x_ex_value = numeric(ns_example)
     for (example_i in 1:ns_example){
@@ -666,6 +669,7 @@ AddExample = function(x,
     }
 
   } else if(class(x) == "power_example") {
+    ## TODO: either warn of specified power etc or check against example
 
     input_example = x
 
