@@ -37,12 +37,12 @@ first element of \code{example} defines the parameter x-axis, so this function
 is not fool proof. See argument \code{slicer} above. If x has only one
 dimension, the example needs not be defined. Ignored if x is a power_example.}
 
+\item{target_value, target_at_least, find_lowest, method, example_text, summary_function}{See help for \code{PowerPlot}. Ignore if x is a power_example.}
+
 \item{col}{Color of arrow and text drawn.}
 
 \item{...}{Further arguments to \code{\link{par}}, which are passed to the
 points and text. For the points pch is fixed.}
-
-\item{x, target_value, target_at_least, find_lowest, method, example_text, summary_function}{See help for \code{PowerPlot}. Ignore if x is a power_example.}
 }
 \value{
 invisibly NULL

@@ -92,7 +92,7 @@
 ##'   where attribute \code{summarized} is FALSE (and individual iterations are
 ##'   stored in dimension \code{iter}, the iterations dimension is aggregated by
 ##'   \code{summary_fun}. Otherwise ignored.
-##' @param ... Further arguments to \code{\link{par}}, \code{\link{axes}} and
+##' @param ... Further arguments to \code{\link{par}}, \code{\link{axis}} and
 ##'   \code{\link{image}}. A few exceptions (e.g. `y`) are ignored with a warning.
 ##' @seealso \code{\link{PowerGrid}}, \code{\link{AddExample}},
 ##'   \code{\link{Example}}, \code{\link{GridPlot}} for plotting
@@ -270,7 +270,7 @@ PowerPlot =
     ## Allow flexible parameter specification via ellipsis
     dots = list(...)
 
-    good_args = c(names(par()),
+    good_args = c(names(graphics::par()),
                   names(formals(graphics::axis)),
                   names(formals(graphics::lines)),
                   names(formals(graphics:::plot.default)),
@@ -307,25 +307,25 @@ PowerPlot =
     }
 
     ## Get bty and las from dots if specified, otherwise use par values
-    dots$las = if ("las" %in% names(dots)) dots$las else par()$las
-    dots$bty = if ("bty" %in% names(dots)) dots$bty else par()$bty
+    dots$las = if ("las" %in% names(dots)) dots$las else graphics::par()$las
+    dots$bty = if ("bty" %in% names(dots)) dots$bty else graphics::par()$bty
 
-    ## If lwd is specified use that, otherwise take lwd from par().
+    ## If lwd is specified use that, otherwise take lwd from graphics::par().
     ## Later it has to be omitted from the dots passed to the contour
-    dots$lwd = if ("lwd" %in% names(dots)) dots$lwd else par()$lwd
+    dots$lwd = if ("lwd" %in% names(dots)) dots$lwd else graphics::par()$lwd
 
     ## Only let lty affect certain plot characteristics, so remove from dots
     user_lty = if ("lty" %in% names(dots)) dots$lty else NULL
     dots$lty = NULL
 
     ## Make lists of all the dots arguments to be passed to each function.
-    par_dots <- dots[intersect(names(dots),names(par()))]
-    image_dots <- dots[intersect(names(dots), c(names(par()), names(formals(graphics:::image.default))))]
-    plot_dots <- dots[intersect(names(dots), c(names(par()), names(formals(graphics:::plot.default))))]
-    lines_dots <- dots[intersect(names(dots), c(names(par()), names(formals(graphics:::lines))))]
-    axis_dots <- dots[intersect(names(dots), c(names(par()), names(formals(graphics::axis))))]
+    par_dots <- dots[intersect(names(dots),names(graphics::par()))]
+    image_dots <- dots[intersect(names(dots), c(names(graphics::par()), names(formals(graphics:::image.default))))]
+    plot_dots <- dots[intersect(names(dots), c(names(graphics::par()), names(formals(graphics:::plot.default))))]
+    lines_dots <- dots[intersect(names(dots), c(names(graphics::par()), names(formals(graphics:::lines))))]
+    axis_dots <- dots[intersect(names(dots), c(names(graphics::par()), names(formals(graphics::axis))))]
 
-    ## Contour is awkward, so it just gets par() args. lwd is not specified
+    ## Contour is awkward, so it just gets graphics::par() args. lwd is not specified
     ## so it can get varying values.
     contour_dots <- par_dots[!names(par_dots) %in% c("lwd")]
 
@@ -521,7 +521,7 @@ PowerPlot =
 ##'   result of AddExample is consistent with the figure it draws on top of
 ##'   (PowerPlot or GridPlot), copy the arguments `x` and `slicer` given to
 ##'   PowerPlot or GridPlot to AddTarget.
-##' @param x,target_value,target_at_least,find_lowest,method,example_text,summary_function
+##' @param target_value,target_at_least,find_lowest,method,example_text,summary_function
 ##'   See help for \code{PowerPlot}. Ignore if x is a power_example.
 ##' @param example A list, defining at which value (list element value) of which
 ##'   parameter(s) (list element name(s)) the example is drawn for a power of
@@ -704,7 +704,7 @@ AddExample = function(x,
   ## =======================================================
   ## Get graphics parameters from the dots
   ## =======================================================
-  ## To make life simple, I only allow formals from par(), this ensures
+  ## To make life simple, I only allow formals from graphics::par(), this ensures
   ## the dots from GridPlot or PowerPlot will also be valid
   ## after filtering.
 
@@ -712,14 +712,11 @@ AddExample = function(x,
   ## call (so they need to be filtered again.
   dots = list(...)
 
-  ## I grasp lwd here to make text and circle lwd match arrows
-  if('lwd' %in% names(dots)){lwd = dots$lwd} else {lwd = par()$lwd}
-
   ## Run directly from the global environment. If run from GridPlot or PowerPlot
   ## repeat warnings add confusion.
   top_level <- identical(parent.frame(), .GlobalEnv)
 
-  good_args = names(par())
+  good_args = names(graphics::par())
   bad_args = setdiff(names(dots), good_args)
   if (length(bad_args) > 0) {
     if(top_level) {
@@ -729,13 +726,13 @@ AddExample = function(x,
     dots[bad_args] = NULL
   }
 
-  if(!"cex" %in% names(dots)) dots$cex = par()$cex
+  if(!"cex" %in% names(dots)) dots$cex = graphics::par()$cex
 
   ## Used for the arrows and the text
   par_dots = dots
 
   ## points just gets par(), cex is omitted so we can specify the inner to outer ratio
-  points_dots = dots[intersect(names(dots), setdiff(names(par()), c("cex", "pch")))]
+  points_dots = dots[intersect(names(dots), setdiff(names(graphics::par()), c("cex", "pch")))]
 
   ## =================================
   ## Draw

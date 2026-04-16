@@ -225,7 +225,7 @@ GridPlot = function(x,
   ## Allow flexible parameter specification via ellipsis
   dots = list(...)
 
-  good_args = c(names(par()),
+  good_args = c(names(graphics::par()),
                 names(formals(graphics::axis)),
                 names(formals(graphics:::plot.default)),
                 names(formals(graphics:::lines))
@@ -267,10 +267,10 @@ GridPlot = function(x,
                    target_value, '')}
 
   ## Make lists of all the dots arguments to be passed to each function.
-  par_dots <- dots[intersect(names(dots),names(par()))]
-  plot_dots <- dots[intersect(names(dots), c(names(par()), names(formals(graphics:::plot.default))))]
-  axis_dots <- dots[intersect(names(dots), c(names(par()), names(formals(graphics::axis))))]
-  lines_dots <- dots[intersect(names(dots), c(names(par()), names(formals(graphics::lines))))]
+  par_dots <- dots[intersect(names(dots),names(graphics::par()))]
+  plot_dots <- dots[intersect(names(dots), c(names(graphics::par()), names(formals(graphics:::plot.default))))]
+  axis_dots <- dots[intersect(names(dots), c(names(graphics::par()), names(formals(graphics::axis))))]
+  lines_dots <- dots[intersect(names(dots), c(names(graphics::par()), names(formals(graphics::lines))))]
   ## The arguments to legend are a bit of a mix, so just take the basic ones.
   legend_dots <- dots[intersect(names(dots), c("lwd", "lty", "cex"))]
 

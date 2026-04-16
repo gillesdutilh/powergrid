@@ -98,7 +98,7 @@ regressing the contour values on the x and y-axis. Suggested value is
 but use is discouraged, since regressing the contour values flattens the
 contour plot, thereby \emph{biasing} the contour lines.}
 
-\item{...}{Further arguments to \code{\link{par}}, \code{\link{axes}} and
+\item{...}{Further arguments to \code{\link{par}}, \code{\link{axis}} and
 \code{\link{image}}. A few exceptions (e.g. \code{y}) are ignored with a warning.}
 }
 \value{
