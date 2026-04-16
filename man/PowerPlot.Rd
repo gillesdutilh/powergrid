@@ -21,7 +21,6 @@ PowerPlot(
   example_text = TRUE,
   title = NULL,
   labcex = 1.2,
-  axes = TRUE,
   par_labels = NULL,
   smooth = NA,
   ...
@@ -89,8 +88,6 @@ title.}
 \item{labcex}{Numeric value passed to `contour, specifying the size of the
 contour labels.}
 
-\item{axes}{Logical, should axes be plotted.}
-
 \item{par_labels}{Named vector with elements named as the parameters
 plotted, with as values the desired labels.}
 
@@ -153,7 +150,8 @@ The plot takes the \code{\link{graphical parameters}} from \code{par}. If graphi
 parameters are given as arguments to the function they will be passed to
 the calls generating axes, titles and plotting. Grid lines are not modified
 by graphical parameters to PowerPlot. \code{lty} is only passed to the plotted
-contours (e.g. to prevent dashed axes).
+contours (e.g. to prevent dashed axes). For further customisation of the
+axes \code{xaxt} and \code{yaxt} can be set to "n", and axes can be added afterwards.
 }
 
 }

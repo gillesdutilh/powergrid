@@ -15,7 +15,7 @@
 ##' If the input to argument x (class `power_array`) contains iterations that
 ##' are not summarized, it will be summarized by `summary_function` with default
 ##' `mean`.
-##' 
+##'
 ##' Note that a line may stop in a corner of the plotting region, not reaching
 ##' the margin. This is often correct behavior, when the \code{target_value}
 ##' level is not reached anywhere in that corner of the parameter range. In case
@@ -62,10 +62,12 @@
 ##' @param col A vector with the length of \code{l_par} defining the color(s) of
 ##'   the lines.
 ##' @param example_text When an example is drawn, should the the required par
-##'   value, and the line parameter value be printed alongside the arrow(s)
+##'   value, and the line parameter value be printed alongside the arrow(s).
 ##' @param title Character string, if not \code{NULL}, replaces default figure
-##'   title.
+##'   title. Replaces `main`if sepcifiec by `...`.
 ##' @param xlim,ylim See \code{?graphics::plot}.
+##' @param add_legend Should the legend be automatically generated
+##' (`default = TRUE`), set to FALSE and add afterwards for more flexibility.
 ##' @param smooth Logical. If TRUE, a 5th order polynomial is fitted though the
 ##'   points constituting each line for smoothing.
 ##' @seealso \code{\link{PowerGrid}}, \code{\link{AddExample}},
@@ -111,7 +113,7 @@
 ##'          col = 3
 ##'          )
 ##'
-##' 
+##'
 ##' ## Above, GridPlot used the default: The first dimension is what you search
 ##' ## (often n), the 2nd and 3rd define the grid of parameters at which the
 ##' #search # is done. Setting this explicitly, with x, y, and l-par, it looks
@@ -148,10 +150,13 @@ GridPlot = function(x,
                     col = NULL,
                     example_text = TRUE,
                     title = NULL,
+                    axes = TRUE,
                     par_labels = NULL,
+                    add_legend = TRUE,
                     xlim = NULL,
                     ylim = NULL,
-                    smooth = FALSE)
+                    smooth = FALSE,
+                    ...)
 {
   ## translator for labels; translates if label is available
   Trans = function(x){
@@ -163,46 +168,26 @@ GridPlot = function(x,
     return(x)
   }
 
-  ## =================================
-  ## process input
-  ## =================================
-  x = ArraySlicer(x, slicer)
-  ## check number of function outputs, dimensionality and summarized status, and
-  ## give feedback in warnings
-  if (all(class(x) == 'power_array')) # made using powergrid functions
-  {
-    ## if there are multiple function returns saved in power_array, give a warning
-    ## and take only the first, by setting slicing accordingly.
-    if (attr(x, 'sim_function_nval') > 1) # still multiple outputs
-    {
-      ## assume the user want the first
-      chosen_fun_out = attr(x, 'dimnames')$fun_out[1]
-      x = ArraySlicer(x, slicer = list(fun_out = chosen_fun_out))
-      warning(paste0("Argument 'x' contains multiple function outputs at each parameter combination (even after possible slicing with argument 'slicer'). \n*** Function output ",
-                     chosen_fun_out,
-                     " was automatically chosen to be plotted! ***\nTo explicitly choose a function output, do so using argument 'slicer', including 'fun_out = <output name> in that list."), call. = FALSE)
-    }
-    if(!attr(x, which = 'summarized')){ # if object contains iterations, first
-                                        # summarize
-      x = SummarizeIterations(x, summary_function)
-      warning(paste0(
-        "The object 'x' you supplied to GridPlot contains individual ",
-        "iterations. For sensible plotting, these were automatically ",
-        "summarized across iterations using the function given in ",
-        "argument `summary_function`."), call. = FALSE)
-      summarize_text = " (after summarizing)"
-    } else {summarize_text = ""}
-    ## Dimensionality
-    if(length(dim(x)) != 3){
-      stop(paste0(
-        ifelse(is.null(slicer),
-               paste0("'x' should be a 3-dimensional array", summarize_text,", but it is a "),
-               paste("After slicing, 'x' should be a 3-dimensional array", summarize_text, ", but it is a ")),
-        length(dim(x)), "-dimensional array instead."))
-    }
-  } else {
-    stop("The object 'x' should be of class 'power_array'. ", call. = FALSE)
-  } 
+  ## =======================================================
+  ## process power array
+  ## =======================================================
+  if (all(class(x) != 'power_array')) stop("The object 'x' should be of class 'power_array'. ", call. = FALSE)
+
+  x = powergrid:::EnsureSummarized(x, summary_function = summary_function)
+
+  ## =======================================================
+  ## take slice that should be plotted
+  ## =======================================================
+  ## TODO: this if structure is not needed as ArraySlicer seems to
+  ## return a unchanged array if slicer = NULL, incidental behaviour though
+  ## So best to keep this in (or change array slicer).
+  if(!is.null(slicer)){
+    sliced_x = ArraySlicer(x = x, slicer = slicer)
+  } else {sliced_x = x}
+
+  sliced_x = powergrid:::EnsureSingleFunOut(sliced_x, sliced = TRUE)
+
+  powergrid:::CheckArrayDim(sliced_x, required_dim = 3)
 
   ## deal with dimensions: user may enter none, one, two, or all of x-, y, and
   ## l-par. For processing, I put them in a vector and then fill the empty
@@ -212,68 +197,139 @@ GridPlot = function(x,
   par_vec[1] = ifelse(is.null(y_par), NA, y_par)
   par_vec[2] = ifelse(is.null(x_par), NA, x_par)
   par_vec[3] = ifelse(is.null(l_par), NA, l_par)
-  dim_vec = names(dimnames(x))
+  dim_vec = names(dimnames(sliced_x))
   par_vec[is.na(par_vec)] = dim_vec[!dim_vec %in% par_vec]
   y_par = par_vec[1]; x_par = par_vec[2]; l_par = par_vec[3]
   ##
   ## define colors
   if (is.null(col)){
-    col = grDevices::grey.colors(length(dimnames(x)[[l_par]]))
+    col = grDevices::grey.colors(length(dimnames(sliced_x)[[l_par]]))
   } else {
-    if (length(col) != length(dimnames(x)[[l_par]])){
+    if (length(col) != length(dimnames(sliced_x)[[l_par]])){
       stop('Length of argument col must be equal to the number of lines to be drawn, as defined by the levels of dimension `l_par` of `x` after eventual slicing.')
     }
   }
-  names(col) = dimnames(x)[[l_par]]
-  
+  names(col) = dimnames(sliced_x)[[l_par]]
+
   ## order dimensions of input, so that we plot the right dimensions
-  ## against eachother. Correct attributes while doing so
-  attributes_x = attributes(x)
-  x = aperm(x, c(y_par, x_par, l_par))
-  attributes_x$dimnames = attributes(x)$dimnames
-  attributes_x$dim = attributes(x)$dim
-  attributes(x) = attributes_x
+  ## against each other. Correct attributes while doing so
+  attributes_x = attributes(sliced_x)
+  sliced_x = aperm(sliced_x, c(y_par, x_par, l_par))
+  attributes_x$dimnames = attributes(sliced_x)$dimnames
+  attributes_x$dim = attributes(sliced_x)$dim
+  attributes(sliced_x) = attributes_x
+
+  ## =======================================================
+  ## User graphical arguments
+  ## =======================================================
+  ## Allow flexible parameter specification via ellipsis
+  dots = list(...)
+
+  good_args = c(names(par()),
+                names(formals(graphics::axis)),
+                names(formals(graphics:::plot.default)),
+                names(formals(graphics:::lines))
+  )
+  good_args = setdiff(good_args, "...")
+
+  bad_args = setdiff(names(dots), good_args)
+  if (length(bad_args) > 0) {
+    warning("Only arguments to par(), axis() plot.default() and lines() can be supplied through `...` the following are ignored: ",
+            paste(bad_args, collapse = ", "), call. = FALSE)
+    dots[bad_args] = NULL
+  }
+
+  ## do not allow dots to override core internals
+  exeption_bad_args = intersect(names(dots), c("y", "z", "type", "at"))
+  if (length(exeption_bad_args) > 0) {
+    warning("These arguments cannot be supplied through `...` and are ignored: ",
+            paste(exeption_bad_args, collapse = ", "), call. = FALSE)
+    dots[exeption_bad_args] = NULL
+  }
+
+  ## Only let lty affect certain plot characteristics, so remove from dots
+  user_lty = if ("lty" %in% names(dots)) dots$lty else NULL
+  dots$lty = NULL
+
+  ## Set the labels, to user specified or using Trans()
+  dots$xlab = if ("xlab" %in% names(dots)) dots$xlab else Trans(x_par)
+  dots$ylab = if ("ylab" %in% names(dots)) dots$ylab else Trans(y_par)
+
+  ## Get the plot title priority is title arg > main arg > internal
+  if ("main" %in% names(dots)) {
+    if (is.null(title)) title = dots$main
+    dots$main = NULL
+  }
+  if(is.null(title)){
+    title = paste0(ifelse(find_lowest, 'Minimum ', 'Maximum '),
+                   Trans(y_par),
+                   ' for a Power of ',
+                   target_value, '')}
+
+  ## Make lists of all the dots arguments to be passed to each function.
+  par_dots <- dots[intersect(names(dots),names(par()))]
+  plot_dots <- dots[intersect(names(dots), c(names(par()), names(formals(graphics:::plot.default))))]
+  axis_dots <- dots[intersect(names(dots), c(names(par()), names(formals(graphics::axis))))]
+  lines_dots <- dots[intersect(names(dots), c(names(par()), names(formals(graphics::lines))))]
+  ## The arguments to legend are a bit of a mix, so just take the basic ones.
+  legend_dots <- dots[intersect(names(dots), c("lwd", "lty", "cex"))]
+
+  ## Only the legend and the lines get the specified lty
+  lines_dots$lty <- legend_dots$lty <- user_lty
+
+
 
   ## =================================
-  ## Prepare graphical coordinates
+  ## Prepare graph coordinates
   ## =================================
   ## find min or max to plot
-  y_rec = FindTarget(x, target_value = target_value,# min or max required of
-                                        # y_par
+  y_rec = FindTarget(sliced_x, target_value = target_value,# min or max required of
+                     # y_par
                      par_to_search = y_par,
                      find_lowest = find_lowest,
                      target_at_least = target_at_least,
                      method = method)
+
   ## if there are only NAs in y_rec, there are no lines, explain in warning:
   if (all(is.na(y_rec))){
-    warning("The target value wasn't achieved at any of the parameter combinations in x. Therefore, no lines can be drawn.", call. = FALSE)
+    warning("The target value wasn't achieved at any of the parameter combinations",
+            " in x. Therefore, no lines can be drawn.", call. = FALSE)
   } else {
-  ## if there are some NAs in y_rec, explain what this means
+    ## if there are some NAs in y_rec, explain what this means
     if (any(is.na(y_rec))){
-      warning("At some combinations of `x_par` and `l_par`, no `y_par` was found that yielded the required target value, which may result in lines ending abruptly. In most common use cases, you may want to increasing the range of n.", call. = FALSE)
+      warning("At some combinations of `x_par` and `l_par`, no `y_par` was found",
+              " that yielded the required target value, which may result in lines",
+              " ending abruptly. In most common use cases, you may want to ",
+              "increasing the range of n.", call. = FALSE)
     }
   }
   ## declare line coordinate containers
-  xvals = as.numeric(dimnames(x)[[x_par]])
-  yvals = as.numeric(dimnames(x)[[y_par]])
+  xvals = as.numeric(dimnames(sliced_x)[[x_par]])
+  yvals = as.numeric(dimnames(sliced_x)[[y_par]])
   ## plotting limits
   if (is.null(xlim)){xlim = range(xvals)}
   if (is.null(ylim)){ylim = range(yvals)}
+
   ## =================================
   ## draw graph
   ## =================================
   ##
   at_x = pretty(xvals[xvals >= xlim[1] & xvals <= xlim[2]])
   at_y = pretty(yvals[yvals >= ylim[1] & yvals <= ylim[2]])
-  plot(0,
-       xlim = xlim,
-       ylim = ylim,
-       xlab = Trans(x_par), ylab = Trans(y_par), type = 'n', axes = FALSE)
-  graphics::axis(1, at = at_x)
-  graphics::axis(2, at = at_y, las = 1)
+  do.call(plot, args=append(list(x=0, xlim = xlim, ylim = ylim,
+                                 type = 'n', axes = FALSE), plot_dots))
+
+  do.call(graphics::box, par_dots)
+
+  if(axes) {
+    do.call(graphics::axis, args= append(list(side=1, at = at_x), axis_dots))
+    do.call(graphics::axis, args= append(list(side=2, at = at_y), axis_dots))
+  }
+  ## Gridlines are unchanged by par arguments
   graphics::abline(v = at_x,
                    h = at_y,
                    col = grDevices::grey.colors(1, .95, .95))
+
   for(i in 1:ncol(y_rec)){
     ys = y_rec[, i]
     xs = as.numeric(dimnames(y_rec)[[x_par]])
@@ -281,41 +337,39 @@ GridPlot = function(x,
       plm = stats::lm(ys ~ xs + I(xs^2) + I(xs^3) + I(xs^4) + I(xs^5))
       ys = stats::predict(plm, newdata = data.frame(xs))
     }
-    graphics::lines(xs, ys, col = col[i], lwd = 2)}
+    do.call(graphics::lines, args = append(list(x=xs, y=ys, col = col[i]), lines_dots))
+  }
+
   ## =================================
   ## add legend
   ## =================================
-  graphics::legend('topright', box.lwd = 0, col = col, lwd = 2,
-                   legend = names(col),
-                   title = Trans(l_par), ncol = min(length(names(col)), 3),
-                   bg = 'white', inset = .01)
+  if(add_legend) {
+    do.call(graphics::legend, append(
+      list(x='topright', box.lwd = 0, col = col,
+           legend = names(col), title = Trans(l_par),
+           ncol = min(length(names(col)), 3),
+           bg = 'white', inset = .01),
+      legend_dots))
+  }
   ## =================================
   ## Add example
   ## =================================
   if(!is.null(example)){
-    ## multiple examples are possible
-    y_ex = ArraySlicer(y_rec, example)
-    usr = graphics::par()$usr
-    x0 = grDevices::extendrange(usr[1:2], f = -.02)[1]
-    y0 = grDevices::extendrange(usr[3:4], f = -.02)[1]
-    arrow_col = col[as.character(example[[l_par]])] # each arrow gets color of
-                                        # the relevant line
-    graphics::segments(example[[x_par]], y0, example[[x_par]], y_ex, col = arrow_col)
-    graphics::arrows(example[[x_par]], y_ex, x0, y_ex, length = .15, col = arrow_col)
-    if (example_text){
-      graphics::text(x = x0, y = y_ex,
-                     labels = paste(y_ex, 'at', Trans(l_par), '=', example[[l_par]]),
-                     adj = c(0, -1), col = arrow_col)
-    }
+
+    example_strata <- as.character(example[[names(dimnames(sliced_x))[3]]])
+    subset_col <- col[match(example_strata, dimnames(sliced_x)[[3]])]
+
+    do.call(AddExample, append(list(x = sliced_x,
+                                    example = example,
+                                    target_value = target_value,
+                                    find_lowest = find_lowest,
+                                    target_at_least = target_at_least,
+                                    col = subset_col,
+                                    example_text = example_text),
+                               dots))
   }
-  if(is.null(title)){
-    title = paste0(ifelse(find_lowest, 'Minimum ', 'Maximum '),
-                   Trans(y_par),
-                   ' for a Power of ',
-                   target_value, '')}
   graphics::title(title)
   invisible(list('at_x' = at_x,
                  'at_y' = at_y,
                  'line_colors' = col))
 }
-

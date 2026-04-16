@@ -35,7 +35,8 @@
 ##'   parameters are given as arguments to the function they will be passed to
 ##'   the calls generating axes, titles and plotting. Grid lines are not modified
 ##'   by graphical parameters to PowerPlot. `lty` is only passed to the plotted
-##'   contours (e.g. to prevent dashed axes).
+##'   contours (e.g. to prevent dashed axes). For further customisation of the
+##'   axes `xaxt` and `yaxt` can be set to "n", and axes can be added afterwards.
 ##'
 ##' @param x An object of class `power_array` (from powergrid).
 ##' @param slicer If the parameter grid for which `x' was constructed has more
@@ -79,7 +80,6 @@
 ##'   title.
 ##' @param labcex Numeric value passed to `contour, specifying the size of the
 ##'   contour labels.
-##' @param axes Logical, should axes be plotted.
 ##' @param par_labels Named vector with elements named as the parameters
 ##'   plotted, with as values the desired labels.
 ##' @param smooth Numeric, defaults to NA, meaning no smoothing. Non NA value is
@@ -196,7 +196,6 @@ PowerPlot =
            example_text = TRUE, # do you want a text next to the Example arrow
            title = NULL,
            labcex = 1.2, # cex specifically for the labels on the contours
-           axes = TRUE, # Should axes be plotted
            par_labels = NULL,
            smooth = NA,
            ...) # Ellipsis passed to various internal calls
@@ -207,18 +206,20 @@ PowerPlot =
     ## =======================================================
     if (all(class(x) != 'power_array')) stop("The object 'x' should be of class 'power_array'. ", call. = FALSE)
 
-    x = EnsureSummarized(x, summary_function = summary_function)
+    x = powergrid:::EnsureSummarized(x, summary_function = summary_function)
 
     ## =======================================================
     ## take slice that should be plotted
     ## =======================================================
+    ## TODO: this if structure is not needed as ArraySlicer seems to
+    ## return a unchanged array if slicer = NULL, incidental behaviour though.
     if(!is.null(slicer)){
       sliced_x = ArraySlicer(x = x, slicer = slicer)
     } else {sliced_x = x}
 
-    sliced_x = EnsureSingleFunOut(sliced_x)
+    sliced_x = powergrid:::EnsureSingleFunOut(sliced_x)
 
-    left_dims = CheckArrayDim(sliced_x, required_dim = c(1,2))
+    left_dims = powergrid:::CheckArrayDim(sliced_x, required_dim = c(1,2))
 
     ## =======================================================
     ## Get the name of the parameter to search (typically n)
@@ -271,13 +272,14 @@ PowerPlot =
 
     good_args = c(names(par()),
                   names(formals(graphics::axis)),
+                  names(formals(graphics::lines)),
+                  names(formals(graphics:::plot.default)),
                   names(formals(graphics:::image.default)))
     good_args = setdiff(good_args, "...")
 
-
     bad_args = setdiff(names(dots), good_args)
     if (length(bad_args) > 0) {
-      warning("Only arguments to par(), axis() and image() can be supplied through `...` the following are ignored: ",
+      warning("Only arguments to par(), axis(), lines(), plot.default() and image.defualt() can be supplied through `...` the following are ignored: ",
               paste(bad_args, collapse = ", "), call. = FALSE)
       dots[bad_args] = NULL
     }
@@ -290,14 +292,11 @@ PowerPlot =
       dots[exeption_bad_args] = NULL
     }
 
-
-
     ## Get the plot title priority is title arg > main arg > internal
     if ("main" %in% names(dots)) {
       if (is.null(title)) title = dots$main
       dots$main = NULL
     }
-
     if (is.null(title)){
       title = ifelse(
         is.null(slicer) | all(names(dimnames(array_toplot)) == names(slicer)),
@@ -319,6 +318,17 @@ PowerPlot =
     user_lty = if ("lty" %in% names(dots)) dots$lty else NULL
     dots$lty = NULL
 
+    ## Make lists of all the dots arguments to be passed to each function.
+    par_dots <- dots[intersect(names(dots),names(par()))]
+    image_dots <- dots[intersect(names(dots), c(names(par()), names(formals(graphics:::image.default))))]
+    plot_dots <- dots[intersect(names(dots), c(names(par()), names(formals(graphics:::plot.default))))]
+    lines_dots <- dots[intersect(names(dots), c(names(par()), names(formals(graphics:::lines))))]
+    axis_dots <- dots[intersect(names(dots), c(names(par()), names(formals(graphics::axis))))]
+
+    ## Contour is awkward, so it just gets par() args. lwd is not specified
+    ## so it can get varying values.
+    contour_dots <- par_dots[!names(par_dots) %in% c("lwd")]
+
     ## =======================================================
     ## Draw 1d figure
     ## =======================================================
@@ -326,38 +336,38 @@ PowerPlot =
 
       x_vals = as.numeric(names(array_toplot))
 
-      dots$xlab = if (is.null(dots$xlab)) Trans(names(dimnames(array_toplot))) else dots$xlab
-      dots$ylab = if (is.null(dots$ylab)) "Power" else dots$ylab
+      if(is.null(plot_dots$xlab)) plot_dots$xlab = Trans(names(dimnames(array_toplot)))
+      if(is.null(plot_dots$ylab)) plot_dots$ylab = "Power"
       plot_main = if (!is.null(title)) {
         title
       } else {
         paste('Power as a function of', Trans(names(margins_toplot)[[1]]))
       }
 
-      plot_args = c(
-        list(x = x_vals,
-             y = array_toplot,
-             type = 'n',
-             axes = FALSE),
-        dots
-      )
       ## make empty plot, add vertical gridlines
-      do.call(graphics::plot, plot_args)
+      do.call(graphics::plot, append(list(x = x_vals,
+                                          y = array_toplot,
+                                          type = 'n',
+                                          axes = FALSE),
+                                     plot_dots))
       graphics::abline(v = x_vals, col = 'lightgrey')
 
       ## Add contour
-      do.call(graphics::lines, append(list(x_vals, array_toplot, col = col,
-                                           lty=user_lty), dots))
+      do.call(graphics::lines, append(list(x= x_vals,
+                                           y= array_toplot,
+                                           col = col,
+                                           lty=user_lty),
+                                      lines_dots))
 
       ## Add axes
-      if(axes) {
-        do.call(graphics::axis, append(list(side=1, at = x_vals), dots))
-        do.call(graphics::axis, append(list(side=2), dots))
-      }
+      do.call(graphics::axis, append(list(side=1,
+                                          at = x_vals),
+                                     axis_dots))
+      do.call(graphics::axis, append(list(side=2), axis_dots))
 
       ## Border and title
-      do.call(graphics::box, dots)
-      do.call(graphics::title, append(list(main = plot_main), dots))
+      do.call(graphics::box, par_dots)
+      do.call(graphics::title, append(list(main = plot_main), par_dots))
 
       ## Add an example
       ## TODO: y_ex_value does not seem to be used.
@@ -372,7 +382,7 @@ PowerPlot =
       image_x = image_y = image_z = NULL
 
     } else
-    ## =======================================================
+      ## =======================================================
     ## Draw 2d figure
     ## =======================================================
     {
@@ -380,8 +390,8 @@ PowerPlot =
       image_y = as.numeric(margins_toplot[[1]])
       image_z = t(array_toplot)
 
-      dots$xlab = if (is.null(dots$xlab)) Trans(names(margins_toplot)[[2]]) else dots$xlab
-      dots$ylab = if (is.null(dots$ylab)) Trans(names(margins_toplot)[[1]]) else dots$ylab
+      image_dots$xlab = if (is.null(image_dots$xlab)) Trans(names(margins_toplot)[[2]])
+      image_dots$ylab = if (is.null(dots$ylab)) Trans(names(margins_toplot)[[1]])
 
       image_args = c(
         list(x = image_x,
@@ -390,14 +400,13 @@ PowerPlot =
              axes = FALSE,
              col = image_cols,
              main = title),
-        dots
+        image_dots
       )
       do.call(graphics::image, image_args)
 
-      ## Draw gridlines
-      do.call(graphics::abline,
-              append(list(h = margins_toplot[[1]], v = margins_toplot[[2]],
-                          col = 'white'), dots))
+      ## Draw gridlines (don't receive dots)
+      graphics::abline(h = margins_toplot[[1]], v = margins_toplot[[2]],
+                       col = 'white')
 
       ## If a target power is specified double the lwd on the target.
       if (!is.null(target_value)) {
@@ -414,11 +423,11 @@ PowerPlot =
         append(list(x = as.numeric(margins_toplot[[2]]),
                     y = as.numeric(margins_toplot[[1]]),
                     z = t(array_toplot), add = TRUE, labcex = labcex,
-                    levels = target_levels, lwd = power_lwds, lty=dots$lty,
+                    levels = target_levels, lwd = power_lwds,
                     col = col),
-               dots[!names(dots) %in% c("lwd", "lty", "xlim", "ylim")])
+               contour_dots)
 
-      ## For smoothed plotting the only the z calculation differs now
+      ## For smoothed plotting only the z calculation differs now
       if (!is.na(smooth)) {
         smooth_pred_grid = as.matrix(expand.grid(as.numeric(margins_toplot[[2]]),
                                                  as.numeric(margins_toplot[[1]])))
@@ -432,9 +441,9 @@ PowerPlot =
         contour_args$z = smooth_z_m
       }
       do.call(graphics::contour, contour_args)
-      do.call(graphics::axis, append(list(side=1), dots))
-      do.call(graphics::axis, append(list(side=2), dots))
-      do.call(graphics::box, args = dots)
+      do.call(graphics::axis, append(list(side=1), axis_dots))
+      do.call(graphics::axis, append(list(side=2), axis_dots))
+      do.call(graphics::box, args = par_dots)
     }
 
     ## =======================================================
@@ -608,15 +617,15 @@ AddExample = function(x,
   ## =======================================================
   if(class(x) == "power_array") {
 
-    x = EnsureSummarized(x, summary_function = summary_function)
+    x = powergrid:::EnsureSummarized(x, summary_function = summary_function)
 
     sliced_x = ArraySlicer(x = x, slicer = slicer)
 
-    sliced_x = EnsureSingleFunOut(sliced_x)
+    sliced_x = powergrid:::EnsureSingleFunOut(sliced_x)
 
     ## This is translated from Gilles, I don't quite get the -1 for the exampl
-    left_dims = CheckArrayDim(sliced_x,
-                              required_dim = c(1,2) + (length(example) - 1)
+    left_dims = powergrid:::CheckArrayDim(sliced_x,
+                                          required_dim = c(1,2) + (length(example) - 1)
     )
 
     ## =======================================================

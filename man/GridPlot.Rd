@@ -20,10 +20,13 @@ GridPlot(
   col = NULL,
   example_text = TRUE,
   title = NULL,
+  axes = TRUE,
   par_labels = NULL,
+  add_legend = TRUE,
   xlim = NULL,
   ylim = NULL,
-  smooth = FALSE
+  smooth = FALSE,
+  ...
 )
 }
 \arguments{
@@ -75,13 +78,16 @@ is aggregated by \code{summary_fun}. Otherwise ignored.}
 the lines.}
 
 \item{example_text}{When an example is drawn, should the the required par
-value, and the line parameter value be printed alongside the arrow(s)}
+value, and the line parameter value be printed alongside the arrow(s).}
 
 \item{title}{Character string, if not \code{NULL}, replaces default figure
-title.}
+title. Replaces \code{main}if sepcifiec by \code{...}.}
 
 \item{par_labels}{Named vector where elements names represent the parameters
 that are plotted, and the values set the desired labels.}
+
+\item{add_legend}{Should the legend be automatically generated
+(\code{default = TRUE}), set to FALSE and add afterwards for more flexibility.}
 
 \item{xlim, ylim}{See \code{?graphics::plot}.}
 
