@@ -191,7 +191,7 @@ PowerPlot =
            method = 'step',
            summary_function = mean,
            target_levels = c(.8, .9, .95), # which power iso lines to draw
-           col = grDevices::grey.colors(1, .2, .2), # TODO: why these specifically
+           col = grDevices::grey.colors(1, .2, .2), # TODO: Decide whether to fix this.
            shades_of_grey = TRUE, # do you want shades of grey on background
            example_text = TRUE, # do you want a text next to the Example arrow
            title = NULL,
@@ -390,8 +390,8 @@ PowerPlot =
       image_y = as.numeric(margins_toplot[[1]])
       image_z = t(array_toplot)
 
-      image_dots$xlab = if (is.null(image_dots$xlab)) Trans(names(margins_toplot)[[2]])
-      image_dots$ylab = if (is.null(dots$ylab)) Trans(names(margins_toplot)[[1]])
+      if(is.null(image_dots$xlab)) image_dots$xlab = Trans(names(margins_toplot)[[2]])
+      if(is.null(dots$ylab)) image_dots$ylab = Trans(names(margins_toplot)[[1]])
 
       image_args = c(
         list(x = image_x,
@@ -452,12 +452,18 @@ PowerPlot =
     draw_example = !is.null(target_value) &&
       (!is.null(example) | left_dims == 1)
     if (draw_example){
+
+      target_value_logical = target_levels %in% target_value
+      if(length(target_value_logical) == length(col)) {
+        COL = col[target_value_logical]
+      } else COL = col[1]
+
       do.call(AddExample, append(list(x = sliced_x,
                                       example = example,
                                       target_value = target_value,
                                       find_lowest = find_lowest,
                                       target_at_least = target_at_least,
-                                      col = col[1],
+                                      col = COL,
                                       example_text = example_text),
                                  dots))
     }
@@ -508,15 +514,15 @@ PowerPlot =
 ##' Argument \code{example} may contain vectors with length longer than one to
 ##' draw multiple examples.
 ##'
-##' @param
-##'   x,target_value,target_at_least,find_lowest,method,example_text,summary_function
-##'   See help for \code{PowerPlot}.
+##' @param x Either a power array, or a power_example produced by \code{\link{Example}}.
 ##' @param slicer A list, internally passed on to \code{\link{ArraySlicer}} to
 ##'   cut out a (multidimensional) slice from x. You can achieve the same by
 ##'   appending "slicing" inside argument `example`. However, to assure that the
 ##'   result of AddExample is consistent with the figure it draws on top of
 ##'   (PowerPlot or GridPlot), copy the arguments `x` and `slicer` given to
 ##'   PowerPlot or GridPlot to AddTarget.
+##' @param x,target_value,target_at_least,find_lowest,method,example_text,summary_function
+##'   See help for \code{PowerPlot}. Ignore if x is a power_example.
 ##' @param example A list, defining at which value (list element value) of which
 ##'   parameter(s) (list element name(s)) the example is drawn for a power of
 ##'   \code{target_value}. You may supply par vector(s) longer than 1 for
@@ -524,10 +530,10 @@ PowerPlot =
 ##'   example, all must contain a vector of the same length. Be aware that the
 ##'   first element of `example` defines the parameter x-axis, so this function
 ##'   is not fool proof. See argument `slicer` above. If x has only one
-##'   dimention, the example needs not be defined.
+##'   dimension, the example needs not be defined. Ignored if x is a power_example.
 ##' @param col Color of arrow and text drawn.
-##' @param ... Further arguments are passed to the two calls of function
-##'   \code{graphics::arrows} drawing the nicked arrow.
+##' @param ... Further arguments to \code{\link{par}}, which are passed to the
+##' points and text. For the points pch is fixed.
 ##' @seealso \code{\link{PowerPlot}}, \code{\link{GridPlot}}
 ##' @return invisibly NULL
 ##' @author Gilles Dutilh
@@ -605,14 +611,6 @@ AddExample = function(x,
   one_dim = FALSE
 
   ## =======================================================
-  ## process graphics input
-  ## =======================================================
-  dots = list(...)
-
-  ## I grasp lwd here to make text and circle lwd match arrows
-  if('lwd' %in% names(dots)){lwd = dots$lwd} else {lwd = par()$lwd}
-
-  ## =======================================================
   ## Check type of input
   ## =======================================================
   if(class(x) == "power_array") {
@@ -623,7 +621,7 @@ AddExample = function(x,
 
     sliced_x = powergrid:::EnsureSingleFunOut(sliced_x)
 
-    ## This is translated from Gilles, I don't quite get the -1 for the exampl
+    ## This is translated from Gilles, I don't quite get the -1 for the example
     left_dims = powergrid:::CheckArrayDim(sliced_x,
                                           required_dim = c(1,2) + (length(example) - 1)
     )
@@ -655,7 +653,7 @@ AddExample = function(x,
     ## Prepare example(s) for plotting
     ## =================================
     ## essentially loop over each individual example
-    ## TODO: This would be cleaner to do with FindTarget
+    ## TODO (Future): This would be cleaner to do with FindTarget
     y_ex_value = numeric(ns_example)
     x_ex_value = numeric(ns_example)
     for (example_i in 1:ns_example){
@@ -678,7 +676,7 @@ AddExample = function(x,
     }
 
   } else if(class(x) == "power_example") {
-    ## TODO: either warn of specified power etc or check against example
+    ## TODO (Future): either warn of specified power etc or check against example
 
     input_example = x
 
@@ -702,6 +700,43 @@ AddExample = function(x,
     stop("x must either be a power_array or a power_example")
 
   }
+
+  ## =======================================================
+  ## Get graphics parameters from the dots
+  ## =======================================================
+  ## To make life simple, I only allow formals from par(), this ensures
+  ## the dots from GridPlot or PowerPlot will also be valid
+  ## after filtering.
+
+  ## If called within GridPlot or PowerPlot these come directly from the function
+  ## call (so they need to be filtered again.
+  dots = list(...)
+
+  ## I grasp lwd here to make text and circle lwd match arrows
+  if('lwd' %in% names(dots)){lwd = dots$lwd} else {lwd = par()$lwd}
+
+  ## Run directly from the global environment. If run from GridPlot or PowerPlot
+  ## repeat warnings add confusion.
+  top_level <- identical(parent.frame(), .GlobalEnv)
+
+  good_args = names(par())
+  bad_args = setdiff(names(dots), good_args)
+  if (length(bad_args) > 0) {
+    if(top_level) {
+      warning("Only arguments to par() can be supplied through `...` the following are ignored: ",
+            paste(bad_args, collapse = ", "), call. = FALSE)
+    }
+    dots[bad_args] = NULL
+  }
+
+  if(!"cex" %in% names(dots)) dots$cex = par()$cex
+
+  ## Used for the arrows and the text
+  par_dots = dots
+
+  ## points just gets par(), cex is omitted so we can specify the inner to outer ratio
+  points_dots = dots[intersect(names(dots), setdiff(names(par()), c("cex", "pch")))]
+
   ## =================================
   ## Draw
   ## =================================
@@ -711,21 +746,48 @@ AddExample = function(x,
   x0 = grDevices::extendrange(graphics::par()$usr[1:2], f = -.02)[1]
   y0 = grDevices::extendrange(graphics::par()$usr[3:4], f = -.02)[1]
 
-  graphics::arrows(x0 = x_ex_value, y0 = y0,
-                   x1 = x_ex_value, y1 = y_ex_value, length = .15,
-                   code = 0, col = col, ...)
-  graphics::arrows(x0 = x_ex_value, y0 = y_ex_value,
-                   x1 = x0, y1 = y_ex_value, length = .15, col = col, ...)
+  ## Horizontal arrow (code = 0 means no arrowheads, anything else looks odd)
+  do.call(graphics::arrows, append(list(x0 = x_ex_value,
+                                        y0 = y_ex_value,
+                                        x1 = x0,
+                                        y1 = y_ex_value,
+                                        code = 0,
+                                        col = col),
+                                   par_dots))
+
+  ##Vertical arrow
+  do.call(graphics::arrows, append(list(x0 = x_ex_value,
+                                        y0 = y0,
+                                        x1 = x_ex_value,
+                                        y1 = y_ex_value,
+                                        code = 0,
+                                        col = col),
+                                   par_dots))
+
   ## point
-  graphics::points(x_ex_value, y_ex_value,
-                   pch = 19, cex = 1, col = col, lwd = lwd)
+  do.call(graphics::points, append(list(x = x_ex_value,
+                                        y = y_ex_value,
+                                        pch = 19,
+                                        cex = dots$cex *1,
+                                        col = col),
+                                   points_dots))
+
+
   ## circle
-  graphics::points(x_ex_value, y_ex_value,
-                   pch = 1, cex = 3, col = col,
-                   lwd = 1)
+  do.call(graphics::points, append(list(x = x_ex_value,
+                                        y = y_ex_value,
+                                        pch = 1,
+                                        cex = dots$cex *3,
+                                        col = col),
+                                   points_dots))
+
   if (example_text){
-    graphics::text(x = x0, y = y_ex_value, labels = y_ex_value,
-                   adj = c(0, -1), col = col, lwd = lwd)
+    do.call(graphics::text, append(list(x = x0,
+                                        y = y_ex_value,
+                                        labels = y_ex_value,
+                                        adj = c(0, -1),
+                                        col = col),
+                                   par_dots))
   }
   invisible(NULL)
 }
