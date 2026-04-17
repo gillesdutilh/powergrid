@@ -11,6 +11,9 @@ EnsureSingleFunOut(x, condition = "warning", sliced = FALSE)
 
 \item{condition}{If array is not summarised should a \code{warning} or
 \code{error} be produced. Ignored if required dimensions is NULL.}
+
+\item{sliced}{For the condition text should the user be informed the array
+is sliced. Ignored if required dimensions is NULL.}
 }
 \value{
 A power array with only a single fun_out value

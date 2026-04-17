@@ -20,7 +20,6 @@ GridPlot(
   col = NULL,
   example_text = TRUE,
   title = NULL,
-  axes = TRUE,
   par_labels = NULL,
   add_legend = TRUE,
   xlim = NULL,
@@ -93,6 +92,10 @@ that are plotted, and the values set the desired labels.}
 
 \item{smooth}{Logical. If TRUE, a 5th order polynomial is fitted though the
 points constituting each line for smoothing.}
+
+\item{...}{Further arguments to \code{\link{par}}, \code{\link{plot}},
+\code{\link{axis}} and \code{\link{lines}}. A few exceptions (e.g. \code{y})
+are ignored with a warning.}
 }
 \value{
 A list with graphical information to use in further plotting.
@@ -128,7 +131,7 @@ sse_pars = list(
   n = seq(from = 2, to = 100, by = 2),
   delta = seq(from = 0.1, to = 1.5, by = 0.05), ## effect size
   sd = seq(.1, .9, .1)) ## Standard deviation
-PowFun <- function(n, delta, sd){
+PowFun = function(n, delta, sd){
   ptt = power.t.test(n = n/2, delta = delta, sd = sd,
                      sig.level = 0.05)
   return(ptt$power)

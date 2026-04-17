@@ -99,7 +99,8 @@ but use is discouraged, since regressing the contour values flattens the
 contour plot, thereby \emph{biasing} the contour lines.}
 
 \item{...}{Further arguments to \code{\link{par}}, \code{\link{axis}} and
-\code{\link{image}}. A few exceptions (e.g. \code{y}) are ignored with a warning.}
+\code{\link{image}}. A few exceptions (e.g. \code{y}) are ignored with a warning.
+\code{...} is also passed directly to \code{\link{AddExample}}}
 }
 \value{
 A list containing the coordinate arguments x, y, and z, as passed to

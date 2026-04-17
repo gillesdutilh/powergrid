@@ -41,8 +41,9 @@ dimension, the example needs not be defined. Ignored if x is a power_example.}
 
 \item{col}{Color of arrow and text drawn.}
 
-\item{...}{Further arguments to \code{\link{par}}, which are passed to the
-points and text. For the points pch is fixed.}
+\item{...}{Further arguments to \code{\link{par}}, as well as \code{length} and \code{angle}
+for arrows. These are passed to the points, arrows and text. For the points
+\code{pch} is fixed.}
 }
 \value{
 invisibly NULL

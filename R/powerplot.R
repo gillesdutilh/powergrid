@@ -94,6 +94,7 @@
 ##'   \code{summary_fun}. Otherwise ignored.
 ##' @param ... Further arguments to \code{\link{par}}, \code{\link{axis}} and
 ##'   \code{\link{image}}. A few exceptions (e.g. `y`) are ignored with a warning.
+##'   `...` is also passed directly to \code{\link{AddExample}}
 ##' @seealso \code{\link{PowerGrid}}, \code{\link{AddExample}},
 ##'   \code{\link{Example}}, \code{\link{GridPlot}} for plotting
 ##'   interdependencies of 3 parameters.
@@ -204,9 +205,9 @@ PowerPlot =
     ## =======================================================
     ## process power array
     ## =======================================================
-    if (all(class(x) != 'power_array')) stop("The object 'x' should be of class 'power_array'. ", call. = FALSE)
+    if (!inherits(x, "power_array")) stop("The object 'x' should be of class 'power_array'. ", call. = FALSE)
 
-    x = powergrid:::EnsureSummarized(x, summary_function = summary_function)
+    x = EnsureSummarized(x, summary_function = summary_function)
 
     ## =======================================================
     ## take slice that should be plotted
@@ -217,9 +218,9 @@ PowerPlot =
       sliced_x = ArraySlicer(x = x, slicer = slicer)
     } else {sliced_x = x}
 
-    sliced_x = powergrid:::EnsureSingleFunOut(sliced_x)
+    sliced_x = EnsureSingleFunOut(sliced_x)
 
-    left_dims = powergrid:::CheckArrayDim(sliced_x, required_dim = c(1,2))
+    left_dims = CheckArrayDim(sliced_x, required_dim = c(1,2))
 
     ## =======================================================
     ## Get the name of the parameter to search (typically n)
@@ -306,13 +307,14 @@ PowerPlot =
       )
     }
 
-    ## Get bty and las from dots if specified, otherwise use par values
-    dots$las = if ("las" %in% names(dots)) dots$las else graphics::par()$las
-    dots$bty = if ("bty" %in% names(dots)) dots$bty else graphics::par()$bty
-
-    ## If lwd is specified use that, otherwise take lwd from graphics::par().
-    ## Later it has to be omitted from the dots passed to the contour
-    dots$lwd = if ("lwd" %in% names(dots)) dots$lwd else graphics::par()$lwd
+    ## TODO: I am pretty sure these are no longer needed.
+    # ## Get bty and las from dots if specified, otherwise use par values
+    # dots$las = if ("las" %in% names(dots)) dots$las else graphics::par()$las
+    # dots$bty = if ("bty" %in% names(dots)) dots$bty else graphics::par()$bty
+    #
+    # ## If lwd is specified use that, otherwise take lwd from graphics::par().
+    # ## Later it has to be omitted from the dots passed to the contour
+    # dots$lwd = if ("lwd" %in% names(dots)) dots$lwd else graphics::par()$lwd
 
     ## Only let lty affect certain plot characteristics, so remove from dots
     user_lty = if ("lty" %in% names(dots)) dots$lty else NULL
@@ -328,6 +330,9 @@ PowerPlot =
     ## Contour is awkward, so it just gets graphics::par() args. lwd is not specified
     ## so it can get varying values.
     contour_dots <- par_dots[!names(par_dots) %in% c("lwd")]
+
+    ## Add back the lty to certain dots
+    lines_dots$lty = contour_dots$lty = user_lty
 
     ## =======================================================
     ## Draw 1d figure
@@ -355,8 +360,7 @@ PowerPlot =
       ## Add contour
       do.call(graphics::lines, append(list(x= x_vals,
                                            y= array_toplot,
-                                           col = col,
-                                           lty=user_lty),
+                                           col = col),
                                       lines_dots))
 
       ## Add axes
@@ -458,14 +462,14 @@ PowerPlot =
         COL = col[target_value_logical]
       } else COL = col[1]
 
-      do.call(AddExample, append(list(x = sliced_x,
-                                      example = example,
-                                      target_value = target_value,
-                                      find_lowest = find_lowest,
-                                      target_at_least = target_at_least,
-                                      col = COL,
-                                      example_text = example_text),
-                                 dots))
+      AddExample(x = sliced_x,
+                 example = example,
+                 target_value = target_value,
+                 find_lowest = find_lowest,
+                 target_at_least = target_at_least,
+                 col = COL,
+                 example_text = example_text,
+                 ...)
     }
 
     invisible(list('image_args' = list('x' = image_x, 'y' = image_y, 'z' = image_z)))
@@ -532,8 +536,9 @@ PowerPlot =
 ##'   is not fool proof. See argument `slicer` above. If x has only one
 ##'   dimension, the example needs not be defined. Ignored if x is a power_example.
 ##' @param col Color of arrow and text drawn.
-##' @param ... Further arguments to \code{\link{par}}, which are passed to the
-##' points and text. For the points pch is fixed.
+##' @param ... Further arguments to \code{\link{par}}, as well as `length` and `angle`
+##' for arrows. These are passed to the points, arrows and text. For the points
+##' `pch` is fixed.
 ##' @seealso \code{\link{PowerPlot}}, \code{\link{GridPlot}}
 ##' @return invisibly NULL
 ##' @author Gilles Dutilh
@@ -613,17 +618,16 @@ AddExample = function(x,
   ## =======================================================
   ## Check type of input
   ## =======================================================
-  if(class(x) == "power_array") {
+  if(inherits(x, "power_array")) {
 
-    x = powergrid:::EnsureSummarized(x, summary_function = summary_function)
+    x = EnsureSummarized(x, summary_function = summary_function)
 
     sliced_x = ArraySlicer(x = x, slicer = slicer)
 
-    sliced_x = powergrid:::EnsureSingleFunOut(sliced_x)
+    sliced_x = EnsureSingleFunOut(sliced_x)
 
     ## This is translated from Gilles, I don't quite get the -1 for the example
-    left_dims = powergrid:::CheckArrayDim(sliced_x,
-                                          required_dim = c(1,2) + (length(example) - 1)
+    left_dims = CheckArrayDim(sliced_x, required_dim = c(1,2) + (length(example) - 1)
     )
 
     ## =======================================================
@@ -675,7 +679,7 @@ AddExample = function(x,
       }
     }
 
-  } else if(class(x) == "power_example") {
+  } else if(inherits(x, "power_example")) {
     ## TODO (Future): either warn of specified power etc or check against example
 
     input_example = x
@@ -716,11 +720,11 @@ AddExample = function(x,
   ## repeat warnings add confusion.
   top_level <- identical(parent.frame(), .GlobalEnv)
 
-  good_args = names(graphics::par())
+  good_args = union(names(graphics::par()), c("length", "angle"))
   bad_args = setdiff(names(dots), good_args)
   if (length(bad_args) > 0) {
     if(top_level) {
-      warning("Only arguments to par() can be supplied through `...` the following are ignored: ",
+      warning("Only arguments to par(), as well as length and angle can be supplied through `...` the following are ignored: ",
             paste(bad_args, collapse = ", "), call. = FALSE)
     }
     dots[bad_args] = NULL
@@ -728,11 +732,13 @@ AddExample = function(x,
 
   if(!"cex" %in% names(dots)) dots$cex = graphics::par()$cex
 
-  ## Used for the arrows and the text
-  par_dots = dots
-
+  ## Arrows take all arguments
+  arrows_dots = dots
+  ## Text only gets par
+  text_dots = dots[intersect(names(dots), names(graphics::par()))]
   ## points just gets par(), cex is omitted so we can specify the inner to outer ratio
   points_dots = dots[intersect(names(dots), setdiff(names(graphics::par()), c("cex", "pch")))]
+
 
   ## =================================
   ## Draw
@@ -743,23 +749,23 @@ AddExample = function(x,
   x0 = grDevices::extendrange(graphics::par()$usr[1:2], f = -.02)[1]
   y0 = grDevices::extendrange(graphics::par()$usr[3:4], f = -.02)[1]
 
-  ## Horizontal arrow (code = 0 means no arrowheads, anything else looks odd)
+  ## Horizontal arrow (code = 2 for arrow at the end)
   do.call(graphics::arrows, append(list(x0 = x_ex_value,
                                         y0 = y_ex_value,
                                         x1 = x0,
                                         y1 = y_ex_value,
-                                        code = 0,
+                                        code = 2,
                                         col = col),
-                                   par_dots))
+                                   arrows_dots))
 
-  ##Vertical arrow
+  ##Vertical arrow (no arrowhead)
   do.call(graphics::arrows, append(list(x0 = x_ex_value,
                                         y0 = y0,
                                         x1 = x_ex_value,
                                         y1 = y_ex_value,
                                         code = 0,
                                         col = col),
-                                   par_dots))
+                                   arrows_dots))
 
   ## point
   do.call(graphics::points, append(list(x = x_ex_value,
@@ -784,7 +790,7 @@ AddExample = function(x,
                                         labels = y_ex_value,
                                         adj = c(0, -1),
                                         col = col),
-                                   par_dots))
+                                   text_dots))
   }
   invisible(NULL)
 }

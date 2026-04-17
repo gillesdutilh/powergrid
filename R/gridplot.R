@@ -70,6 +70,9 @@
 ##' (`default = TRUE`), set to FALSE and add afterwards for more flexibility.
 ##' @param smooth Logical. If TRUE, a 5th order polynomial is fitted though the
 ##'   points constituting each line for smoothing.
+##' @param ... Further arguments to \code{\link{par}}, \code{\link{plot}},
+##' \code{\link{axis}} and \code{\link{lines}}. A few exceptions (e.g. `y`)
+##' are ignored with a warning.
 ##' @seealso \code{\link{PowerGrid}}, \code{\link{AddExample}},
 ##'   \code{\link{Example}}, \code{\link{PowerPlot}} for similar plotting of
 ##'   just 2 parameters, at multiple power (target value) levels.
@@ -83,7 +86,7 @@
 ##'   n = seq(from = 2, to = 100, by = 2),
 ##'   delta = seq(from = 0.1, to = 1.5, by = 0.05), ## effect size
 ##'   sd = seq(.1, .9, .1)) ## Standard deviation
-##' PowFun <- function(n, delta, sd){
+##' PowFun = function(n, delta, sd){
 ##'   ptt = power.t.test(n = n/2, delta = delta, sd = sd,
 ##'                      sig.level = 0.05)
 ##'   return(ptt$power)
@@ -150,7 +153,6 @@ GridPlot = function(x,
                     col = NULL,
                     example_text = TRUE,
                     title = NULL,
-                    axes = TRUE,
                     par_labels = NULL,
                     add_legend = TRUE,
                     xlim = NULL,
@@ -171,9 +173,9 @@ GridPlot = function(x,
   ## =======================================================
   ## process power array
   ## =======================================================
-  if (all(class(x) != 'power_array')) stop("The object 'x' should be of class 'power_array'. ", call. = FALSE)
+  if (!inherits(x, "power_array")) stop("The object 'x' should be of class 'power_array'. ", call. = FALSE)
 
-  x = powergrid:::EnsureSummarized(x, summary_function = summary_function)
+  x = EnsureSummarized(x, summary_function = summary_function)
 
   ## =======================================================
   ## take slice that should be plotted
@@ -185,9 +187,9 @@ GridPlot = function(x,
     sliced_x = ArraySlicer(x = x, slicer = slicer)
   } else {sliced_x = x}
 
-  sliced_x = powergrid:::EnsureSingleFunOut(sliced_x, sliced = TRUE)
+  sliced_x = EnsureSingleFunOut(sliced_x, sliced = TRUE)
 
-  powergrid:::CheckArrayDim(sliced_x, required_dim = 3)
+  CheckArrayDim(sliced_x, required_dim = 3)
 
   ## deal with dimensions: user may enter none, one, two, or all of x-, y, and
   ## l-par. For processing, I put them in a vector and then fill the empty
@@ -227,8 +229,8 @@ GridPlot = function(x,
 
   good_args = c(names(graphics::par()),
                 names(formals(graphics::axis)),
-                names(formals(graphics:::plot.default)),
-                names(formals(graphics:::lines))
+                names(formals(graphics::plot.default)),
+                names(formals(graphics::lines))
   )
   good_args = setdiff(good_args, "...")
 
@@ -267,15 +269,18 @@ GridPlot = function(x,
                    target_value, '')}
 
   ## Make lists of all the dots arguments to be passed to each function.
-  par_dots <- dots[intersect(names(dots),names(graphics::par()))]
-  plot_dots <- dots[intersect(names(dots), c(names(graphics::par()), names(formals(graphics:::plot.default))))]
-  axis_dots <- dots[intersect(names(dots), c(names(graphics::par()), names(formals(graphics::axis))))]
-  lines_dots <- dots[intersect(names(dots), c(names(graphics::par()), names(formals(graphics::lines))))]
+  par_dots = dots[intersect(names(dots),names(graphics::par()))]
+  plot_dots = dots[intersect(names(dots), c(names(graphics::par()),
+                                            names(formals(graphics::plot.default))))]
+  axis_dots = dots[intersect(names(dots), c(names(graphics::par()),
+                                            names(formals(graphics::axis))))]
+  lines_dots = dots[intersect(names(dots), c(names(graphics::par()),
+                                             names(formals(graphics::lines))))]
   ## The arguments to legend are a bit of a mix, so just take the basic ones.
-  legend_dots <- dots[intersect(names(dots), c("lwd", "lty", "cex"))]
+  legend_dots = dots[intersect(names(dots), c("lwd", "lty", "cex"))]
 
   ## Only the legend and the lines get the specified lty
-  lines_dots$lty <- legend_dots$lty <- user_lty
+  lines_dots$lty = legend_dots$lty = user_lty
 
 
 
@@ -321,10 +326,9 @@ GridPlot = function(x,
 
   do.call(graphics::box, par_dots)
 
-  if(axes) {
-    do.call(graphics::axis, args= append(list(side=1, at = at_x), axis_dots))
-    do.call(graphics::axis, args= append(list(side=2, at = at_y), axis_dots))
-  }
+  do.call(graphics::axis, args= append(list(side=1, at = at_x), axis_dots))
+  do.call(graphics::axis, args= append(list(side=2, at = at_y), axis_dots))
+
   ## Gridlines are unchanged by par arguments
   graphics::abline(v = at_x,
                    h = at_y,
@@ -356,8 +360,8 @@ GridPlot = function(x,
   ## =================================
   if(!is.null(example)){
 
-    example_strata <- as.character(example[[names(dimnames(sliced_x))[3]]])
-    subset_col <- col[match(example_strata, dimnames(sliced_x)[[3]])]
+    example_strata = as.character(example[[names(dimnames(sliced_x))[3]]])
+    subset_col = col[match(example_strata, dimnames(sliced_x)[[3]])]
 
     do.call(AddExample, append(list(x = sliced_x,
                                     example = example,

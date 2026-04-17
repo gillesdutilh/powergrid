@@ -70,6 +70,9 @@ EnsureSummarized = function(x, summary_function = NULL, condition = "warning") {
 ##' @param x A power array
 ##' @param condition If array is not summarised should a `warning` or
 ##' `error` be produced. Ignored if required dimensions is NULL.
+##' @param sliced For the condition text should the user be informed the array
+##' is sliced. Ignored if required dimensions is NULL.
+##'
 ##' @returns A power array with only a single fun_out value
 EnsureSingleFunOut <- function(x, condition = "warning", sliced = FALSE) {
 
