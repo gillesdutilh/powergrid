@@ -487,10 +487,10 @@ PowerPlot =
 ##' anything about the figure it draws on top off. Therefore, take care your
 ##' figure makes sense, by supplying the same arguments \code{x} and
 ##' \code{slicer} that you supplied to the \code{\link{PowerPlot}} or
-##' \code{link{GridPlot}} you are drawing on top off: With \code{slicer} you
+##' \code{\link{GridPlot}} you are drawing on top off: With \code{slicer} you
 ##' define the plotted plain, with \code{example} the value on the x-axis where
 ##' the arrow starts. To be sure of a sensible result, use the argument
-##' `example` inside \code{Powerplot} or \code{GridPlot}.
+##' `example` inside \code{PowerPlot} or \code{GridPlot}.
 
 ##' @details
 ##' ## arguments \code{slicer} and \code{example}
