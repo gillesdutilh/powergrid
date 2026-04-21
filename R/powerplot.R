@@ -11,22 +11,33 @@
 ##'   argument settings reflect this use case.
 ##'
 ##'   ## Flexible plotting
-##'   The plotting is, however, more flexible. 
+##'   The plotting is, however, more flexible.
 ##'   ### Any variable on the axes
 ##'   You can flip the axes by setting a different \code{par_to_search} (which
 ##'   defines the y-axis). The other parameter is automatically chosen to be
 ##'   drawn on the x-axis.
+##'
 ##'   ### Maximizing a parameter
 ##'   One may also search not the minimum, as in the case of sample
 ##'   size, but the maximum, e.g., the highest sd at which a certain power may
 ##'   still be achieved. In this case, the \code{par_to_search} is sd, and
 ##'   \code{find_lowest = FALSE}.
+##'
 ##'   ### When smaller is better
 ##'   In the standard case of power, higher is better, so you search for a
 ##'   *minimal* level of power. One may however also aim at, e.g., a *maximal*
 ##'   width of a confidence interval. For this purpose, set \code{target_at_least}
 ##'   to \code{FALSE}. See Example for more details about `find_lowest` and
 ##'   `target_at_least`.
+##'
+##'   ### Graphical parameters
+##'   The plot takes the \code{\link{graphical parameters}} from `par`. If graphical
+##'   parameters are given as arguments to the function they will be passed to
+##'   the calls generating axes, titles and plotting. Grid lines are not modified
+##'   by graphical parameters to PowerPlot. `lty` is only passed to the plotted
+##'   contours (e.g. to prevent dashed axes). For further customisation of the
+##'   axes `xaxt` and `yaxt` can be set to "n", and axes can be added afterwards.
+##'
 ##' @param x An object of class `power_array` (from powergrid).
 ##' @param slicer If the parameter grid for which `x' was constructed has more
 ##'   than 2 dimensions, a 2-dimensional slice may be cut out using
@@ -67,6 +78,8 @@
 ##'   value be printed alongside the arrow(s)
 ##' @param title Character string, if not \code{NULL}, replaces default figure
 ##'   title.
+##' @param labcex Numeric value passed to `contour, specifying the size of the
+##'   contour labels.
 ##' @param par_labels Named vector with elements named as the parameters
 ##'   plotted, with as values the desired labels.
 ##' @param smooth Numeric, defaults to NA, meaning no smoothing. Non NA value is
@@ -79,8 +92,9 @@
 ##'   where attribute \code{summarized} is FALSE (and individual iterations are
 ##'   stored in dimension \code{iter}, the iterations dimension is aggregated by
 ##'   \code{summary_fun}. Otherwise ignored.
-##' @param ... Further arguments are passed on to function `image`
-##'   internally. Most useful for zooming with xlim and ylim.
+##' @param ... Further arguments to \code{\link{par}}, \code{\link{axis}} and
+##'   \code{\link{image}}. A few exceptions (e.g. `y`) are ignored with a warning.
+##'   `...` is also passed directly to \code{\link{AddExample}}
 ##' @seealso \code{\link{PowerGrid}}, \code{\link{AddExample}},
 ##'   \code{\link{Example}}, \code{\link{GridPlot}} for plotting
 ##'   interdependencies of 3 parameters.
@@ -100,7 +114,7 @@
 ##'   sd = seq(.1, 1.1, .2)) # Standard deviation
 ##'
 ##' ## Define a power function using these parameters:
-##' PowFun <- function(n, delta, sd){ # power for a t-test at alpha = .05
+##' PowFun = function(n, delta, sd){ # power for a t-test at alpha = .05
 ##'   ptt = power.t.test(n = n/2, delta = delta, sd = sd,
 ##'                      sig.level = 0.05)
 ##'   return(ptt$power)
@@ -132,7 +146,7 @@
 ##'            example = list(delta = .9),
 ##'            target_value = .9,
 ##'            col = 'Orange', lwd = 3)
-##' 
+##'
 ##' ## ============================================
 ##' ## Less typical use case:
 ##' ## minimal delta for power, given sd, as a function of n
@@ -152,7 +166,7 @@
 ##' ## You're not limited to study n at all, nor to searching a minimum: When
 ##' ## your n is given to be 30, what is the largest sd at which we still find
 ##' ## enough power? (as a function of delta on the x-axis)
-##' 
+##'
 ##' PowerPlot(power_array,
 ##'           par_to_search = 'sd',
 ##'           find_lowest = FALSE,
@@ -160,7 +174,7 @@
 ##'
 ##' ## Adding an example works the same: If we expect a delta of 1, and the n =
 ##' ## 30, what is the maximal SD we can have still yielding 90% power?
-##' 
+##'
 ##' AddExample(power_array,
 ##'            find_lowest = FALSE,
 ##'            slicer = list(n = 30),
@@ -178,220 +192,288 @@ PowerPlot =
            method = 'step',
            summary_function = mean,
            target_levels = c(.8, .9, .95), # which power iso lines to draw
-           col = grDevices::grey.colors(1, .2, .2),
+           col = grDevices::grey.colors(1, .2, .2), # TODO: Decide whether to fix this.
            shades_of_grey = TRUE, # do you want shades of grey on background
            example_text = TRUE, # do you want a text next to the Example arrow
            title = NULL,
+           labcex = 1.2, # cex specifically for the labels on the contours
            par_labels = NULL,
            smooth = NA,
-           ...) # dictionary vector of <varname> = <varlabel>
-{
-  ## =======================================================
-  ## process input
-  ## =======================================================
-  ##
-  if (all(class(x) == 'power_array')) # made using powergrid functions
+           ...) # Ellipsis passed to various internal calls
   {
-    if(!attr(x, which = 'summarized')){ # if object contains iterations, first
-                                        # summarize
-      x = SummarizeIterations(x, summary_function)
+
+    ## =======================================================
+    ## process power array
+    ## =======================================================
+    if (!inherits(x, "power_array")) stop("The object 'x' should be of class 'power_array'. ", call. = FALSE)
+
+    x = EnsureSummarized(x, summary_function = summary_function)
+
+    ## =======================================================
+    ## take slice that should be plotted
+    ## =======================================================
+    ## TODO: this if structure is not needed as ArraySlicer seems to
+    ## return a unchanged array if slicer = NULL, incidental behaviour though.
+    if(!is.null(slicer)){
+      sliced_x = ArraySlicer(x = x, slicer = slicer)
+    } else {sliced_x = x}
+
+    sliced_x = EnsureSingleFunOut(sliced_x)
+
+    left_dims = CheckArrayDim(sliced_x, required_dim = c(1,2))
+
+    ## =======================================================
+    ## Get the name of the parameter to search (typically n)
+    ## =======================================================
+    dimnms = names(dimnames(sliced_x))
+    first_dim = dimnms[1]
+    if(par_to_search == 'n' & !(par_to_search %in% dimnms)){
       warning(paste0(
-        "The object 'x' you supplied to PowerPlot contains individual ",
-        "iterations. For sensible plotting, these were automatically ",
-        "summarized across iterations using the function given in ",
-        "argument `summary_function`."), call. = FALSE)
+        "Argument `par_to_search` was automatically changed from 'n' (the default) to '",
+        first_dim,
+        "'. If you want to search along another dimension, please set `par_to_search` accordingly."
+      ), call. = FALSE)
+      par_to_search = first_dim
     }
-  } else {
-    stop("The object 'x' should be of class 'power_array'. ", call. = FALSE)
-  }
+    dimorder = c(par_to_search, dimnms[dimnms != par_to_search])
 
-  ## =======================================================
-  ## take slice that should be plotted
-  ## =======================================================
-  if(!is.null(slicer)){
-    sliced_x = ArraySlicer(x = x, slicer = slicer)
-  } else {sliced_x = x}
-  ##
-  ## if there are multiple function returns saved in power_array, give a warning
-  ## and take only the first, by setting slicing accordingly.
-  if (attr(sliced_x, 'sim_function_nval') > 1) # still multiple outputs
-  {
-    ## assume the user want the first
-    chosen_fun_out = attr(sliced_x, 'dimnames')$fun_out[1]
-    sliced_x = ArraySlicer(sliced_x, slicer = list(fun_out = chosen_fun_out))
-      warning(paste0("Argument 'x' contains multiple function outputs at each parameter combination (even after possible slicing with argument 'slicer'). \n*** Function output ",
-                     chosen_fun_out,
-                     " was automatically chosen to be plotted! ***\nTo explicitly choose a function output, do so using argument 'slicer', including 'fun_out = <output name> in that list."), call. = FALSE)
-  }
-  ## feedback if the number of dimension are not correct
-  left_dims = length(dim(sliced_x))
-  if (left_dims == 0){
-    left_dims = ifelse(length(sliced_x) > 0,
-                       1, 0)
-  }
-  if(!(left_dims %in% c(2, 1))){
-    stop(paste0(
-        ifelse(is.null(slicer),
-               "Input 'x' should be a 2- or 1-dimensional array, but is a ",
-               "Slicing 'x' by 'slicer' did not yield the necessary 2- or 1-dimensional, but a "),
-        left_dims, "-dimensional array instead."))
-  }
-  ##
-  dimnms = names(dimnames(sliced_x)) # dimension names to plot
-  first_dim = dimnms[1]
-  if(par_to_search == 'n' & !(par_to_search %in% dimnms)){
-    warning(paste0("Argument `par_to_search` was automatically changed from 'n' (the default) to '",
-                   first_dim,
-                   "'. If you want to search along another dimension, please set `par_to_search` accordingly."), call. = FALSE)
-    par_to_search = first_dim
-  }
-  dimorder = c(par_to_search, dimnms[dimnms != par_to_search])
+    ## =======================================================
+    ## Graphical preparation
+    ## =======================================================
+    array_toplot = aperm(sliced_x, dimorder)
+    margins_toplot = dimnames(array_toplot)
 
-  ## =======================================================
-  ## About example
-  ## =======================================================
-  if (!is.null(example) | left_dims == 1){
-    ## when either explicitly ordered, or in on-dimentional case.
-    draw_example = TRUE
-  } else {
-    draw_example = FALSE
-  }
-  ##
-  ## =======================================================
-  ## Graphical preparation
-  ## =======================================================
-  ##
-  array_toplot = aperm(sliced_x, dimorder) # note that array_toplot is only for
-                                           # graphical purposes, not a
-                                           # power_array opbject
-  margins_toplot = dimnames(array_toplot) # what are the values on the axes
-  ## ============================================
-  ## Calculate colors and legend values if shades_of_grey
-  if(shades_of_grey){
-    n_breaks = 101 # granularity of colors, more is better, but 101 is enough
-    ## calculate breaks, which are used to define legend colors.
-    breaks = seq(0, 1, length = n_breaks)
-    image_cols = grDevices::grey.colors(length(breaks) - 1, start = 0.3, end = .9)
-    legend_ats = pretty(array_toplot)
-    legend_cols = image_cols[
-      cut(legend_ats, breaks, labels = 1:(n_breaks-1), include.lowest = TRUE)]
-  } else
-  {image_cols = grDevices::grey.colors(1, .9, .9)}
-  ##
-  ## ============================================
-  ## translator for labels; translates if label is available
-  Trans = function(x){# Vectorize for mul
-    if(!is.null(par_labels)){
-      for(i in seq_along(x)){
-        if(x[i] %in% names(par_labels)){x[i] = par_labels[[x[i]]]}
-      }
-    }
-    return(x)
-  }
-  ## texts
-  slice_at = slicer[lapply(slicer, length) == 1] # I construct this
-                                        # to deal with
-                                        # cases where
-                                        # dimensions are
-                                        # only reduced by
-                                        # slicer, not cut
-                                        # out.
-  if (is.null(title)){
-    title = ifelse(is.null(slicer) |
-                   all(names(dimnames(array_toplot)) == names(slicer))
-                 , "Power",
-                   paste('Power at',
-                         paste(Trans(names(slice_at)), '=', slice_at,
-                               collapse = ', ')))
-  }
-  ## =======================================================
-  ## Draw figure
-  ## =======================================================
-  ## if input is a 1-dimensional array, create simple line plot
-  if (left_dims == 1){
-    plot(as.numeric(names(array_toplot)), array_toplot, type = 'n', axes = FALSE,
-         xlab = names(dimnames(array_toplot)), ylab = 'Power', las = 1)
-    graphics::abline(v = as.numeric(names(array_toplot)), col = 'lightgrey')
-    graphics::lines(as.numeric(names(array_toplot)), array_toplot, col = col)
-    graphics::axis(1, at = as.numeric(names(array_toplot)))
-    graphics::axis(2, las = 1)
-    graphics::box(bty = 'l')
-    graphics::title(paste('Power as a function of',
-                          Trans(names(margins_toplot)[[1]])))
-    ## simple plot always gets example (otherwise, the argument 'example' would
-    ## have to be redefined only for this special case). Example is drawn with
-    ## the same code as the normal case
-    x_ex_value = FindTarget(array_toplot,
-                            target_value = target_value,
-                            target_at_least = target_at_least,
-                            par_to_search = names(dimnames(array_toplot)),
-                            find_lowest = find_lowest,
-                            method = method)
-    y_ex_value = round(array_toplot[as.character(x_ex_value)], 3)
-  } else {
-    ## the most typical case:
-    ## ============================================
-    ## Main plot.
-    ## Image contains shades of grey or white, creating higher level plot
-    image_x = as.numeric(margins_toplot[[2]])
-    image_y = as.numeric(margins_toplot[[1]])
-    image_z = t(array_toplot)
-    graphics::image(image_x, image_y, image_z,
-                    ylab = Trans(names(margins_toplot)[[1]]),
-                    xlab = Trans(names(margins_toplot)[[2]]),
-                    axes = FALSE, col = image_cols, main = title,...)
-    ##
-    ## grid lines
-    graphics::abline(h = margins_toplot[[1]], v = margins_toplot[[2]], col = 'white')
-    ## power contour lines
-    if (!is.null(target_value)) # if a target_value is given
-    {
-      if (!(target_value %in% target_levels)){ # but not one of levels, attach.
-        target_levels = sort(unique(c(target_levels, target_value)))
-      }
-      power_lwds = ifelse(target_levels == target_value, 2, 1)
+    if(shades_of_grey){
+      n_breaks = 101
+      breaks = seq(0, 1, length = n_breaks)
+      image_cols = grDevices::grey.colors(length(breaks) - 1, start = 0.3, end = .9)
+      legend_ats = pretty(array_toplot)
+      legend_cols = image_cols[
+        cut(legend_ats, breaks, labels = 1:(n_breaks-1), include.lowest = TRUE)]
     } else {
-      power_lwds = 1
+      image_cols = grDevices::grey.colors(1, .9, .9)
     }
-    ## Contour lines
-    if (is.na(smooth)){ # no smoothing
-      graphics::contour(as.numeric(margins_toplot[[2]]),
-                        as.numeric(margins_toplot[[1]]),
-                        t(array_toplot), add = TRUE, labcex = 1.2,
-                        levels = target_levels, lwd = power_lwds,
-                        col = col)
 
-    } else { # smoothing
-      smooth_pred_grid = as.matrix(expand.grid(as.numeric(margins_toplot[[2]]),
-                                               as.numeric(margins_toplot[[1]])))
-      smooth_z =
-        stats::fitted(
-                 stats::loess(
-                          as.vector(ftable(array_toplot, row.vars = 1:2)) ~
-                            smooth_pred_grid, span = smooth, degree = 2))
-      smooth_z_m =
-        stats::xtabs(smooth_z ~ smooth_pred_grid[, 1] + smooth_pred_grid[, 2])
-      graphics::contour(as.numeric(margins_toplot[[2]]),
-                        as.numeric(margins_toplot[[1]]),
-                        z = smooth_z_m, add = TRUE, labcex = 1.2,
-                        levels = target_levels, lwd = power_lwds,
-                        col = grDevices::grey.colors(1, .2, .2))
+    Trans = function(x){
+      if(!is.null(par_labels)){
+        for(i in seq_along(x)){
+          if(x[i] %in% names(par_labels)){x[i] = par_labels[[x[i]]]}
+        }
+      }
+      return(x)
     }
-    graphics::axis(1);graphics::axis(2, las = 1);graphics::box(bty = 'l')
-    ## ============================================
+
+    slice_at = slicer[lapply(slicer, length) == 1]
+
+    ## =======================================================
+    ## User graphical arguments
+    ## =======================================================
+    ## Allow flexible parameter specification via ellipsis
+    dots = list(...)
+
+    good_args = c(names(graphics::par()),
+                  names(formals(graphics::axis)),
+                  names(formals(graphics::lines)),
+                  names(formals(graphics:::plot.default)),
+                  names(formals(graphics:::image.default)))
+    good_args = setdiff(good_args, "...")
+
+    bad_args = setdiff(names(dots), good_args)
+    if (length(bad_args) > 0) {
+      warning("Only arguments to par(), axis(), lines(), plot.default() and image.defualt() can be supplied through `...` the following are ignored: ",
+              paste(bad_args, collapse = ", "), call. = FALSE)
+      dots[bad_args] = NULL
+    }
+
+    ## do not allow dots to override core internals
+    exeption_bad_args = intersect(names(dots), c("y", "z", "type", "at"))
+    if (length(exeption_bad_args) > 0) {
+      warning("These arguments cannot be supplied through `...` and are ignored: ",
+              paste(exeption_bad_args, collapse = ", "), call. = FALSE)
+      dots[exeption_bad_args] = NULL
+    }
+
+    ## Get the plot title priority is title arg > main arg > internal
+    if ("main" %in% names(dots)) {
+      if (is.null(title)) title = dots$main
+      dots$main = NULL
+    }
+    if (is.null(title)){
+      title = ifelse(
+        is.null(slicer) | all(names(dimnames(array_toplot)) == names(slicer)),
+        "Power",
+        paste('Power at',
+              paste(Trans(names(slice_at)), '=', slice_at, collapse = ', '))
+      )
+    }
+
+    ## TODO: I am pretty sure these are no longer needed.
+    # ## Get bty and las from dots if specified, otherwise use par values
+    # dots$las = if ("las" %in% names(dots)) dots$las else graphics::par()$las
+    # dots$bty = if ("bty" %in% names(dots)) dots$bty else graphics::par()$bty
+    #
+    # ## If lwd is specified use that, otherwise take lwd from graphics::par().
+    # ## Later it has to be omitted from the dots passed to the contour
+    # dots$lwd = if ("lwd" %in% names(dots)) dots$lwd else graphics::par()$lwd
+
+    ## Only let lty affect certain plot characteristics, so remove from dots
+    user_lty = if ("lty" %in% names(dots)) dots$lty else NULL
+    dots$lty = NULL
+
+    ## Make lists of all the dots arguments to be passed to each function.
+    par_dots <- dots[intersect(names(dots),names(graphics::par()))]
+    image_dots <- dots[intersect(names(dots), c(names(graphics::par()), names(formals(graphics:::image.default))))]
+    plot_dots <- dots[intersect(names(dots), c(names(graphics::par()), names(formals(graphics:::plot.default))))]
+    lines_dots <- dots[intersect(names(dots), c(names(graphics::par()), names(formals(graphics:::lines))))]
+    axis_dots <- dots[intersect(names(dots), c(names(graphics::par()), names(formals(graphics::axis))))]
+
+    ## Contour is awkward, so it just gets graphics::par() args. lwd is not specified
+    ## so it can get varying values.
+    contour_dots <- par_dots[!names(par_dots) %in% c("lwd")]
+
+    ## Add back the lty to certain dots
+    lines_dots$lty = contour_dots$lty = user_lty
+
+    ## =======================================================
+    ## Draw 1d figure
+    ## =======================================================
+    if (left_dims == 1){
+
+      x_vals = as.numeric(names(array_toplot))
+
+      if(is.null(plot_dots$xlab)) plot_dots$xlab = Trans(names(dimnames(array_toplot)))
+      if(is.null(plot_dots$ylab)) plot_dots$ylab = "Power"
+      plot_main = if (!is.null(title)) {
+        title
+      } else {
+        paste('Power as a function of', Trans(names(margins_toplot)[[1]]))
+      }
+
+      ## make empty plot, add vertical gridlines
+      do.call(graphics::plot, append(list(x = x_vals,
+                                          y = array_toplot,
+                                          type = 'n',
+                                          axes = FALSE),
+                                     plot_dots))
+      graphics::abline(v = x_vals, col = 'lightgrey')
+
+      ## Add contour
+      do.call(graphics::lines, append(list(x= x_vals,
+                                           y= array_toplot,
+                                           col = col),
+                                      lines_dots))
+
+      ## Add axes
+      do.call(graphics::axis, append(list(side=1,
+                                          at = x_vals),
+                                     axis_dots))
+      do.call(graphics::axis, append(list(side=2), axis_dots))
+
+      ## Border and title
+      do.call(graphics::box, par_dots)
+      do.call(graphics::title, append(list(main = plot_main), par_dots))
+
+      ## Add an example
+      ## TODO: y_ex_value does not seem to be used.
+      x_ex_value = FindTarget(array_toplot,
+                              target_value = target_value,
+                              target_at_least = target_at_least,
+                              par_to_search = names(dimnames(array_toplot)),
+                              find_lowest = find_lowest,
+                              method = method)
+      y_ex_value = round(array_toplot[as.character(x_ex_value)], 3)
+
+      image_x = image_y = image_z = NULL
+
+    } else
+      ## =======================================================
+    ## Draw 2d figure
+    ## =======================================================
+    {
+      image_x = as.numeric(margins_toplot[[2]])
+      image_y = as.numeric(margins_toplot[[1]])
+      image_z = t(array_toplot)
+
+      if(is.null(image_dots$xlab)) image_dots$xlab = Trans(names(margins_toplot)[[2]])
+      if(is.null(dots$ylab)) image_dots$ylab = Trans(names(margins_toplot)[[1]])
+
+      image_args = c(
+        list(x = image_x,
+             y = image_y,
+             z = image_z,
+             axes = FALSE,
+             col = image_cols,
+             main = title),
+        image_dots
+      )
+      do.call(graphics::image, image_args)
+
+      ## Draw gridlines (don't receive dots)
+      graphics::abline(h = margins_toplot[[1]], v = margins_toplot[[2]],
+                       col = 'white')
+
+      ## If a target power is specified double the lwd on the target.
+      if (!is.null(target_value)) {
+        if (!(target_value %in% target_levels)) {
+          target_levels = sort(unique(c(target_levels, target_value)))
+        }
+        power_lwds = ifelse(target_levels == target_value, 2, 1) * dots$lwd
+      } else {
+        power_lwds = dots$lwd
+      }
+
+      ## Contour is a bit funny in it arguments.
+      contour_args =
+        append(list(x = as.numeric(margins_toplot[[2]]),
+                    y = as.numeric(margins_toplot[[1]]),
+                    z = t(array_toplot), add = TRUE, labcex = labcex,
+                    levels = target_levels, lwd = power_lwds,
+                    col = col),
+               contour_dots)
+
+      ## For smoothed plotting only the z calculation differs now
+      if (!is.na(smooth)) {
+        smooth_pred_grid = as.matrix(expand.grid(as.numeric(margins_toplot[[2]]),
+                                                 as.numeric(margins_toplot[[1]])))
+        smooth_z =
+          stats::fitted(
+            stats::loess(
+              as.vector(ftable(array_toplot, row.vars = 1:2)) ~ smooth_pred_grid,
+              span = smooth, degree = 2))
+        smooth_z_m =
+          stats::xtabs(smooth_z ~ smooth_pred_grid[, 1] + smooth_pred_grid[, 2])
+        contour_args$z = smooth_z_m
+      }
+      do.call(graphics::contour, contour_args)
+      do.call(graphics::axis, append(list(side=1), axis_dots))
+      do.call(graphics::axis, append(list(side=2), axis_dots))
+      do.call(graphics::box, args = par_dots)
+    }
+
+    ## =======================================================
+    ## About example
+    ## =======================================================
+    draw_example = !is.null(target_value) &&
+      (!is.null(example) | left_dims == 1)
+    if (draw_example){
+
+      target_value_logical = target_levels %in% target_value
+      if(length(target_value_logical) == length(col)) {
+        COL = col[target_value_logical]
+      } else COL = col[1]
+
+      AddExample(x = sliced_x,
+                 example = example,
+                 target_value = target_value,
+                 find_lowest = find_lowest,
+                 target_at_least = target_at_least,
+                 col = COL,
+                 example_text = example_text,
+                 ...)
+    }
+
+    invisible(list('image_args' = list('x' = image_x, 'y' = image_y, 'z' = image_z)))
   }
-  ## Draw Example Arrow
-  if (draw_example){
-    AddExample(x = sliced_x,
-               example = example,
-               target_value = target_value,
-               find_lowest = find_lowest,
-               target_at_least = target_at_least,
-               col = col[1],
-               example_text = example_text)
-  }
-  invisible(list('image_args' = list('x' = image_x, 'y' = image_y, 'z' = image_z)))
-}
 
 ## ======================================================= lower level function
 ## for plotting example =======================================================
@@ -421,7 +503,7 @@ PowerPlot =
 ##' AddExample, and define your example in `example`.
 ##'
 ##' Note however, that:
-##' 
+##'
 ##' slicer = list(a = c(1, 2)) and example = list(b = c(3, 4))
 ##'
 ##' has the same result as:
@@ -430,21 +512,21 @@ PowerPlot =
 ##'
 ##' Importantly, the the order of `example` matters here, where the first
 ##' element defines the x-axis.
-##' 
+##'
 ##' ## multiple examples
 ##'
 ##' Argument \code{example} may contain vectors with length longer than one to
 ##' draw multiple examples.
-##' 
-##' @param
-##'   x,target_value,target_at_least,find_lowest,method,example_text,summary_function
-##'   See help for \code{PowerPlot}.
+##'
+##' @param x Either a power array, or a power_example produced by \code{\link{Example}}.
 ##' @param slicer A list, internally passed on to \code{\link{ArraySlicer}} to
 ##'   cut out a (multidimensional) slice from x. You can achieve the same by
 ##'   appending "slicing" inside argument `example`. However, to assure that the
 ##'   result of AddExample is consistent with the figure it draws on top of
 ##'   (PowerPlot or GridPlot), copy the arguments `x` and `slicer` given to
 ##'   PowerPlot or GridPlot to AddTarget.
+##' @param target_value,target_at_least,find_lowest,method,example_text,summary_function
+##'   See help for \code{PowerPlot}. Ignore if x is a power_example.
 ##' @param example A list, defining at which value (list element value) of which
 ##'   parameter(s) (list element name(s)) the example is drawn for a power of
 ##'   \code{target_value}. You may supply par vector(s) longer than 1 for
@@ -452,10 +534,11 @@ PowerPlot =
 ##'   example, all must contain a vector of the same length. Be aware that the
 ##'   first element of `example` defines the parameter x-axis, so this function
 ##'   is not fool proof. See argument `slicer` above. If x has only one
-##'   dimention, the example needs not be defined.
+##'   dimension, the example needs not be defined. Ignored if x is a power_example.
 ##' @param col Color of arrow and text drawn.
-##' @param ... Further arguments are passed to the two calls of function
-##'   \code{graphics::arrows} drawing the nicked arrow.
+##' @param ... Further arguments to \code{\link{par}}, as well as `length` and `angle`
+##' for arrows. These are passed to the points, arrows and text. For the points
+##' `pch` is fixed.
 ##' @seealso \code{\link{PowerPlot}}, \code{\link{GridPlot}}
 ##' @return invisibly NULL
 ##' @author Gilles Dutilh
@@ -469,7 +552,7 @@ PowerPlot =
 ##'   delta = seq(from = 0.5, to = 1.5, by = 0.1), # effect size
 ##'   sd = seq(.1, 1.1, .2)) # Standard deviation
 ##' ## Define a power function using these parameters:
-##' PowFun <- function(n, delta, sd){ # power for a t-test at alpha = .05
+##' PowFun = function(n, delta, sd){ # power for a t-test at alpha = .05
 ##'   ptt = power.t.test(n = n/2, delta = delta, sd = sd,
 ##'                      sig.level = 0.05)
 ##'   return(ptt$power)
@@ -503,7 +586,7 @@ PowerPlot =
 ##'            example = list(sd = .7, delta = 1.2), # sd first?!
 ##'            target_value = .9,
 ##'            col = 'red')
-##' 
+##'
 ##' ## ======================
 ##' ## GridPlot
 ##' ## ======================
@@ -529,117 +612,186 @@ AddExample = function(x,
                       col = grDevices::grey.colors(1, .2, .2),
                       example_text = TRUE, ...)
 {
+  ## Initially assume the default situation where the plot has 2 par-dimensions
+  one_dim = FALSE
+
   ## =======================================================
-  ## process input
+  ## Check type of input
   ## =======================================================
-  ##
-  ## further args
-  args = list(...)
-  ## I grasp lwd here to make text and circle lwd match arrows
-  if('lwd' %in% names(args)){lwd = args$lwd}else{lwd = 1}
-  ## slice
-  sliced_x = ArraySlicer(x = x, slicer = slicer)
-  one_dim = FALSE # the default situation where the plot has 2 par-dimenstions
+  if(inherits(x, "power_array")) {
+
+    x = EnsureSummarized(x, summary_function = summary_function)
+
+    sliced_x = ArraySlicer(x = x, slicer = slicer)
+
+    sliced_x = EnsureSingleFunOut(sliced_x)
+
+    ## This is translated from Gilles, I don't quite get the -1 for the example
+    left_dims = CheckArrayDim(sliced_x, required_dim = c(1,2) + (length(example) - 1)
+    )
+
+    ## =======================================================
+    ## Check example input
+    ## =======================================================
+    ## User may define multiple requested examples. Are they correctly defined and
+    ## How many are there?
+    if(!is.null(example)){
+      if(length(unique(sapply(example, function(x)length(x)))) != 1){
+        ## if more than one example is requested, each parameter in example must have
+        ## the same length
+        stop("If multiple pars are listed in argument 'example', all must contain a vector of the same length.")
+      }
+      ns_example = sapply(example, function(x)length(x))[[1]]
+      ## The first element of example always defines the par on the x-axis
+      x_ex_name = names(example)[1] # (also if only one parameter in example)
+    } else { # if example NULL
+      if (length(dim(sliced_x)) > 1){
+        stop("When x (after slicer has been applied) has more than one dimension, 'example' must be supplied")
+      }
+      one_dim = TRUE # we're in the on-dimensional situation, where we plot the
+      # value (power) on the y-axis
+      ns_example = 1
+    }
+
+    ## =================================
+    ## Prepare example(s) for plotting
+    ## =================================
+    ## essentially loop over each individual example
+    ## TODO (Future): This would be cleaner to do with FindTarget
+    y_ex_value = numeric(ns_example)
+    x_ex_value = numeric(ns_example)
+    for (example_i in 1:ns_example){
+      ## run over examples and calculate and store coordinates
+      cur_example = lapply(example, function(x)x[example_i])
+      example_list =
+        Example(sliced_x,
+                example = cur_example, # append(slicer, cur_example),
+                target_value = target_value, target_at_least = target_at_least,
+                find_lowest = find_lowest, method = method, summary_function = summary_function)
+      ## Prepare example for figure. Note that it is possible to have any
+      ## parameter on x and y, whereas the default is to have 'n' on y.
+      if (!one_dim){
+        y_ex_value[example_i] = example_list$required_value
+        x_ex_value[example_i] = cur_example[[x_ex_name]]
+      } else {
+        x_ex_value[example_i] = example_list$required_value
+        y_ex_value[example_i] = example_list$target_value
+      }
+    }
+
+  } else if(inherits(x, "power_example")) {
+    ## TODO (Future): either warn of specified power etc or check against example
+
+    input_example = x
+
+    if(is.null(slicer)) one_dim = TRUE
+
+
+    if (!one_dim){
+
+      left_par <- setdiff(names(input_example$requested_example), names(slicer))
+
+      if(length(left_par) != 1) stop("slicer argument incompatable with provided x")
+
+      x_ex_value <- input_example$requested_example[[left_par]]
+      y_ex_value <- input_example$required_value
+
+    } else {
+      x_ex_value = input_example$required_value
+      y_ex_value = input_example$target_value
+    }
+  } else {
+    stop("x must either be a power_array or a power_example")
+
+  }
+
+  ## =======================================================
+  ## Get graphics parameters from the dots
+  ## =======================================================
+  ## To make life simple, I only allow formals from graphics::par(), this ensures
+  ## the dots from GridPlot or PowerPlot will also be valid
+  ## after filtering.
+
+  ## If called within GridPlot or PowerPlot these come directly from the function
+  ## call (so they need to be filtered again.
+  dots = list(...)
+
+  ## Run directly from the global environment. If run from GridPlot or PowerPlot
+  ## repeat warnings add confusion.
+  top_level <- identical(parent.frame(), .GlobalEnv)
+
+  good_args = union(names(graphics::par()), c("length", "angle"))
+  bad_args = setdiff(names(dots), good_args)
+  if (length(bad_args) > 0) {
+    if(top_level) {
+      warning("Only arguments to par(), as well as length and angle can be supplied through `...` the following are ignored: ",
+            paste(bad_args, collapse = ", "), call. = FALSE)
+    }
+    dots[bad_args] = NULL
+  }
+
+  if(!"cex" %in% names(dots)) dots$cex = graphics::par()$cex
+
+  ## Arrows take all arguments
+  arrows_dots = dots
+  ## Text only gets par
+  text_dots = dots[intersect(names(dots), names(graphics::par()))]
+  ## points just gets par(), cex is omitted so we can specify the inner to outer ratio
+  points_dots = dots[intersect(names(dots), setdiff(names(graphics::par()), c("cex", "pch")))]
+
 
   ## =================================
-  ## check argument x (partly the same as in PowerPlot)
+  ## Draw
   ## =================================
-  ##
-  ## powerplot object
-  if (!all(class(sliced_x) == 'power_array')){ # made using powergrid functions
-    stop("The object 'x' should be of class 'power_array'. ")
-  }
-  ## If there are multiple function returns saved in power_array, give a warning
-  ## and take only the first, by setting slicing accordingly.
-  if (attr(sliced_x, 'sim_function_nval') > 1) # still multiple outputs
-  {
-    ## assume the user want the first
-    chosen_fun_out = attr(sliced_x, 'dimnames')$fun_out[1]
-    sliced_x = ArraySlicer(sliced_x, slicer = list(fun_out = chosen_fun_out))
-    warning(paste0("Argument 'x' contains multiple function outputs at each parameter combination (even after possible slicing with argument 'slicer'). \n*** Function output ",
-                   chosen_fun_out,
-                   " was automatically chosen to be plotted! ***\nTo explicitly choose a function output, do so using argument 'slicer', including 'fun_out = <output name> in that list."))
-  }
-  ## feedback if the number of dimension are not correct
-  left_dims = length(dim(sliced_x))
-  if (left_dims == 0){
-    left_dims = ifelse(length(sliced_x) > 0,
-                       1, 0)
-  }
-  left_dims = left_dims - (length(example) - 1) # because a longer example will
-                                              # slice on the first dim
-  if(!(left_dims %in% c(2, 1))){
-    stop(paste0("The example ", ifelse(is.null(slicer), "", "(after slicing) "),
-                "does not define a one-dimensional vector in x, as it should")
-         )
-  }
-  ## =================================
-  ## Check example input
-  ## =================================
-  ## User may define multiple requested examples. Are they correctly defined and
-  ## How many are there?
-  if(!is.null(example)){
-    if(length(unique(sapply(example, function(x)length(x)))) != 1){
-      ## if more than one example is requested, each parameter in example must have
-      ## the same length
-      stop("If multiple pars are listed in argument 'example', all must contain a vector of the same length.")
-    }
-    ns_example = sapply(example, function(x)length(x))[[1]]
-    ## The first element of example always defines the par on the x-axis
-    x_ex_name = names(example)[1] # (also if only one parameret in example)
-  } else { # if example NULL
-    if (length(dim(sliced_x)) > 1){
-      stop("When x (after slicer has been applied) has more than one dimension, 'example' must be supplied")
-    }
-    one_dim = TRUE # we're in the on-dimensional situation, where we plot the
-                                        # value (power) on the y-axis
-    ns_example = 1
-  }
-  ## =================================
-  ## Prepare example(s) for plotting
-  ## =================================
-  y_ex_value = numeric(ns_example)
-  x_ex_value = numeric(ns_example)
-  for (example_i in 1:ns_example){
-    ## run over examples and calculate and store coordinates
-    cur_example = lapply(example, function(x)x[example_i])
-    example_list =
-      Example(sliced_x,
-              example = cur_example, # append(slicer, cur_example),
-              target_value = target_value, target_at_least = target_at_least,
-              find_lowest = find_lowest, method = method, summary_function = summary_function)
-    ## Prepare example for figure. Note that it is possible to have any
-    ## parameter on x and y, whereas the default is to have 'n' on y.
-    if (!one_dim){
-      y_ex_value[example_i] = example_list$required_value
-      x_ex_value[example_i] = cur_example[[x_ex_name]]
-    } else {
-      x_ex_value[example_i] = example_list$required_value
-      y_ex_value[example_i] = example_list$target_value      
-    }
-  }
+
   ## note that "y_ex_name" is not defined, this is par_to_search
   ## Draw Example Arrow
   x0 = grDevices::extendrange(graphics::par()$usr[1:2], f = -.02)[1]
   y0 = grDevices::extendrange(graphics::par()$usr[3:4], f = -.02)[1]
-  ## =================================
-  ## Draw
-  ## =================================
-  graphics::arrows(x0 = x_ex_value, y0 = y0,
-                   x1 = x_ex_value, y1 = y_ex_value, length = .15,
-                   code = 0, col = col, ...)
-  graphics::arrows(x0 = x_ex_value, y0 = y_ex_value,
-                   x1 = x0, y1 = y_ex_value, length = .15, col = col, ...)
+
+  ## Horizontal arrow (code = 2 for arrow at the end)
+  do.call(graphics::arrows, append(list(x0 = x_ex_value,
+                                        y0 = y_ex_value,
+                                        x1 = x0,
+                                        y1 = y_ex_value,
+                                        code = 2,
+                                        col = col),
+                                   arrows_dots))
+
+  ##Vertical arrow (no arrowhead)
+  do.call(graphics::arrows, append(list(x0 = x_ex_value,
+                                        y0 = y0,
+                                        x1 = x_ex_value,
+                                        y1 = y_ex_value,
+                                        code = 0,
+                                        col = col),
+                                   arrows_dots))
+
   ## point
-  graphics::points(x_ex_value, y_ex_value,
-                   pch = 19, cex = 1, col = col, lwd = lwd)
+  do.call(graphics::points, append(list(x = x_ex_value,
+                                        y = y_ex_value,
+                                        pch = 19,
+                                        cex = dots$cex *1,
+                                        col = col),
+                                   points_dots))
+
+
   ## circle
-  graphics::points(x_ex_value, y_ex_value,
-                   pch = 1, cex = 3, col = col,
-                   lwd = 1)
+  do.call(graphics::points, append(list(x = x_ex_value,
+                                        y = y_ex_value,
+                                        pch = 1,
+                                        cex = dots$cex *3,
+                                        col = col),
+                                   points_dots))
+
   if (example_text){
-    graphics::text(x = x0, y = y_ex_value, labels = y_ex_value,
-                   adj = c(0, -1), col = col, lwd = lwd)
+    do.call(graphics::text, append(list(x = x0,
+                                        y = y_ex_value,
+                                        labels = y_ex_value,
+                                        adj = c(0, -1),
+                                        col = col),
+                                   text_dots))
   }
   invisible(NULL)
 }
+

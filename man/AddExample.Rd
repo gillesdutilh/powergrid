@@ -19,7 +19,7 @@ AddExample(
 )
 }
 \arguments{
-\item{x, target_value, target_at_least, find_lowest, method, example_text, summary_function}{See help for \code{PowerPlot}.}
+\item{x}{Either a power array, or a power_example produced by \code{\link{Example}}.}
 
 \item{slicer}{A list, internally passed on to \code{\link{ArraySlicer}} to
 cut out a (multidimensional) slice from x. You can achieve the same by
@@ -35,12 +35,15 @@ multiple examples. If \code{example} contains multiple parameters to define the
 example, all must contain a vector of the same length. Be aware that the
 first element of \code{example} defines the parameter x-axis, so this function
 is not fool proof. See argument \code{slicer} above. If x has only one
-dimention, the example needs not be defined.}
+dimension, the example needs not be defined. Ignored if x is a power_example.}
+
+\item{target_value, target_at_least, find_lowest, method, example_text, summary_function}{See help for \code{PowerPlot}. Ignore if x is a power_example.}
 
 \item{col}{Color of arrow and text drawn.}
 
-\item{...}{Further arguments are passed to the two calls of function
-\code{graphics::arrows} drawing the nicked arrow.}
+\item{...}{Further arguments to \code{\link{par}}, as well as \code{length} and \code{angle}
+for arrows. These are passed to the points, arrows and text. For the points
+\code{pch} is fixed.}
 }
 \value{
 invisibly NULL
@@ -96,7 +99,7 @@ sse_pars = list(
   delta = seq(from = 0.5, to = 1.5, by = 0.1), # effect size
   sd = seq(.1, 1.1, .2)) # Standard deviation
 ## Define a power function using these parameters:
-PowFun <- function(n, delta, sd){ # power for a t-test at alpha = .05
+PowFun = function(n, delta, sd){ # power for a t-test at alpha = .05
   ptt = power.t.test(n = n/2, delta = delta, sd = sd,
                      sig.level = 0.05)
   return(ptt$power)

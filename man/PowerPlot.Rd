@@ -20,6 +20,7 @@ PowerPlot(
   shades_of_grey = TRUE,
   example_text = TRUE,
   title = NULL,
+  labcex = 1.2,
   par_labels = NULL,
   smooth = NA,
   ...
@@ -84,6 +85,9 @@ value be printed alongside the arrow(s)}
 \item{title}{Character string, if not \code{NULL}, replaces default figure
 title.}
 
+\item{labcex}{Numeric value passed to `contour, specifying the size of the
+contour labels.}
+
 \item{par_labels}{Named vector with elements named as the parameters
 plotted, with as values the desired labels.}
 
@@ -94,8 +98,9 @@ regressing the contour values on the x and y-axis. Suggested value is
 but use is discouraged, since regressing the contour values flattens the
 contour plot, thereby \emph{biasing} the contour lines.}
 
-\item{...}{Further arguments are passed on to function \code{image}
-internally. Most useful for zooming with xlim and ylim.}
+\item{...}{Further arguments to \code{\link{par}}, \code{\link{axis}} and
+\code{\link{image}}. A few exceptions (e.g. \code{y}) are ignored with a warning.
+\code{...} is also passed directly to \code{\link{AddExample}}}
 }
 \value{
 A list containing the coordinate arguments x, y, and z, as passed to
@@ -140,6 +145,16 @@ to \code{FALSE}. See Example for more details about \code{find_lowest} and
 \code{target_at_least}.
 }
 
+\subsection{Graphical parameters}{
+
+The plot takes the \code{\link{graphical parameters}} from \code{par}. If graphical
+parameters are given as arguments to the function they will be passed to
+the calls generating axes, titles and plotting. Grid lines are not modified
+by graphical parameters to PowerPlot. \code{lty} is only passed to the plotted
+contours (e.g. to prevent dashed axes). For further customisation of the
+axes \code{xaxt} and \code{yaxt} can be set to "n", and axes can be added afterwards.
+}
+
 }
 }
 \examples{
@@ -155,7 +170,7 @@ sse_pars = list(
   sd = seq(.1, 1.1, .2)) # Standard deviation
 
 ## Define a power function using these parameters:
-PowFun <- function(n, delta, sd){ # power for a t-test at alpha = .05
+PowFun = function(n, delta, sd){ # power for a t-test at alpha = .05
   ptt = power.t.test(n = n/2, delta = delta, sd = sd,
                      sig.level = 0.05)
   return(ptt$power)

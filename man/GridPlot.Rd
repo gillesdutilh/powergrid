@@ -21,9 +21,11 @@ GridPlot(
   example_text = TRUE,
   title = NULL,
   par_labels = NULL,
+  add_legend = TRUE,
   xlim = NULL,
   ylim = NULL,
-  smooth = FALSE
+  smooth = FALSE,
+  ...
 )
 }
 \arguments{
@@ -75,18 +77,25 @@ is aggregated by \code{summary_fun}. Otherwise ignored.}
 the lines.}
 
 \item{example_text}{When an example is drawn, should the the required par
-value, and the line parameter value be printed alongside the arrow(s)}
+value, and the line parameter value be printed alongside the arrow(s).}
 
 \item{title}{Character string, if not \code{NULL}, replaces default figure
-title.}
+title. Replaces \code{main}if sepcifiec by \code{...}.}
 
 \item{par_labels}{Named vector where elements names represent the parameters
 that are plotted, and the values set the desired labels.}
+
+\item{add_legend}{Should the legend be automatically generated
+(\code{default = TRUE}), set to FALSE and add afterwards for more flexibility.}
 
 \item{xlim, ylim}{See \code{?graphics::plot}.}
 
 \item{smooth}{Logical. If TRUE, a 5th order polynomial is fitted though the
 points constituting each line for smoothing.}
+
+\item{...}{Further arguments to \code{\link{par}}, \code{\link{plot}},
+\code{\link{axis}} and \code{\link{lines}}. A few exceptions (e.g. \code{y})
+are ignored with a warning.}
 }
 \value{
 A list with graphical information to use in further plotting.
@@ -122,7 +131,7 @@ sse_pars = list(
   n = seq(from = 2, to = 100, by = 2),
   delta = seq(from = 0.1, to = 1.5, by = 0.05), ## effect size
   sd = seq(.1, .9, .1)) ## Standard deviation
-PowFun <- function(n, delta, sd){
+PowFun = function(n, delta, sd){
   ptt = power.t.test(n = n/2, delta = delta, sd = sd,
                      sig.level = 0.05)
   return(ptt$power)
