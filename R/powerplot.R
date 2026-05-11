@@ -311,13 +311,15 @@ PowerPlot =
     # dots$las = if ("las" %in% names(dots)) dots$las else graphics::par()$las
     # dots$bty = if ("bty" %in% names(dots)) dots$bty else graphics::par()$bty
     #
-    # ## If lwd is specified use that, otherwise take lwd from graphics::par().
-    # ## Later it has to be omitted from the dots passed to the contour
-    # dots$lwd = if ("lwd" %in% names(dots)) dots$lwd else graphics::par()$lwd
 
-    ## Only let lty affect certain plot characteristics, so remove from dots
+
+    ## Keep some graphical pars from affecting everything they can (e.g., box
+    ## should not be thick and dashed)
     user_lty = if ("lty" %in% names(dots)) dots$lty else NULL
     dots$lty = NULL
+    ## If lwd is specified use that, otherwise take lwd from graphics::par().
+    user_lwd = if ("lwd" %in% names(dots)) dots$lwd else graphics::par()$lwd
+    dots$lwd = NULL
 
     ## Make lists of all the dots arguments to be passed to each function.
     par_dots <- dots[intersect(names(dots),names(graphics::par()))]
@@ -406,7 +408,7 @@ PowerPlot =
         image_dots
       )
       do.call(graphics::image, image_args)
-
+browser()
       ## Draw gridlines (don't receive dots)
       graphics::abline(h = margins_toplot[[1]], v = margins_toplot[[2]],
                        col = 'white')
@@ -416,9 +418,9 @@ PowerPlot =
         if (!(target_value %in% target_levels)) {
           target_levels = sort(unique(c(target_levels, target_value)))
         }
-        power_lwds = ifelse(target_levels == target_value, 2, 1) * dots$lwd
+        power_lwds = ifelse(target_levels == target_value, 2, 1) * user_lwd
       } else {
-        power_lwds = dots$lwd
+        power_lwds = user_lwd
       }
 
       ## Contour is a bit funny in it arguments.
