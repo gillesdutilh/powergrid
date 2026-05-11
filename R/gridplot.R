@@ -64,7 +64,7 @@
 ##' @param example_text When an example is drawn, should the the required par
 ##'   value, and the line parameter value be printed alongside the arrow(s).
 ##' @param title Character string, if not \code{NULL}, replaces default figure
-##'   title. Replaces `main`if sepcifiec by `...`.
+##'   title. Replaces `main`if specifiec by `...` .
 ##' @param axes Logical defining whether or not axes are drawn.
 ##' @param xlim,ylim See \code{?graphics::plot}.
 ##' @param add_legend Should the legend be automatically generated
