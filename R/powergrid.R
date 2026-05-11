@@ -71,11 +71,12 @@
 ##'
 ##' ## Progress bar
 ##'
-##' By default PowerGrid does not report progress. To return the optional progress bar (`progress_bar = TRUE`), the
-##' `progressr` package must be installed. As required by the design of that
-##' package, the progress handler must be explicitly activated before running
-##' your simulation. For that, run `progressr::handlers(global = TRUE)` in the
-##' current R console (not sent to the console from quarto for example).
+##' By default PowerGrid does not report progress. To return the optional
+##' progress bar (`progress_bar = TRUE`), the `progressr` package must be
+##' installed. As required by the design of that package, the progress handler
+##' must be explicitly activated before running your simulation. For that, run
+##' `progressr::handlers(global = TRUE)` in the current R console (not sent to
+##' the console from quarto for example).
 ##'
 ##' @title Evaluate function (iteratively) at a grid of input arguments
 ##' @param pars A list where each element is a numeric vector of values named as
@@ -276,7 +277,8 @@ PowerGrid = function(pars, fun, more_args = NULL, n_iter = NA,
     }
 
     if (!any(names(globalCallingHandlers()) %in% "condition")) {
-      warning("Global handlers are not set, so progress will not be printed. See details section of help file.", immediate. = TRUE)
+      warning("Requested progress bar can't be shown as global progress handlers aren't set. See details section of help file.",
+              immediate. = TRUE)
     }
 
     ## Store the old handlers
