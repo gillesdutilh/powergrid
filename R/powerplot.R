@@ -361,8 +361,9 @@ PowerPlot =
       ## Add contour
       do.call(graphics::lines, append(list(x= x_vals,
                                            y= array_toplot,
-                                           col = col),
-                                      lines_dots))
+                                           col = col,
+                                           lwd = user_lwd),
+                                      lines_dots),)
 
       ## Add axes
       do.call(graphics::axis, append(list(side=1,
@@ -373,19 +374,8 @@ PowerPlot =
       ## Border and title
       do.call(graphics::box, par_dots)
       do.call(graphics::title, append(list(main = plot_main), par_dots))
-
-      ## Add an example
-      ## TODO: y_ex_value does not seem to be used.
-      x_ex_value = FindTarget(array_toplot,
-                              target_value = target_value,
-                              target_at_least = target_at_least,
-                              par_to_search = names(dimnames(array_toplot)),
-                              find_lowest = find_lowest,
-                              method = method)
-      y_ex_value = round(array_toplot[as.character(x_ex_value)], 3)
-
+      ## Adding an example is too much effort for little use.
       image_x = image_y = image_z = NULL
-
     } else
       ## =======================================================
     ## Draw 2d figure
@@ -408,7 +398,6 @@ PowerPlot =
         image_dots
       )
       do.call(graphics::image, image_args)
-browser()
       ## Draw gridlines (don't receive dots)
       graphics::abline(h = margins_toplot[[1]], v = margins_toplot[[2]],
                        col = 'white')
@@ -454,25 +443,31 @@ browser()
     ## =======================================================
     ## About example
     ## =======================================================
-    draw_example = !is.null(target_value) &&
-      (!is.null(example) | left_dims == 1)
-    if (draw_example){
-
-      target_value_logical = target_levels %in% target_value
-      if(length(target_value_logical) == length(col)) {
-        COL = col[target_value_logical]
-      } else COL = col[1]
-
-      AddExample(x = sliced_x,
-                 example = example,
-                 target_value = target_value,
-                 find_lowest = find_lowest,
-                 target_at_least = target_at_least,
-                 col = COL,
-                 example_text = example_text,
-                 ...)
+    ##
+    ## Example for one-dimensional case is pretty different from standard case,
+    ## so not generic here:
+    if (left_dims == 1 && !is.null(example)) {
+        warning("For plots along one parameter, no example can be drawn automatically.")
+    } else if (left_dims != 1) {
+      draw_example = !is.null(target_value) &&
+        (!is.null(example) | left_dims == 1)
+      if (draw_example){
+        
+        target_value_logical = target_levels %in% target_value
+        if(length(target_value_logical) == length(col)) {
+          COL = col[target_value_logical]
+        } else COL = col[1]
+        
+        AddExample(x = sliced_x,
+                   example = example,
+                   target_value = target_value,
+                   find_lowest = find_lowest,
+                   target_at_least = target_at_least,
+                   col = COL,
+                   example_text = example_text,
+                   ...)
+      }
     }
-
     invisible(list('image_args' = list('x' = image_x, 'y' = image_y, 'z' = image_z)))
   }
 
