@@ -31,21 +31,37 @@
 ##'   `target_at_least`.
 ##'
 ##'   ### Graphical parameters
+##' 
 ##'   Graphical parameters that are allowed as input to the functions
-##'   `graphics::plot`, `graphics::lines`, `graphics::image` and `graphics::axis`,
-##'   including all parametes available in par() are passed on to these functions
-##'   internally. Not passed through are "x", "y", "z", "type", "at", and
-##'   parameters that are explict arguments to `PowerPlot`.
+##'   `graphics::plot`, `graphics::lines`, `graphics::image` and
+##'   `graphics::axis`, including all parametes available in par() are passed on
+##'   to these functions internally. Not passed through are "x", "y", "z",
+##'   "type", "at", and parameters that are explict arguments to `PowerPlot`.
 ##'
 ##' @param x An object of class `power_array` (from powergrid).
+##' @param par_to_search The variable whose minimum (or maximum, when
+##'   \code{find_lowest == FALSE}) is searched for achieving the
+##'   \code{target_levels}.
+##' @param method Method used for finding the required \code{par_to_search}
+##'   needed to achieve \code{target_value}. Either \code{step}: walking in
+##'   steps along \code{par_to_search} or \code{lm}: Interpolating assuming a
+##'   linear relation between \code{par_to_search} and \code{(qnorm(x) + qnorm(1
+##'   - 0.05)) ^ 2}. The setting \code{lm} is inspired on the implementation in
+##'   the \code{sse} package by Thomas Fabbro.
+##' @param summary_function If \code{x} is an object of class \code{power_array}
+##'   where attribute \code{summarized} is FALSE (and individual iterations are
+##'   stored in dimension \code{iter}, the iterations dimension is aggregated by
+##'   \code{summary_fun}. Otherwise ignored.
+##' @param target_levels For which levels of power (or whichever variable is
+##'   contained in x) lines are drawn.
+##' @param ... Further arguments to \code{\link{par}}, \code{\link{axis}} and
+##'   \code{\link{image}}. A few exceptions (e.g. `y`) are ignored with a
+##'   warning.  `...` is also passed directly to \code{\link{AddExample}}
 ##' @param slicer If the parameter grid for which `x' was constructed has more
 ##'   than 2 dimensions, a 2-dimensional slice may be cut out using
 ##'   \code{slicer}, which is a list whose elements define at which values (the
 ##'   list element value) of which parameter (the list element name) the slice
 ##'   should be cut out.
-##' @param par_to_search The variable whose minimum (or maximum, when
-##'   \code{find_lowest == FALSE}) is searched for achieving the
-##'   \code{target_levels}.
 ##' @param find_lowest Logical, indicating whether the example should be found
 ##'   that minimizes an assumption (e.g., minimal required n) to achieve the
 ##'   \code{target_value} or an example that maximizes this assumption (e.g.,
@@ -61,14 +77,6 @@
 ##'   (list element value) of which parameter (list element name) the example is
 ##'   drawn for a power of \code{target_value}. You may supply a vector longer
 ##'   than 1 for multiple examples.
-##' @param method Method used for finding the required \code{par_to_search}
-##'   needed to achieve \code{target_value}. Either \code{step}: walking in
-##'   steps along \code{par_to_search} or \code{lm}: Interpolating assuming a
-##'   linear relation between \code{par_to_search} and \code{(qnorm(x) + qnorm(1
-##'   - 0.05)) ^ 2}. The setting \code{lm} is inspired on the implementation in
-##'   the \code{sse} package by Thomas Fabbro.
-##' @param target_levels For which levels of power (or whichever variable is
-##'   contained in x) lines are drawn.
 ##' @param col Color for the contour lines. Does not effect eventual example
 ##'   arrows. Therefore, use AddExample.
 ##' @param shades_of_grey Logical indicating whether greylevels are painted in
@@ -88,13 +96,6 @@
 ##'   .35. Functionality implemented for consistency with \code{sse} package,
 ##'   but use is discouraged, since regressing the contour values flattens the
 ##'   contour plot, thereby *biasing* the contour lines.
-##' @param summary_function If \code{x} is an object of class \code{power_array}
-##'   where attribute \code{summarized} is FALSE (and individual iterations are
-##'   stored in dimension \code{iter}, the iterations dimension is aggregated by
-##'   \code{summary_fun}. Otherwise ignored.
-##' @param ... Further arguments to \code{\link{par}}, \code{\link{axis}} and
-##'   \code{\link{image}}. A few exceptions (e.g. `y`) are ignored with a warning.
-##'   `...` is also passed directly to \code{\link{AddExample}}
 ##' @seealso \code{\link{PowerGrid}}, \code{\link{AddExample}},
 ##'   \code{\link{Example}}, \code{\link{GridPlot}} for plotting
 ##'   interdependencies of 3 parameters.
