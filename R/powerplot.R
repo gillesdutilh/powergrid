@@ -201,7 +201,6 @@ PowerPlot =
            smooth = NA,
            ...) # Ellipsis passed to various internal calls
   {
-
     ## =======================================================
     ## process power array
     ## =======================================================
@@ -220,7 +219,7 @@ PowerPlot =
 
     sliced_x = EnsureSingleFunOut(sliced_x)
 
-    left_dims = CheckArrayDim(sliced_x, required_dim = c(1,2))
+    left_dims = CheckArrayDim(sliced_x, condition = 'error', required_dim = c(1,2))
 
     ## =======================================================
     ## Get the name of the parameter to search (typically n)
