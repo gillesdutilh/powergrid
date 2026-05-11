@@ -78,6 +78,7 @@
 ##'   value be printed alongside the arrow(s)
 ##' @param title Character string, if not \code{NULL}, replaces default figure
 ##'   title.
+##' @param axes Logical defining whether or not axes are drawn.
 ##' @param labcex Numeric value passed to `contour, specifying the size of the
 ##'   contour labels.
 ##' @param par_labels Named vector with elements named as the parameters
@@ -196,6 +197,7 @@ PowerPlot =
            shades_of_grey = TRUE, # do you want shades of grey on background
            example_text = TRUE, # do you want a text next to the Example arrow
            title = NULL,
+           axes = TRUE,
            labcex = 1.2, # cex specifically for the labels on the contours
            par_labels = NULL,
            smooth = NA,
@@ -328,9 +330,10 @@ PowerPlot =
     lines_dots <- dots[intersect(names(dots), c(names(graphics::par()), names(formals(graphics:::lines))))]
     axis_dots <- dots[intersect(names(dots), c(names(graphics::par()), names(formals(graphics::axis))))]
 
-    ## Contour is awkward, so it just gets graphics::par() args. lwd is not specified
-    ## so it can get varying values.
-    contour_dots <- par_dots[!names(par_dots) %in% c("lwd")]
+    ## ## Contour is awkward, so it just gets graphics::par() args. lwd is not specified
+    ## ## so it can get varying values.
+    ## contour_dots <- par_dots[!(names(par_dots) %in% c("lwd"))]
+    contour_dots = list()
 
     ## Add back the lty to certain dots
     lines_dots$lty = contour_dots$lty = user_lty
@@ -435,8 +438,10 @@ PowerPlot =
         contour_args$z = smooth_z_m
       }
       do.call(graphics::contour, contour_args)
-      do.call(graphics::axis, append(list(side=1), axis_dots))
-      do.call(graphics::axis, append(list(side=2), axis_dots))
+      if (axes == TRUE) {
+        do.call(graphics::axis, append(list(side=1), axis_dots))
+        do.call(graphics::axis, append(list(side=2), axis_dots))
+      }
       do.call(graphics::box, args = par_dots)
     }
 
