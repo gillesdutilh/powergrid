@@ -31,12 +31,11 @@
 ##'   `target_at_least`.
 ##'
 ##'   ### Graphical parameters
-##'   The plot takes the \code{\link{graphical parameters}} from `par`. If graphical
-##'   parameters are given as arguments to the function they will be passed to
-##'   the calls generating axes, titles and plotting. Grid lines are not modified
-##'   by graphical parameters to PowerPlot. `lty` is only passed to the plotted
-##'   contours (e.g. to prevent dashed axes). For further customisation of the
-##'   axes `xaxt` and `yaxt` can be set to "n", and axes can be added afterwards.
+##'   Graphical parameters that are allowed as input to the functions
+##'   `graphics::plot`, `graphics::lines`, `graphics::image` and `graphics::axis`,
+##'   including all parametes available in par() are passed on to these functions
+##'   internally. Not passed through are "x", "y", "z", "type", "at", and
+##'   parameters that are explict arguments to `PowerPlot`.
 ##'
 ##' @param x An object of class `power_array` (from powergrid).
 ##' @param slicer If the parameter grid for which `x' was constructed has more
