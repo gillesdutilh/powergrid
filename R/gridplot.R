@@ -28,7 +28,7 @@
 ##'   `graphics::plot`, `graphics::lines`, `graphics::image` and `graphics::axis`,
 ##'   including all parametes available in par() are passed on to these functions
 ##'   internally. Not passed through are "x", "y", "z", "type", "at", and
-##'   parameters that are explict arguments to `PowerPlot`.
+##'   parameters that are explict arguments to `GridPlot`.
 ##'
 ##' @param x An object of class "power_array" (from `powergrid`).
 ##' @param slicer If the parameter grid of `x` has more than 3 dimensions, a
