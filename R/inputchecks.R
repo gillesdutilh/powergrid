@@ -50,15 +50,27 @@ EnsureSummarized = function(x, summary_function = NULL, condition = "warning") {
         "iterations."), call. = FALSE)
     }
     if(condition == "warning") {
+      ## handle name and call of function. This must be done here, because the
+      ## substitute information gets lost passing on to SummarizeIterations
+      if (class(substitute(summary_function)) == "name"){
+        x = SummarizeIterations(x, summary_function = substitute(summary_function))
+      } else if (class(substitute(summary_function)) == "call"){
+        x = SummarizeIterations(x, summary_function = summary_function)
+      }
+      attr(x, which = 'summary_function') = summary_function
+      attr(x, which = 'summary_function_name') =
+        ifelse (class(substitute(summary_function)) == 'name',
+                substitute(summary_function),
+                ## if created on the fly, it's an ananymous function
+                "anonymous function, echt"
+                )
       warning(paste0(
         "The power array you supplied to contains individual ",
         "iterations. To be used further these were automatically ",
-        "summarized across iterations using the provided summary function"),
+        "summarized across iterations using: ", attr(x, which = "summary_function_name")),
         call. = FALSE, immediate. = TRUE)
     }
     if(is.null(summary_function)) stop("No summary function provided", call. = TRUE)
-
-    x = SummarizeIterations(x, summary_function)
   }
   return(x)
 }
