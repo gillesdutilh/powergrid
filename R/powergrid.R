@@ -453,6 +453,16 @@ PowerGrid = function(pars, fun, more_args = NULL, n_iter = NA,
   if((!is.na(n_iter) && summarize)) {
     out_array = SummarizeIterations(out_array, summary_function = summary_function)
   }
+  ## SummarizeIterations can't know the name of the summary function. But
+  ## PowerGrid does, so fill in here:
+  attr(out_array, which = 'summary_function') = summary_function
+  attr(out_array, which = 'summary_function_name') =
+    ifelse (class(substitute(summary_function)) == 'name',
+            substitute(summary_function),
+            ## if created on the fly, it's an ananymous function
+            "anonymous function"
+            )
+  
   ## If the object never needed summarizing, it is already summarized:
   if(is.na(n_iter)) {
     attr(out_array, which = 'summarized') = TRUE
