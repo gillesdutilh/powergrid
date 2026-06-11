@@ -20,6 +20,7 @@ GridPlot(
   col = NULL,
   example_text = TRUE,
   title = NULL,
+  axes = TRUE,
   par_labels = NULL,
   add_legend = TRUE,
   xlim = NULL,
@@ -80,7 +81,9 @@ the lines.}
 value, and the line parameter value be printed alongside the arrow(s).}
 
 \item{title}{Character string, if not \code{NULL}, replaces default figure
-title. Replaces \code{main}if sepcifiec by \code{...}.}
+title. Replaces \code{main}if specifiec by \code{...} .}
+
+\item{axes}{Logical defining whether or not axes are drawn.}
 
 \item{par_labels}{Named vector where elements names represent the parameters
 that are plotted, and the values set the desired labels.}
@@ -125,6 +128,14 @@ level is not reached anywhere in that corner of the parameter range. In case
 n is on the y-axis, this may easily be solved by adding larger sample sizes
 to the grid (consider \code{Update}), and then adjusting the y-limit to only
 include the values of interest.
+\subsection{Graphical parameters}{
+
+Graphical parameters that are allowed as input to the functions
+\code{graphics::plot}, \code{graphics::lines}, \code{graphics::image} and \code{graphics::axis},
+including all parametes available in par() are passed on to these functions
+internally. Not passed through are "x", "y", "z", "type", "at", and
+parameters that are explict arguments to \code{GridPlot}.
+}
 }
 \examples{
 sse_pars = list(

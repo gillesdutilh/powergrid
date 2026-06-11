@@ -23,6 +23,13 @@
 ##' to the grid (consider \code{Update}), and then adjusting the y-limit to only
 ##' include the values of interest.
 ##'
+##'   ### Graphical parameters
+##'   Graphical parameters that are allowed as input to the functions
+##'   `graphics::plot`, `graphics::lines`, `graphics::image` and `graphics::axis`,
+##'   including all parametes available in par() are passed on to these functions
+##'   internally. Not passed through are "x", "y", "z", "type", "at", and
+##'   parameters that are explict arguments to `GridPlot`.
+##'
 ##' @param x An object of class "power_array" (from `powergrid`).
 ##' @param slicer If the parameter grid of `x` has more than 3 dimensions, a
 ##'   3-dimensional slice must be cut out using \code{slicer}, a list whose
@@ -64,7 +71,8 @@
 ##' @param example_text When an example is drawn, should the the required par
 ##'   value, and the line parameter value be printed alongside the arrow(s).
 ##' @param title Character string, if not \code{NULL}, replaces default figure
-##'   title. Replaces `main`if sepcifiec by `...`.
+##'   title. Replaces `main`if specifiec by `...` .
+##' @param axes Logical defining whether or not axes are drawn.
 ##' @param xlim,ylim See \code{?graphics::plot}.
 ##' @param add_legend Should the legend be automatically generated
 ##' (`default = TRUE`), set to FALSE and add afterwards for more flexibility.
@@ -153,6 +161,7 @@ GridPlot = function(x,
                     col = NULL,
                     example_text = TRUE,
                     title = NULL,
+                    axes = TRUE,
                     par_labels = NULL,
                     add_legend = TRUE,
                     xlim = NULL,
@@ -325,9 +334,10 @@ GridPlot = function(x,
                                  type = 'n', axes = FALSE), plot_dots))
 
   do.call(graphics::box, par_dots)
-
-  do.call(graphics::axis, args= append(list(side=1, at = at_x), axis_dots))
-  do.call(graphics::axis, args= append(list(side=2, at = at_y), axis_dots))
+  if (axes){
+    do.call(graphics::axis, args= append(list(side=1, at = at_x), axis_dots))
+    do.call(graphics::axis, args= append(list(side=2, at = at_y), axis_dots))
+  }
 
   ## Gridlines are unchanged by par arguments
   graphics::abline(v = at_x,

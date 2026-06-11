@@ -31,22 +31,37 @@
 ##'   `target_at_least`.
 ##'
 ##'   ### Graphical parameters
-##'   The plot takes the \code{\link{graphical parameters}} from `par`. If graphical
-##'   parameters are given as arguments to the function they will be passed to
-##'   the calls generating axes, titles and plotting. Grid lines are not modified
-##'   by graphical parameters to PowerPlot. `lty` is only passed to the plotted
-##'   contours (e.g. to prevent dashed axes). For further customisation of the
-##'   axes `xaxt` and `yaxt` can be set to "n", and axes can be added afterwards.
+##' 
+##'   Graphical parameters that are allowed as input to the functions
+##'   `graphics::plot`, `graphics::lines`, `graphics::image` and
+##'   `graphics::axis`, including all parametes available in par() are passed on
+##'   to these functions internally. Not passed through are "x", "y", "z",
+##'   "type", "at", and parameters that are explict arguments to `PowerPlot`.
 ##'
 ##' @param x An object of class `power_array` (from powergrid).
+##' @param par_to_search The variable whose minimum (or maximum, when
+##'   \code{find_lowest == FALSE}) is searched for achieving the
+##'   \code{target_levels}.
+##' @param method Method used for finding the required \code{par_to_search}
+##'   needed to achieve \code{target_value}. Either \code{step}: walking in
+##'   steps along \code{par_to_search} or \code{lm}: Interpolating assuming a
+##'   linear relation between \code{par_to_search} and \code{(qnorm(x) + qnorm(1
+##'   - 0.05)) ^ 2}. The setting \code{lm} is inspired on the implementation in
+##'   the \code{sse} package by Thomas Fabbro.
+##' @param summary_function If \code{x} is an object of class \code{power_array}
+##'   where attribute \code{summarized} is FALSE (and individual iterations are
+##'   stored in dimension \code{iter}, the iterations dimension is aggregated by
+##'   \code{summary_fun}. Otherwise ignored.
+##' @param target_levels For which levels of power (or whichever variable is
+##'   contained in x) lines are drawn.
+##' @param ... Further arguments to \code{\link{par}}, \code{\link{axis}} and
+##'   \code{\link{image}}. A few exceptions (e.g. `y`) are ignored with a
+##'   warning.  `...` is also passed directly to \code{\link{AddExample}}
 ##' @param slicer If the parameter grid for which `x' was constructed has more
 ##'   than 2 dimensions, a 2-dimensional slice may be cut out using
 ##'   \code{slicer}, which is a list whose elements define at which values (the
 ##'   list element value) of which parameter (the list element name) the slice
 ##'   should be cut out.
-##' @param par_to_search The variable whose minimum (or maximum, when
-##'   \code{find_lowest == FALSE}) is searched for achieving the
-##'   \code{target_levels}.
 ##' @param find_lowest Logical, indicating whether the example should be found
 ##'   that minimizes an assumption (e.g., minimal required n) to achieve the
 ##'   \code{target_value} or an example that maximizes this assumption (e.g.,
@@ -62,14 +77,6 @@
 ##'   (list element value) of which parameter (list element name) the example is
 ##'   drawn for a power of \code{target_value}. You may supply a vector longer
 ##'   than 1 for multiple examples.
-##' @param method Method used for finding the required \code{par_to_search}
-##'   needed to achieve \code{target_value}. Either \code{step}: walking in
-##'   steps along \code{par_to_search} or \code{lm}: Interpolating assuming a
-##'   linear relation between \code{par_to_search} and \code{(qnorm(x) + qnorm(1
-##'   - 0.05)) ^ 2}. The setting \code{lm} is inspired on the implementation in
-##'   the \code{sse} package by Thomas Fabbro.
-##' @param target_levels For which levels of power (or whichever variable is
-##'   contained in x) lines are drawn.
 ##' @param col Color for the contour lines. Does not effect eventual example
 ##'   arrows. Therefore, use AddExample.
 ##' @param shades_of_grey Logical indicating whether greylevels are painted in
@@ -78,6 +85,7 @@
 ##'   value be printed alongside the arrow(s)
 ##' @param title Character string, if not \code{NULL}, replaces default figure
 ##'   title.
+##' @param axes Logical defining whether or not axes are drawn.
 ##' @param labcex Numeric value passed to `contour, specifying the size of the
 ##'   contour labels.
 ##' @param par_labels Named vector with elements named as the parameters
@@ -88,13 +96,6 @@
 ##'   .35. Functionality implemented for consistency with \code{sse} package,
 ##'   but use is discouraged, since regressing the contour values flattens the
 ##'   contour plot, thereby *biasing* the contour lines.
-##' @param summary_function If \code{x} is an object of class \code{power_array}
-##'   where attribute \code{summarized} is FALSE (and individual iterations are
-##'   stored in dimension \code{iter}, the iterations dimension is aggregated by
-##'   \code{summary_fun}. Otherwise ignored.
-##' @param ... Further arguments to \code{\link{par}}, \code{\link{axis}} and
-##'   \code{\link{image}}. A few exceptions (e.g. `y`) are ignored with a warning.
-##'   `...` is also passed directly to \code{\link{AddExample}}
 ##' @seealso \code{\link{PowerGrid}}, \code{\link{AddExample}},
 ##'   \code{\link{Example}}, \code{\link{GridPlot}} for plotting
 ##'   interdependencies of 3 parameters.
@@ -196,12 +197,12 @@ PowerPlot =
            shades_of_grey = TRUE, # do you want shades of grey on background
            example_text = TRUE, # do you want a text next to the Example arrow
            title = NULL,
+           axes = TRUE,
            labcex = 1.2, # cex specifically for the labels on the contours
            par_labels = NULL,
            smooth = NA,
            ...) # Ellipsis passed to various internal calls
   {
-
     ## =======================================================
     ## process power array
     ## =======================================================
@@ -220,7 +221,7 @@ PowerPlot =
 
     sliced_x = EnsureSingleFunOut(sliced_x)
 
-    left_dims = CheckArrayDim(sliced_x, required_dim = c(1,2))
+    left_dims = CheckArrayDim(sliced_x, condition = 'error', required_dim = c(1,2))
 
     ## =======================================================
     ## Get the name of the parameter to search (typically n)
@@ -274,8 +275,8 @@ PowerPlot =
     good_args = c(names(graphics::par()),
                   names(formals(graphics::axis)),
                   names(formals(graphics::lines)),
-                  names(formals(graphics:::plot.default)),
-                  names(formals(graphics:::image.default)))
+                  names(formals(graphics::plot.default)),
+                  names(formals(graphics::image.default)))
     good_args = setdiff(good_args, "...")
 
     bad_args = setdiff(names(dots), good_args)
@@ -312,24 +313,27 @@ PowerPlot =
     # dots$las = if ("las" %in% names(dots)) dots$las else graphics::par()$las
     # dots$bty = if ("bty" %in% names(dots)) dots$bty else graphics::par()$bty
     #
-    # ## If lwd is specified use that, otherwise take lwd from graphics::par().
-    # ## Later it has to be omitted from the dots passed to the contour
-    # dots$lwd = if ("lwd" %in% names(dots)) dots$lwd else graphics::par()$lwd
 
-    ## Only let lty affect certain plot characteristics, so remove from dots
+
+    ## Keep some graphical pars from affecting everything they can (e.g., box
+    ## should not be thick and dashed)
     user_lty = if ("lty" %in% names(dots)) dots$lty else NULL
     dots$lty = NULL
+    ## If lwd is specified use that, otherwise take lwd from graphics::par().
+    user_lwd = if ("lwd" %in% names(dots)) dots$lwd else graphics::par()$lwd
+    dots$lwd = NULL
 
     ## Make lists of all the dots arguments to be passed to each function.
     par_dots <- dots[intersect(names(dots),names(graphics::par()))]
-    image_dots <- dots[intersect(names(dots), c(names(graphics::par()), names(formals(graphics:::image.default))))]
-    plot_dots <- dots[intersect(names(dots), c(names(graphics::par()), names(formals(graphics:::plot.default))))]
-    lines_dots <- dots[intersect(names(dots), c(names(graphics::par()), names(formals(graphics:::lines))))]
+    image_dots <- dots[intersect(names(dots), c(names(graphics::par()), names(formals(graphics::image.default))))]
+    plot_dots <- dots[intersect(names(dots), c(names(graphics::par()), names(formals(graphics::plot.default))))]
+    lines_dots <- dots[intersect(names(dots), c(names(graphics::par()), names(formals(graphics::lines))))]
     axis_dots <- dots[intersect(names(dots), c(names(graphics::par()), names(formals(graphics::axis))))]
 
-    ## Contour is awkward, so it just gets graphics::par() args. lwd is not specified
-    ## so it can get varying values.
-    contour_dots <- par_dots[!names(par_dots) %in% c("lwd")]
+    ## ## Contour is awkward, so it just gets graphics::par() args. lwd is not specified
+    ## ## so it can get varying values.
+    ## contour_dots <- par_dots[!(names(par_dots) %in% c("lwd"))]
+    contour_dots = list()
 
     ## Add back the lty to certain dots
     lines_dots$lty = contour_dots$lty = user_lty
@@ -360,8 +364,9 @@ PowerPlot =
       ## Add contour
       do.call(graphics::lines, append(list(x= x_vals,
                                            y= array_toplot,
-                                           col = col),
-                                      lines_dots))
+                                           col = col,
+                                           lwd = user_lwd),
+                                      lines_dots),)
 
       ## Add axes
       do.call(graphics::axis, append(list(side=1,
@@ -372,19 +377,8 @@ PowerPlot =
       ## Border and title
       do.call(graphics::box, par_dots)
       do.call(graphics::title, append(list(main = plot_main), par_dots))
-
-      ## Add an example
-      ## TODO: y_ex_value does not seem to be used.
-      x_ex_value = FindTarget(array_toplot,
-                              target_value = target_value,
-                              target_at_least = target_at_least,
-                              par_to_search = names(dimnames(array_toplot)),
-                              find_lowest = find_lowest,
-                              method = method)
-      y_ex_value = round(array_toplot[as.character(x_ex_value)], 3)
-
+      ## Adding an example is too much effort for little use.
       image_x = image_y = image_z = NULL
-
     } else
       ## =======================================================
     ## Draw 2d figure
@@ -407,7 +401,6 @@ PowerPlot =
         image_dots
       )
       do.call(graphics::image, image_args)
-
       ## Draw gridlines (don't receive dots)
       graphics::abline(h = margins_toplot[[1]], v = margins_toplot[[2]],
                        col = 'white')
@@ -417,9 +410,9 @@ PowerPlot =
         if (!(target_value %in% target_levels)) {
           target_levels = sort(unique(c(target_levels, target_value)))
         }
-        power_lwds = ifelse(target_levels == target_value, 2, 1) * dots$lwd
+        power_lwds = ifelse(target_levels == target_value, 2, 1) * user_lwd
       } else {
-        power_lwds = dots$lwd
+        power_lwds = user_lwd
       }
 
       ## Contour is a bit funny in it arguments.
@@ -445,33 +438,41 @@ PowerPlot =
         contour_args$z = smooth_z_m
       }
       do.call(graphics::contour, contour_args)
-      do.call(graphics::axis, append(list(side=1), axis_dots))
-      do.call(graphics::axis, append(list(side=2), axis_dots))
+      if (axes == TRUE) {
+        do.call(graphics::axis, append(list(side=1), axis_dots))
+        do.call(graphics::axis, append(list(side=2), axis_dots))
+      }
       do.call(graphics::box, args = par_dots)
     }
 
     ## =======================================================
     ## About example
     ## =======================================================
-    draw_example = !is.null(target_value) &&
-      (!is.null(example) | left_dims == 1)
-    if (draw_example){
-
-      target_value_logical = target_levels %in% target_value
-      if(length(target_value_logical) == length(col)) {
-        COL = col[target_value_logical]
-      } else COL = col[1]
-
-      AddExample(x = sliced_x,
-                 example = example,
-                 target_value = target_value,
-                 find_lowest = find_lowest,
-                 target_at_least = target_at_least,
-                 col = COL,
-                 example_text = example_text,
-                 ...)
+    ##
+    ## Example for one-dimensional case is pretty different from standard case,
+    ## so not generic here:
+    if (left_dims == 1 && !is.null(example)) {
+        warning("For plots along one parameter, no example can be drawn automatically.")
+    } else if (left_dims != 1) {
+      draw_example = !is.null(target_value) &&
+        (!is.null(example) | left_dims == 1)
+      if (draw_example){
+        
+        target_value_logical = target_levels %in% target_value
+        if(length(target_value_logical) == length(col)) {
+          COL = col[target_value_logical]
+        } else COL = col[1]
+        
+        AddExample(x = sliced_x,
+                   example = example,
+                   target_value = target_value,
+                   find_lowest = find_lowest,
+                   target_at_least = target_at_least,
+                   col = COL,
+                   example_text = example_text,
+                   ...)
+      }
     }
-
     invisible(list('image_args' = list('x' = image_x, 'y' = image_y, 'z' = image_z)))
   }
 

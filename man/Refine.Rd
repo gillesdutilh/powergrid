@@ -25,18 +25,25 @@ PowerGrid or by another call of Refine), adding further values in
 \code{pars} and/or larger \code{n_iter}.
 }
 \details{
-If \code{pars == NULL}, update extends \code{old} by adding
-iterations \code{n_iter_add} to the existing power_array. If \code{pars}
-is given, the function that was evaluated in \code{old} (attribute
-\code{sim_function}) is evaluated at the crossings of \code{pars}. If
-argument \code{pars} is different from \code{attr(old, which = 'pars')},
-this means that the function is evaluated additional crossings of
-parameters.
+This function allows extending the number of iterations, as well as
+changing the parameter grid across which the function of interest is
+evaluated. Being able to do both at the same time is handy in cases where
+calculation takes significant time: You may first only evaluate a broad
+grid of parameters with a low number of iterations using PowerGrid. Then,
+using \code{Refine}, you can zoom in on a certain section of the parameter grid
+(and increase resolution in the focal range), and evaluate with a higher
+number of iterations.
 
-Note that certain combinations of \code{pars} and \code{n_iter_add} result
-in arrays where some crossings of parameters include more iterations than
-others. This is a feature, not a bug. May result in less aesthetic
-plotting, however.
+If \code{pars == NULL}, \code{Refine} extends \code{old} by adding iterations
+\code{n_iter_add} to the existing power_array (applying the original
+function \code{attr(old, which = 'sim_function'}).
+
+If \code{pars} is given and different from the original \code{pars}
+(\code{attr(old, which = 'pars')}), the function is evaluated at
+additional crossings of parameters. This means that the resulting array
+may have empty cells, or cells with different numbers of iterations. This
+is a feature, not a bug. It may result in less aesthetic plotting,
+however.
 
 For details about handling the random seed, see \code{\link{PowerGrid}}.
 }
@@ -98,15 +105,16 @@ sse_pars = list(
 set.seed(1)
 power_array_up = Refine(power_array, n_iter_add = 555, pars = sse_pars)
 summary(power_array_up)
-PowerPlot(power_array_up) # that looks funny! It's because the default summary
-                          # mean does not deal with the empty value in the
-                          # grid. Solution is in illustration below.
+PowerPlot(power_array_up)
+
+## That looks funny! It's because the default summary mean does not deal
+## with the empty value in the grid. Solution is in illustration below.
 
 ## A visual illustration of this zooming in, in three figures
 layout(t(1:3))
 PowerPlot(power_array, title = 'Course grid to start with')
 PowerPlot(power_array_up, summary_function = function(x)mean(x, na.rm = TRUE),
-          title = 'Extra samples at finer parameter grid (does not look good)')
+          title = 'Extra samples at finer parameter grid\n(looks a bit funny with large empty cells)')
 PowerPlot(power_array_up,
           slicer = list(n = seq(50, 100, 5),
                         delta = seq(.7, 1.1, .05)),

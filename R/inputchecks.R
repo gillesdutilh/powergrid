@@ -23,9 +23,9 @@ CheckArrayDim =
     if(!is.null(required_dim) && !dim %in% required_dim) {
 
       condition_text <- paste0("The input ", ifelse(sliced, "(after slicing) ", ""),
-      "does not define an array with dimension equal to one of {",
+      "does not define an array with dimensions equal to one of {",
       paste0(required_dim, collapse = ', '),"}, as expected. ",
-      "Instead the array has dimensions of ", dim, ".")
+      "Instead the array has ", dim, " dimensions.")
 
       if(condition == "error") stop(condition_text)
       if(condition == "warning") warning(condition_text)
