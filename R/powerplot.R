@@ -275,8 +275,8 @@ PowerPlot =
     good_args = c(names(graphics::par()),
                   names(formals(graphics::axis)),
                   names(formals(graphics::lines)),
-                  names(formals(graphics:::plot.default)),
-                  names(formals(graphics:::image.default)))
+                  names(formals(graphics::plot.default)),
+                  names(formals(graphics::image.default)))
     good_args = setdiff(good_args, "...")
 
     bad_args = setdiff(names(dots), good_args)
@@ -325,9 +325,9 @@ PowerPlot =
 
     ## Make lists of all the dots arguments to be passed to each function.
     par_dots <- dots[intersect(names(dots),names(graphics::par()))]
-    image_dots <- dots[intersect(names(dots), c(names(graphics::par()), names(formals(graphics:::image.default))))]
-    plot_dots <- dots[intersect(names(dots), c(names(graphics::par()), names(formals(graphics:::plot.default))))]
-    lines_dots <- dots[intersect(names(dots), c(names(graphics::par()), names(formals(graphics:::lines))))]
+    image_dots <- dots[intersect(names(dots), c(names(graphics::par()), names(formals(graphics::image.default))))]
+    plot_dots <- dots[intersect(names(dots), c(names(graphics::par()), names(formals(graphics::plot.default))))]
+    lines_dots <- dots[intersect(names(dots), c(names(graphics::par()), names(formals(graphics::lines))))]
     axis_dots <- dots[intersect(names(dots), c(names(graphics::par()), names(formals(graphics::axis))))]
 
     ## ## Contour is awkward, so it just gets graphics::par() args. lwd is not specified
