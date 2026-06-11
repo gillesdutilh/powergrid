@@ -76,17 +76,23 @@ PowerGrid or by another call of Refine), adding further values in
     </div>
     <div class="section level2">
     <h2 id="details">Details<a class="anchor" aria-label="anchor" href="#details"></a></h2>
-    <p>If <code>pars == NULL</code>, update extends <code>old</code> by adding
-iterations <code>n_iter_add</code> to the existing power_array. If <code>pars</code>
-is given, the function that was evaluated in <code>old</code> (attribute
-<code>sim_function</code>) is evaluated at the crossings of <code>pars</code>. If
-argument <code>pars</code> is different from <code>attr(old, which = 'pars')</code>,
-this means that the function is evaluated additional crossings of
-parameters.</p>
-<p>Note that certain combinations of <code>pars</code> and <code>n_iter_add</code> result
-in arrays where some crossings of parameters include more iterations than
-others. This is a feature, not a bug. May result in less aesthetic
-plotting, however.</p>
+    <p>This function allows extending the number of iterations, as well as
+changing the parameter grid across which the function of interest is
+evaluated. Being able to do both at the same time is handy in cases where
+calculation takes significant time: You may first only evaluate a broad
+grid of parameters with a low number of iterations using PowerGrid. Then,
+using <code>Refine</code>, you can zoom in on a certain section of the parameter grid
+(and increase resolution in the focal range), and evaluate with a higher
+number of iterations.</p>
+<p>If <code>pars == NULL</code>, <code>Refine</code> extends <code>old</code> by adding iterations
+<code>n_iter_add</code> to the existing power_array (applying the original
+function <code>attr(old, which = 'sim_function'</code>).</p>
+<p>If <code>pars</code> is given and different from the original <code>pars</code>
+(<code>attr(old, which = 'pars')</code>), the function is evaluated at
+additional crossings of parameters. This means that the resulting array
+may have empty cells, or cells with different numbers of iterations. This
+is a feature, not a bug. It may result in less aesthetic plotting,
+however.</p>
 <p>For details about handling the random seed, see <code><a href="PowerGrid.html">PowerGrid</a></code>.</p>
     </div>
     <div class="section level2">
@@ -189,18 +195,19 @@ plotting, however.</p>
 <span class="r-out co"><span class="r-pr">#&gt;</span>       n 200</span>
 <span class="r-out co"><span class="r-pr">#&gt;</span>   delta 0.5, 0.7, 0.75, 0.8, 0.85, 0.9, 0.95, 1, 1.05,</span>
 <span class="r-out co"><span class="r-pr">#&gt;</span>   delta 1.1, 1.5</span>
-<span class="r-in"><span><span class="fu"><a href="PowerPlot.html">PowerPlot</a></span><span class="op">(</span><span class="va">power_array_up</span><span class="op">)</span> <span class="co"># that looks funny! It's because the default summary</span></span></span>
+<span class="r-in"><span><span class="fu"><a href="PowerPlot.html">PowerPlot</a></span><span class="op">(</span><span class="va">power_array_up</span><span class="op">)</span></span></span>
 <span class="r-wrn co"><span class="r-pr">#&gt;</span> <span class="warning">Warning: </span>The power array you supplied to contains individual iterations. To be used further these were automatically summarized across iterations using the provided summary function</span>
 <span class="r-plt img"><img src="Refine-2.png" alt="" width="700" height="433"></span>
-<span class="r-in"><span>                          <span class="co"># mean does not deal with the empty value in the</span></span></span>
-<span class="r-in"><span>                          <span class="co"># grid. Solution is in illustration below.</span></span></span>
+<span class="r-in"><span></span></span>
+<span class="r-in"><span><span class="co">## That looks funny! It's because the default summary mean does not deal</span></span></span>
+<span class="r-in"><span><span class="co">## with the empty value in the grid. Solution is in illustration below.</span></span></span>
 <span class="r-in"><span></span></span>
 <span class="r-in"><span><span class="co">## A visual illustration of this zooming in, in three figures</span></span></span>
 <span class="r-in"><span><span class="fu"><a href="https://rdrr.io/r/graphics/layout.html" class="external-link">layout</a></span><span class="op">(</span><span class="fu"><a href="https://rdrr.io/r/base/t.html" class="external-link">t</a></span><span class="op">(</span><span class="fl">1</span><span class="op">:</span><span class="fl">3</span><span class="op">)</span><span class="op">)</span></span></span>
 <span class="r-in"><span><span class="fu"><a href="PowerPlot.html">PowerPlot</a></span><span class="op">(</span><span class="va">power_array</span>, title <span class="op">=</span> <span class="st">'Course grid to start with'</span><span class="op">)</span></span></span>
 <span class="r-wrn co"><span class="r-pr">#&gt;</span> <span class="warning">Warning: </span>The power array you supplied to contains individual iterations. To be used further these were automatically summarized across iterations using the provided summary function</span>
 <span class="r-in"><span><span class="fu"><a href="PowerPlot.html">PowerPlot</a></span><span class="op">(</span><span class="va">power_array_up</span>, summary_function <span class="op">=</span> <span class="kw">function</span><span class="op">(</span><span class="va">x</span><span class="op">)</span><span class="fu"><a href="https://rdrr.io/r/base/mean.html" class="external-link">mean</a></span><span class="op">(</span><span class="va">x</span>, na.rm <span class="op">=</span> <span class="cn">TRUE</span><span class="op">)</span>,</span></span>
-<span class="r-in"><span>          title <span class="op">=</span> <span class="st">'Extra samples at finer parameter grid (does not look good)'</span><span class="op">)</span></span></span>
+<span class="r-in"><span>          title <span class="op">=</span> <span class="st">'Extra samples at finer parameter grid\n(looks a bit funny with large empty cells)'</span><span class="op">)</span></span></span>
 <span class="r-wrn co"><span class="r-pr">#&gt;</span> <span class="warning">Warning: </span>The power array you supplied to contains individual iterations. To be used further these were automatically summarized across iterations using the provided summary function</span>
 <span class="r-in"><span><span class="fu"><a href="PowerPlot.html">PowerPlot</a></span><span class="op">(</span><span class="va">power_array_up</span>,</span></span>
 <span class="r-in"><span>          slicer <span class="op">=</span> <span class="fu"><a href="https://rdrr.io/r/base/list.html" class="external-link">list</a></span><span class="op">(</span>n <span class="op">=</span> <span class="fu"><a href="https://rdrr.io/r/base/seq.html" class="external-link">seq</a></span><span class="op">(</span><span class="fl">50</span>, <span class="fl">100</span>, <span class="fl">5</span><span class="op">)</span>,</span></span>
