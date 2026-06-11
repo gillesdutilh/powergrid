@@ -20,6 +20,7 @@ PowerPlot(
   shades_of_grey = TRUE,
   example_text = TRUE,
   title = NULL,
+  axes = TRUE,
   labcex = 1.2,
   par_labels = NULL,
   smooth = NA,
@@ -62,7 +63,7 @@ uncertainty).}
 needed to achieve \code{target_value}. Either \code{step}: walking in
 steps along \code{par_to_search} or \code{lm}: Interpolating assuming a
 linear relation between \code{par_to_search} and \code{(qnorm(x) + qnorm(1
-  - 0.05)) ^ 2}. The setting \code{lm} is inspired on the implementation in
+- 0.05)) ^ 2}. The setting \code{lm} is inspired on the implementation in
 the \code{sse} package by Thomas Fabbro.}
 
 \item{summary_function}{If \code{x} is an object of class \code{power_array}
@@ -85,6 +86,8 @@ value be printed alongside the arrow(s)}
 \item{title}{Character string, if not \code{NULL}, replaces default figure
 title.}
 
+\item{axes}{Logical defining whether or not axes are drawn.}
+
 \item{labcex}{Numeric value passed to `contour, specifying the size of the
 contour labels.}
 
@@ -99,8 +102,8 @@ but use is discouraged, since regressing the contour values flattens the
 contour plot, thereby \emph{biasing} the contour lines.}
 
 \item{...}{Further arguments to \code{\link{par}}, \code{\link{axis}} and
-\code{\link{image}}. A few exceptions (e.g. \code{y}) are ignored with a warning.
-\code{...} is also passed directly to \code{\link{AddExample}}}
+\code{\link{image}}. A few exceptions (e.g. \code{y}) are ignored with a
+warning.  \code{...} is also passed directly to \code{\link{AddExample}}}
 }
 \value{
 A list containing the coordinate arguments x, y, and z, as passed to
@@ -147,12 +150,11 @@ to \code{FALSE}. See Example for more details about \code{find_lowest} and
 
 \subsection{Graphical parameters}{
 
-The plot takes the \code{\link{graphical parameters}} from \code{par}. If graphical
-parameters are given as arguments to the function they will be passed to
-the calls generating axes, titles and plotting. Grid lines are not modified
-by graphical parameters to PowerPlot. \code{lty} is only passed to the plotted
-contours (e.g. to prevent dashed axes). For further customisation of the
-axes \code{xaxt} and \code{yaxt} can be set to "n", and axes can be added afterwards.
+Graphical parameters that are allowed as input to the functions
+\code{graphics::plot}, \code{graphics::lines}, \code{graphics::image} and
+\code{graphics::axis}, including all parametes available in par() are passed on
+to these functions internally. Not passed through are "x", "y", "z",
+"type", "at", and parameters that are explict arguments to \code{PowerPlot}.
 }
 
 }

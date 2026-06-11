@@ -130,11 +130,12 @@ attr(<your_power_array>, which = 'random.seed')[[2]]}, etc.
 
 \subsection{Progress bar}{
 
-By default PowerGrid does not report progress. To return the optional progress bar (\code{progress_bar = TRUE}), the
-\code{progressr} package must be installed. As required by the design of that
-package, the progress handler must be explicitly activated before running
-your simulation. For that, run \code{progressr::handlers(global = TRUE)} in the
-current R console (not sent to the console from quarto for example).
+By default PowerGrid does not report progress. To return the optional
+progress bar (\code{progress_bar = TRUE}), the \code{progressr} package must be
+installed. As required by the design of that package, the progress handler
+must be explicitly activated before running your simulation. For that, run
+\code{progressr::handlers(global = TRUE)} in the current R console (not sent to
+the console from quarto for example).
 }
 }
 \examples{

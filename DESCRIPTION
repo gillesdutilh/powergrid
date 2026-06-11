@@ -13,7 +13,6 @@ Description: Evaluate a function across a grid of parameters. The function may b
 License: GPL-3
 Encoding: UTF-8
 Roxygen: list(markdown = TRUE)
-RoxygenNote: 7.3.3
 Suggests: 
     future.apply (>= 1.11.2),
     future (>= 1.33.2),
@@ -26,3 +25,4 @@ VignetteBuilder: knitr
 Config/testthat/edition: 3
 URL: https://github.com/SwissClinicalTrialOrganisation/powergrid
 BugReports: https://github.com/SwissClinicalTrialOrganisation/powergrid/issues
+Config/roxygen2/version: 8.0.0
