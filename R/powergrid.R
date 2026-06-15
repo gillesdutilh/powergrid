@@ -303,6 +303,13 @@ PowerGrid = function(pars, fun, more_args = NULL, n_iter = NA,
   if (!all(names(pars) %in% methods::formalArgs(fun))){
     stop("`pars` contains parameters that do not match the arguments of `fun`")
   }
+
+  summary_function_name =
+    ifelse (class(substitute(summary_function)) == 'name',
+            substitute(summary_function),
+            ## if created on the fly, it's an anonymous function
+            "anonymous function")
+
   ## ============================================
   ##
   ## if in the current session there has been no random generation done, there
@@ -451,7 +458,8 @@ PowerGrid = function(pars, fun, more_args = NULL, n_iter = NA,
 
   ## If the array has iterations, and needs summarising, summarize it
   if((!is.na(n_iter) && summarize)) {
-    out_array = SummarizeIterations(out_array, summary_function = summary_function)
+    out_array = EnsureSummarized(out_array, summary_function = summary_function,
+                                 sum_fun_nm = summary_function_name)
   }
   ## If the object never needed summarizing, it is already summarized:
   if(is.na(n_iter)) {
@@ -762,7 +770,7 @@ summary.power_array = function(object, ...){
 ##' dimnames(powarr_summarized)
 ##' summary(powarr_summarized) # indicates that iterations are now summarized
 ##' @export
-SummarizeIterations = function(x, summary_function, ...){
+SummarizeIterations = function(x, summary_function, sum_fun_nm =NULL, ...){
   if(attr(x, which = 'summarized') | !inherits(x, 'power_array')){
     stop('Object x should be an object of class `power_array`, where attribute `summarized` is FALSE; containing individual iterations.')
   }
@@ -786,12 +794,18 @@ SummarizeIterations = function(x, summary_function, ...){
   ## change summary-related attributes
   new_attributes$summarized = TRUE
   new_attributes$summary_function = summary_function
-  new_attributes$summary_function_name =
-    ifelse (class(substitute(summary_function)) == 'name',
-            substitute(summary_function),
-            ## if created on the fly, it's an ananymous function
-            "anonymous function"
-            )
+  #' Handling the function name is awkward
+  if(!is.null(sum_fun_nm)) {
+    new_attributes$summary_function_name <- sum_fun_nm
+  }
+  else {
+    new_attributes$summary_function_name =
+      ifelse (class(substitute(summary_function)) == 'name',
+              substitute(summary_function),
+              ## if created on the fly, it's an ananymous function
+              "anonymous function"
+      )
+  }
   attributes(summarized_x) = new_attributes
   return(summarized_x)
 }

@@ -42,7 +42,9 @@ CheckArrayDim =
 ##' @param condition If array is not summarised should a `warning` or
 ##' `error` be produced. Ignored if required dimensions is NULL.
 ##' @returns A summarised power_array
-EnsureSummarized = function(x, summary_function = NULL, condition = "warning") {
+EnsureSummarized = function(x, summary_function = NULL,
+                            sum_fun_nm = NULL,
+                            condition = "warning") {
   if(!attr(x, which = 'summarized')){
     if(condition == "error") {
       stop(paste0(
@@ -58,7 +60,7 @@ EnsureSummarized = function(x, summary_function = NULL, condition = "warning") {
     }
     if(is.null(summary_function)) stop("No summary function provided", call. = TRUE)
 
-    x = SummarizeIterations(x, summary_function)
+    x = SummarizeIterations(x, summary_function, sum_fun_nm = sum_fun_nm)
   }
   return(x)
 }
