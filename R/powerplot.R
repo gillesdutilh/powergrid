@@ -208,7 +208,7 @@ PowerPlot =
     ## =======================================================
     if (!inherits(x, "power_array")) stop("The object 'x' should be of class 'power_array'. ", call. = FALSE)
 
-    x = EnsureSummarized(x, summary_function = summary_function)
+    x = EnsureSummarized(x, summary_function = substitute(summary_function))
 
     ## =======================================================
     ## take slice that should be plotted

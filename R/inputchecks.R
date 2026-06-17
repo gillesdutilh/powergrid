@@ -53,7 +53,13 @@ EnsureSummarized = function(x, summary_function = NULL, condition = "warning") {
       warning(paste0(
         "The power array you supplied to contains individual ",
         "iterations. To be used further these were automatically ",
-        "summarized across iterations using the provided summary function"),
+        "summarized across iterations by function: ",
+##        ifelse (class(substitute(summary_function)) == 'name',
+                summary_function
+                ## if created on the fly, it's an ananymous function
+       ##         "anonymous function"
+      ##)
+      ),
         call. = FALSE, immediate. = TRUE)
     }
     if(is.null(summary_function)) stop("No summary function provided", call. = TRUE)

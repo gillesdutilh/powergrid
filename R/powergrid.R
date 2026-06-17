@@ -331,8 +331,8 @@ PowerGrid = function(pars, fun, more_args = NULL, n_iter = NA,
   ## Route A1) No iteration ('n_iter' not supplied)
   if(is.na(n_iter)) {
     e1d42fl5z7b6 = vapply( # the long name is to make it very unlikely
-      # to get the same name in the grid, which
-      # would break the xtab below.
+                                        # to get the same name in the grid, which
+                                        # would break the xtab below.
       .mapply(fun, pars_grid, MoreArgs = more_args), I,
       FUN.VALUE = funout_paradigm)
     ## out = cbind(pars_grid, e1d42fl5z7b6)
@@ -357,7 +357,7 @@ PowerGrid = function(pars, fun, more_args = NULL, n_iter = NA,
           }
           return(out)
         }, FUN.VALUE = iter_paradigm)
-      )
+        )
   }
   ## =================================
   ## Route A3) Parallel iteration using future_replicate
@@ -372,20 +372,20 @@ PowerGrid = function(pars, fun, more_args = NULL, n_iter = NA,
     ## If progress requested initiate a progressbar
     if(progress_bar) p <- progressr::progressor(steps = n_iter)
 
-    # Three level sapply(iter, sapply(mapply( PowFun, pars)))
+                                        # Three level sapply(iter, sapply(mapply( PowFun, pars)))
     e1d42fl5z7b6 = drop(future.apply::future_vapply(
-      X = iter, function(i) {
-        out <- vapply( # reshape mapply result
-          .mapply(fun, pars_grid, MoreArgs = more_args), unlist,
-          FUN.VALUE = funout_paradigm)
+                                        X = iter, function(i) {
+                                          out <- vapply( # reshape mapply result
+                                            .mapply(fun, pars_grid, MoreArgs = more_args), unlist,
+                                            FUN.VALUE = funout_paradigm)
 
-        if(progress_bar) {
-          p()
-        }
-        return(out)
-      }, future.seed = TRUE,
-      FUN.VALUE = iter_paradigm)
-    )
+                                          if(progress_bar) {
+                                            p()
+                                          }
+                                          return(out)
+                                        }, future.seed = TRUE,
+                                        FUN.VALUE = iter_paradigm)
+                        )
   }
   ## =================================
   ## A1-A3 briefly converge and then diverge into B1-B2 depending on whether
@@ -396,9 +396,9 @@ PowerGrid = function(pars, fun, more_args = NULL, n_iter = NA,
 
     ## Turn grid into array
     out_array = stats::xtabs(
-      stats::as.formula(
-        paste('e1d42fl5z7b6 ~', paste(names(pars_grid), collapse = '+'))),
-      data = pars_grid)
+                         stats::as.formula(
+                                  paste('e1d42fl5z7b6 ~', paste(names(pars_grid), collapse = '+'))),
+                         data = pars_grid)
   }
   ##
   ## Route B2) Multiple variables, with slightly different behaviours based
@@ -409,7 +409,7 @@ PowerGrid = function(pars, fun, more_args = NULL, n_iter = NA,
     if(any(dimnames(e1d42fl5z7b6)[[1]] %in% names(pars))){
       dimnames(e1d42fl5z7b6)[[1]] =
         paste0('funout_', dimnames(e1d42fl5z7b6)[[1]])
-      }
+    }
     ## if, else to control the wrangling based on whether multiple iterations present
     ## nitt is a dummy version of n_iteration which is 1 if there is no interations.
     if(!is.na(n_iter)) {
@@ -451,7 +451,7 @@ PowerGrid = function(pars, fun, more_args = NULL, n_iter = NA,
 
   ## If the array has iterations, and needs summarising, summarize it
   if((!is.na(n_iter) && summarize)) {
-    out_array = SummarizeIterations(out_array, summary_function = summary_function)
+    out_array = SummarizeIterations(out_array, summary_function = substitute(summary_function))
   }
   ## If the object never needed summarizing, it is already summarized:
   if(is.na(n_iter)) {
