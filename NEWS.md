@@ -1,3 +1,5 @@
+# powergrid 0.6.0
+
 # powergrid 0.5.2
 Corrected listing in readme and vignette.
 # powergrid 0.5.1
