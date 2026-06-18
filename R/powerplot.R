@@ -207,7 +207,6 @@ PowerPlot =
     ## process power array
     ## =======================================================
     if (!inherits(x, "power_array")) stop("The object 'x' should be of class 'power_array'. ", call. = FALSE)
-
     x = EnsureSummarized(x, summary_function = substitute(summary_function))
 
     ## =======================================================
@@ -621,7 +620,7 @@ AddExample = function(x,
   ## =======================================================
   if(inherits(x, "power_array")) {
 
-    x = EnsureSummarized(x, summary_function = summary_function)
+    x = EnsureSummarized(x, summary_function = substitute(summary_function))
 
     sliced_x = ArraySlicer(x = x, slicer = slicer)
 
@@ -629,7 +628,7 @@ AddExample = function(x,
 
     ## This is translated from Gilles, I don't quite get the -1 for the example
     left_dims = CheckArrayDim(sliced_x, required_dim = c(1,2) + (length(example) - 1)
-    )
+                              )
 
     ## =======================================================
     ## Check example input
@@ -650,7 +649,7 @@ AddExample = function(x,
         stop("When x (after slicer has been applied) has more than one dimension, 'example' must be supplied")
       }
       one_dim = TRUE # we're in the on-dimensional situation, where we plot the
-      # value (power) on the y-axis
+                                        # value (power) on the y-axis
       ns_example = 1
     }
 
@@ -668,7 +667,7 @@ AddExample = function(x,
         Example(sliced_x,
                 example = cur_example, # append(slicer, cur_example),
                 target_value = target_value, target_at_least = target_at_least,
-                find_lowest = find_lowest, method = method, summary_function = summary_function)
+                find_lowest = find_lowest, method = method, summary_function = substitute(summary_function))
       ## Prepare example for figure. Note that it is possible to have any
       ## parameter on x and y, whereas the default is to have 'n' on y.
       if (!one_dim){
@@ -726,7 +725,7 @@ AddExample = function(x,
   if (length(bad_args) > 0) {
     if(top_level) {
       warning("Only arguments to par(), as well as length and angle can be supplied through `...` the following are ignored: ",
-            paste(bad_args, collapse = ", "), call. = FALSE)
+              paste(bad_args, collapse = ", "), call. = FALSE)
     }
     dots[bad_args] = NULL
   }

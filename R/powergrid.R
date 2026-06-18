@@ -269,7 +269,6 @@ PowerGrid = function(pars, fun, more_args = NULL, n_iter = NA,
                      parallel = FALSE,
                      n_cores = future::availableCores()-1,
                      progress_bar = FALSE) {
-
   if(progress_bar) {
 
     if (!requireNamespace("progressr", quietly = TRUE)) {
@@ -766,9 +765,30 @@ SummarizeIterations = function(x, summary_function, ...){
   if(attr(x, which = 'summarized') | !inherits(x, 'power_array')){
     stop('Object x should be an object of class `power_array`, where attribute `summarized` is FALSE; containing individual iterations.')
   }
+  ## to be sure the summary_function and it's name get preserved, we need to
+  ## explicitly cover differnt situations, and define what the to be evaluated
+  ## argument to apply below is. The latter is also the opject stored in
+  ## attribute "summary_function".
+  if (class(summary_function) == 'name') { # function name inherited
+    summary_function_name = as.character(summary_function)
+    summary_function_eval = eval(summary_function)
+  } else if (class(summary_function) == 'call') { # ano function inherited
+    summary_function_name = 'anonymous function'
+    summary_function_eval = eval(summary_function)
+  } else if (class(summary_function) == 'function' &
+             class(substitute(summary_function)) == 'name'
+             ) { # function name in direct SumarizeIterations use
+    summary_function_name = as.character(substitute(summary_function))
+    summary_function_eval = summary_function
+  } else if (class(summary_function) == 'function' &
+             class(substitute(summary_function)) == 'call'
+             ) { # function name in direct SumarizeIterations use
+    summary_function_name = 'anonymous function'
+    summary_function_eval = summary_function
+  }
   aa = attributes(x)
   summarized_x = apply(x, names(dimnames(x))[names(dimnames(x)) != 'iter'],
-                       summary_function, ...)
+                       summary_function_eval, ...)
   ## In case the summarizing results in only a vector, we need to transform back
   ## to array, resetting dims and dimnames
   if(is.vector(summarized_x)){
@@ -785,13 +805,8 @@ SummarizeIterations = function(x, summary_function, ...){
     }
   ## change summary-related attributes
   new_attributes$summarized = TRUE
-  new_attributes$summary_function = summary_function
-  new_attributes$summary_function_name =
-    ifelse (class(substitute(summary_function)) == 'name',
-            substitute(summary_function),
-            ## if created on the fly, it's an ananymous function
-            "anonymous function"
-            )
+  new_attributes$summary_function = summary_function_eval
+  new_attributes$summary_function_name = summary_function_name
   attributes(summarized_x) = new_attributes
   return(summarized_x)
 }

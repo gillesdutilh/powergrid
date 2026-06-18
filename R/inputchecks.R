@@ -43,6 +43,26 @@ CheckArrayDim =
 ##' `error` be produced. Ignored if required dimensions is NULL.
 ##' @returns A summarised power_array
 EnsureSummarized = function(x, summary_function = NULL, condition = "warning") {
+  ## to be sure the summary_function and it's name get preserved, we need to
+  ## explicitly cover differnt situations, and define what the argument to
+  ## SummarizeIterations below is.
+  if (class(summary_function) == 'name') { # function name inherited
+    summary_function_name = as.character(summary_function)
+    summary_function_arg = summary_function
+  } else if (class(summary_function) == 'call') { # ano function inherited
+    summary_function_name = 'anonymous function'
+    summary_function_arg = eval(summary_function) ##
+  } else if (class(summary_function) == 'function' &
+             class(substitute(summary_function)) == 'name'
+             ) { # function name in direct EnsureSummarized use
+    summary_function_name = as.character(substitute(summary_function))
+    summary_function_arg = substitute(summary_function)
+  } else if (class(summary_function) == 'function' &
+             class(substitute(summary_function)) == 'call'
+             ) { # function name in direct EnsureSummarized use
+    summary_function_name = 'anonymous function'
+    summary_function_arg = substitute(summary_function)
+  }
   if(!attr(x, which = 'summarized')){
     if(condition == "error") {
       stop(paste0(
@@ -50,21 +70,14 @@ EnsureSummarized = function(x, summary_function = NULL, condition = "warning") {
         "iterations."), call. = FALSE)
     }
     if(condition == "warning") {
-      warning(paste0(
+      warning(PrintWrap(paste0(
         "The power array you supplied to contains individual ",
         "iterations. To be used further these were automatically ",
-        "summarized across iterations by function: ",
-##        ifelse (class(substitute(summary_function)) == 'name',
-                summary_function
-                ## if created on the fly, it's an ananymous function
-       ##         "anonymous function"
-      ##)
-      ),
+        "summarized across iterations by function: ", summary_function_name, '.')),
         call. = FALSE, immediate. = TRUE)
     }
     if(is.null(summary_function)) stop("No summary function provided", call. = TRUE)
-
-    x = SummarizeIterations(x, summary_function)
+    x = SummarizeIterations(x, summary_function_arg)
   }
   return(x)
 }
