@@ -765,7 +765,7 @@ SummarizeIterations = function(x, summary_function, ...){
   if(attr(x, which = 'summarized') | !inherits(x, 'power_array')){
     stop('Object x should be an object of class `power_array`, where attribute `summarized` is FALSE; containing individual iterations.')
   }
-  ## to be sure the summary_function and it's name get preserved, we need to
+  ## to be sure the summary_function and its name is preserved, we need to
   ## explicitly cover differnt situations, and define what the to be evaluated
   ## argument to apply below is. The latter is also the opject stored in
   ## attribute "summary_function".

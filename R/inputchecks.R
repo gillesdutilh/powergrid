@@ -43,7 +43,7 @@ CheckArrayDim =
 ##' `error` be produced. Ignored if required dimensions is NULL.
 ##' @returns A summarised power_array
 EnsureSummarized = function(x, summary_function = NULL, condition = "warning") {
-  ## to be sure the summary_function and it's name get preserved, we need to
+  ## to be sure the summary_function and its name is preserved, we need to
   ## explicitly cover differnt situations, and define what the argument to
   ## SummarizeIterations below is.
   if (class(summary_function) == 'name') { # function name inherited
