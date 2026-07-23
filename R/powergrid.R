@@ -510,10 +510,14 @@ PowerGrid = function(pars, fun, more_args = NULL, n_iter = NA,
   if (is.null(dim(x))){ # vector to become 1-dim array
     the_attributes$dim = length(x)
     the_attributes$dimnames = list('dropped_name' = NULL)
+    ## If the array becomes a vector, it should get names as an attribute
+    ## This is very important for FindTarget
+    the_attributes$names = attr(x, "names")
   } else { # array
     the_attributes$dim = dim(x)
     the_attributes$dimnames = dimnames(x)
   }
+
   ## copy the current dimnames to replace the pars, but only those dimensions
   ## the have name that is in pars.
   the_attributes$pars[
