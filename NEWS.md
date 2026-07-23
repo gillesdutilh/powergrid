@@ -1,3 +1,6 @@
+# powergrid 0.6.1
+- The behaviour of the idexing method for the power array "[" was changes so that if
+  a vector is returned it correctly gets the names from he original array.
 # powergrid 0.6.0
 A number of improvements were made
 - Clearer, more consistent documentation across package help files and warning
