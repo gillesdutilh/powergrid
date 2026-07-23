@@ -10,6 +10,8 @@ A number of improvements were made
     and definition accordingly)
   - PowerPlot (call EnsureSummarized)
   - GridPlot (call EnsureSummarized)
+- Updated plotting behaviour so that plotting parameters (par) are taken from the existing
+  par settings, and can be specified in the relevant powergrid plotting functions. 
 # powergrid 0.5.2
 Corrected listing in readme and vignette.
 # powergrid 0.5.1
