@@ -269,7 +269,6 @@ PowerGrid = function(pars, fun, more_args = NULL, n_iter = NA,
                      parallel = FALSE,
                      n_cores = future::availableCores()-1,
                      progress_bar = FALSE) {
-
   if(progress_bar) {
 
     if (!requireNamespace("progressr", quietly = TRUE)) {
@@ -303,13 +302,6 @@ PowerGrid = function(pars, fun, more_args = NULL, n_iter = NA,
   if (!all(names(pars) %in% methods::formalArgs(fun))){
     stop("`pars` contains parameters that do not match the arguments of `fun`")
   }
-
-  summary_function_name =
-    ifelse (class(substitute(summary_function)) == 'name',
-            substitute(summary_function),
-            ## if created on the fly, it's an anonymous function
-            "anonymous function")
-
   ## ============================================
   ##
   ## if in the current session there has been no random generation done, there
@@ -338,8 +330,8 @@ PowerGrid = function(pars, fun, more_args = NULL, n_iter = NA,
   ## Route A1) No iteration ('n_iter' not supplied)
   if(is.na(n_iter)) {
     e1d42fl5z7b6 = vapply( # the long name is to make it very unlikely
-      # to get the same name in the grid, which
-      # would break the xtab below.
+                                        # to get the same name in the grid, which
+                                        # would break the xtab below.
       .mapply(fun, pars_grid, MoreArgs = more_args), I,
       FUN.VALUE = funout_paradigm)
     ## out = cbind(pars_grid, e1d42fl5z7b6)
@@ -364,7 +356,7 @@ PowerGrid = function(pars, fun, more_args = NULL, n_iter = NA,
           }
           return(out)
         }, FUN.VALUE = iter_paradigm)
-      )
+        )
   }
   ## =================================
   ## Route A3) Parallel iteration using future_replicate
@@ -379,20 +371,20 @@ PowerGrid = function(pars, fun, more_args = NULL, n_iter = NA,
     ## If progress requested initiate a progressbar
     if(progress_bar) p <- progressr::progressor(steps = n_iter)
 
-    # Three level sapply(iter, sapply(mapply( PowFun, pars)))
+                                        # Three level sapply(iter, sapply(mapply( PowFun, pars)))
     e1d42fl5z7b6 = drop(future.apply::future_vapply(
-      X = iter, function(i) {
-        out <- vapply( # reshape mapply result
-          .mapply(fun, pars_grid, MoreArgs = more_args), unlist,
-          FUN.VALUE = funout_paradigm)
+                                        X = iter, function(i) {
+                                          out <- vapply( # reshape mapply result
+                                            .mapply(fun, pars_grid, MoreArgs = more_args), unlist,
+                                            FUN.VALUE = funout_paradigm)
 
-        if(progress_bar) {
-          p()
-        }
-        return(out)
-      }, future.seed = TRUE,
-      FUN.VALUE = iter_paradigm)
-    )
+                                          if(progress_bar) {
+                                            p()
+                                          }
+                                          return(out)
+                                        }, future.seed = TRUE,
+                                        FUN.VALUE = iter_paradigm)
+                        )
   }
   ## =================================
   ## A1-A3 briefly converge and then diverge into B1-B2 depending on whether
@@ -403,9 +395,9 @@ PowerGrid = function(pars, fun, more_args = NULL, n_iter = NA,
 
     ## Turn grid into array
     out_array = stats::xtabs(
-      stats::as.formula(
-        paste('e1d42fl5z7b6 ~', paste(names(pars_grid), collapse = '+'))),
-      data = pars_grid)
+                         stats::as.formula(
+                                  paste('e1d42fl5z7b6 ~', paste(names(pars_grid), collapse = '+'))),
+                         data = pars_grid)
   }
   ##
   ## Route B2) Multiple variables, with slightly different behaviours based
@@ -416,7 +408,7 @@ PowerGrid = function(pars, fun, more_args = NULL, n_iter = NA,
     if(any(dimnames(e1d42fl5z7b6)[[1]] %in% names(pars))){
       dimnames(e1d42fl5z7b6)[[1]] =
         paste0('funout_', dimnames(e1d42fl5z7b6)[[1]])
-      }
+    }
     ## if, else to control the wrangling based on whether multiple iterations present
     ## nitt is a dummy version of n_iteration which is 1 if there is no interations.
     if(!is.na(n_iter)) {
@@ -458,8 +450,7 @@ PowerGrid = function(pars, fun, more_args = NULL, n_iter = NA,
 
   ## If the array has iterations, and needs summarising, summarize it
   if((!is.na(n_iter) && summarize)) {
-    out_array = EnsureSummarized(out_array, summary_function = summary_function,
-                                 sum_fun_nm = summary_function_name)
+    out_array = SummarizeIterations(out_array, summary_function = substitute(summary_function))
   }
   ## If the object never needed summarizing, it is already summarized:
   if(is.na(n_iter)) {
@@ -770,13 +761,34 @@ summary.power_array = function(object, ...){
 ##' dimnames(powarr_summarized)
 ##' summary(powarr_summarized) # indicates that iterations are now summarized
 ##' @export
-SummarizeIterations = function(x, summary_function, sum_fun_nm =NULL, ...){
+SummarizeIterations = function(x, summary_function, ...){
   if(attr(x, which = 'summarized') | !inherits(x, 'power_array')){
     stop('Object x should be an object of class `power_array`, where attribute `summarized` is FALSE; containing individual iterations.')
   }
+  ## to be sure the summary_function and its name is preserved, we need to
+  ## explicitly cover differnt situations, and define what the to be evaluated
+  ## argument to apply below is. The latter is also the opject stored in
+  ## attribute "summary_function".
+  if (class(summary_function) == 'name') { # function name inherited
+    summary_function_name = as.character(summary_function)
+    summary_function_eval = eval(summary_function)
+  } else if (class(summary_function) == 'call') { # ano function inherited
+    summary_function_name = 'anonymous function'
+    summary_function_eval = eval(summary_function)
+  } else if (class(summary_function) == 'function' &
+             class(substitute(summary_function)) == 'name'
+             ) { # function name in direct SumarizeIterations use
+    summary_function_name = as.character(substitute(summary_function))
+    summary_function_eval = summary_function
+  } else if (class(summary_function) == 'function' &
+             class(substitute(summary_function)) == 'call'
+             ) { # function name in direct SumarizeIterations use
+    summary_function_name = 'anonymous function'
+    summary_function_eval = summary_function
+  }
   aa = attributes(x)
   summarized_x = apply(x, names(dimnames(x))[names(dimnames(x)) != 'iter'],
-                       summary_function, ...)
+                       summary_function_eval, ...)
   ## In case the summarizing results in only a vector, we need to transform back
   ## to array, resetting dims and dimnames
   if(is.vector(summarized_x)){
@@ -793,19 +805,8 @@ SummarizeIterations = function(x, summary_function, sum_fun_nm =NULL, ...){
     }
   ## change summary-related attributes
   new_attributes$summarized = TRUE
-  new_attributes$summary_function = summary_function
-  #' Handling the function name is awkward
-  if(!is.null(sum_fun_nm)) {
-    new_attributes$summary_function_name <- sum_fun_nm
-  }
-  else {
-    new_attributes$summary_function_name =
-      ifelse (class(substitute(summary_function)) == 'name',
-              substitute(summary_function),
-              ## if created on the fly, it's an ananymous function
-              "anonymous function"
-      )
-  }
+  new_attributes$summary_function = summary_function_eval
+  new_attributes$summary_function_name = summary_function_name
   attributes(summarized_x) = new_attributes
   return(summarized_x)
 }
