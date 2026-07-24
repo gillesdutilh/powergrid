@@ -21,7 +21,7 @@ minimum n (or min/max of any other parameter) to achieve a minimal level of
 power (or a maximum of any value). Also, plotting functions are included that
 present the dependency of n and power in relation to further parameters.
 
-The package (version 0.6.2) is available from
+The package (version 0.6.1) is available from
 [CRAN](https://CRAN.R-project.org/package=powergrid) and may be installed
 through your favorite mirror.
 
@@ -32,7 +32,7 @@ using argument `tag` to `install_github`.
 
 ```{r, eval = FALSE}
 devtools::install_github("SwissClinicalTrialOrganisation/powergrid",
-                         ## tag = 'v0.6.2', # replace with a specific
+                         ## tag = 'v0.6.1', # replace with a specific
                          ## development version, or omit to install the current
                          ## release
                          build_vignette = TRUE)
