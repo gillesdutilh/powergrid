@@ -263,6 +263,7 @@
 ##'           target_value = .9, # set target power to 90%, defining the thick line
 ##'           example = list(delta = .7) # Highlight the example with arrow
 ##'           )
+##' @importFrom methods is
 ##' @export
 PowerGrid = function(pars, fun, more_args = NULL, n_iter = NA,
                      summarize = TRUE, summary_function = mean,
