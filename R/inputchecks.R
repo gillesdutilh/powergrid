@@ -42,6 +42,7 @@ CheckArrayDim =
 ##' @param condition If array is not summarised should a `warning` or
 ##' `error` be produced. Ignored if required dimensions is NULL.
 ##' @returns A summarised power_array
+##' @importFrom methods is
 EnsureSummarized = function(x, summary_function = NULL, condition = "warning") {
   ## to be sure the summary_function and its name is preserved, we need to
   ## explicitly cover differnt situations, and define what the argument to
