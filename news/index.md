@@ -1,7 +1,10 @@
 # Changelog
 
-## powergrid 0.6.1
+## powergrid 0.6.2
 
+CRAN release: 2026-07-31
+
+- Method import “is” explicit in namespace \# powergrid 0.6.1
 - The idexing method for the power array “\[” was changed so that if a
   vector is returned it correctly gets the names from he original array.
   This adjustment was made to assure correct behavior when aperm() is
