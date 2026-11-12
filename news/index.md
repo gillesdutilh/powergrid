@@ -1,7 +1,10 @@
 # Changelog
 
-## powergrid 0.6.3
+## powergrid 0.7.0
 
+- In GridPlot, lines are now actually drawn in the legend
+- In GridPlot, you can now choose the line type, either giving one
+  single lty, or by giving one lty per line. \# powergrid 0.6.3
 - Corrected how the \[.power_array method deals with non-numeric
   parameters, not trying to convert them into numerics, as was done in
   previous versions, resulting in NAs for pars levels.
@@ -32,9 +35,12 @@
   - GridPlot (call EnsureSummarized)
 - Updated plotting behaviour so that plotting parameters (par) are taken
   from the existing par settings, and can be specified in the relevant
-  powergrid plotting functions. \# powergrid 0.5.2 Corrected listing in
-  readme and vignette. \# powergrid 0.5.1 Small update, making readme in
-  line with CRAN status package. \# powergrid 0.5.0
+  powergrid plotting functions.
+- Added functionality to report progress of iterations for both series
+  and parallel computation, implemented using the progressr package. \#
+  powergrid 0.5.2 Corrected listing in readme and vignette. \# powergrid
+  0.5.1 Small update, making readme in line with CRAN status package. \#
+  powergrid 0.5.0
 - Added Richard Charles Allen as contributor and maintainer.
 - Fixed one typo in description.
 
